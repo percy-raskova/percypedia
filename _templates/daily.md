@@ -1,10 +1,9 @@
 ---
-id: {{date:YYYYMMDDHHMM}}
+zkid: {{date:YYYYMMDDHHMM}}
 title: "{{date:YYYY-MM-DD}}"
-slug: {{date:YYYY-MM-DD}}
 author: Percy
-created: {{date:YYYY-MM-DD}}T{{time:HH:mm}}
-updated: {{date:YYYY-MM-DD}}T{{time:HH:mm}}
+date-created: {{date:YYYY-MM-DD}}T{{time:HH:mm}}
+date-edited: {{date:YYYY-MM-DD}}T{{time:HH:mm}}
 category: Dailies
 tags:
   - dailies/{{date:YYYY}}

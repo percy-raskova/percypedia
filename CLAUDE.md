@@ -36,10 +36,10 @@ mise run test:watch  # Run tests, stop on first failure
 
 ### Custom Sphinx Extensions (`_extensions/`)
 
-Three local extensions power the system:
+Four local extensions plus a shared module power the system:
 
 **category_nav** - Generates navigation from frontmatter
-- `extract_frontmatter()` - Parse YAML from markdown
+- `extract_frontmatter()` - Parse YAML from markdown (from `_common.frontmatter`)
 - `collect_categories()` - Group files by `category:` field
 - `CategoryNavDirective` - Renders `{category-nav}` directive as toctrees
 - Config: `category_nav_default`, `category_nav_exclude` in conf.py
@@ -59,6 +59,10 @@ Three local extensions power the system:
 - Captures `{doc}` cross-references to non-existent documents
 - Outputs `_build/html/missing_refs.json` with targets grouped by category
 - Optional: Set `missing_refs_generate_page = True` in conf.py to auto-generate a "Planned Articles" page
+
+**_common** - Shared utilities for extensions
+- `frontmatter.py` - Single source of truth for YAML frontmatter extraction
+- Used by: category_nav, frontmatter_schema, publish_filter
 
 ### Frontmatter Schema
 

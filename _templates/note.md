@@ -1,13 +1,12 @@
 ---
 # === Identity ===
-id: {{date:YYYYMMDDHHMM}}
+zkid: {{date:YYYYMMDDHHMM}}
 title: "{{title}}"
-slug: {{title}}
 author: Percy
 
 # === Timestamps ===
-created: {{date:YYYY-MM-DD}}T{{time:HH:mm}}
-updated: {{date:YYYY-MM-DD}}T{{time:HH:mm}}
+date-created: {{date:YYYY-MM-DD}}T{{time:HH:mm}}
+date-edited: {{date:YYYY-MM-DD}}T{{time:HH:mm}}
 
 # === Three-Layer Taxonomy ===
 # Category: Website navigation (pick ONE)

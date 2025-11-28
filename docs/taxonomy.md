@@ -121,11 +121,11 @@ tags:
 
 ## Implementation
 
-Two custom Sphinx extensions power this workflow:
+Three custom Sphinx extensions plus a shared module power this workflow:
 
 ### category_nav (`_extensions/category_nav/`)
 
-- `extract_frontmatter()` - Parse YAML from markdown
+- `extract_frontmatter()` - Parse YAML from markdown (from `_common.frontmatter`)
 - `collect_categories()` - Group files by category
 - `CategoryNavDirective` - Generate toctrees
 - Respects `publish: false` to exclude drafts
@@ -134,6 +134,11 @@ Two custom Sphinx extensions power this workflow:
 
 - Excludes documents with `publish: false` from the entire build
 - Strips Obsidian comments (`%%...%%`) from output
+
+### _common (`_extensions/_common/`)
+
+Shared utilities used by all extensions:
+- `frontmatter.py` - Single source of truth for YAML frontmatter extraction
 
 ### External Extensions
 
@@ -147,12 +152,11 @@ Use `<leader>mN` in Neovim to create notes from templates in `_templates/`:
 
 ```yaml
 ---
-id: 202411281430              # Zettelkasten ID (YYYYMMDDHHMM)
+zkid: 202411281430            # Zettelkasten ID (YYYYMMDDHHMM)
 title: "Document Title"
-slug: document-title
 author: Percy
-created: 2024-11-28T14:30
-updated: 2024-11-28T14:30
+date-created: 2024-11-28T14:30
+date-edited: 2024-11-28T14:30
 category:                     # Website navigation
 tags: []                      # AI/Zettelkasten navigation
 publish: false                # Draft by default
