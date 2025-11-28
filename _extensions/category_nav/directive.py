@@ -1,7 +1,7 @@
 """category_nav directive - generates toctrees from frontmatter categories.
 
 This module provides:
-- extract_frontmatter: Parse YAML frontmatter from markdown content
+- extract_frontmatter: Re-exported from _common.frontmatter
 - extract_title: Extract H1 title from markdown content
 - collect_categories: Scan directory and group files by category
 - CategoryNavDirective: Sphinx directive that renders categorized toctrees
@@ -12,47 +12,11 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
-import yaml
 from docutils import nodes
 from sphinx.util.docutils import SphinxDirective
 
-
-def extract_frontmatter(content: str) -> Dict[str, Any]:
-    """Extract YAML frontmatter from markdown content.
-
-    Args:
-        content: Raw markdown file content
-
-    Returns:
-        Dictionary of frontmatter fields, empty dict if no frontmatter
-    """
-    # Frontmatter must start at the beginning of the file
-    if not content.startswith('---'):
-        return {}
-
-    # Find the closing delimiter
-    # Look for --- on its own line after the opening
-    lines = content.split('\n')
-    if len(lines) < 2:
-        return {}
-
-    # Find closing ---
-    end_idx = None
-    for i, line in enumerate(lines[1:], start=1):
-        if line.strip() == '---':
-            end_idx = i
-            break
-
-    if end_idx is None:
-        return {}
-
-    # Extract and parse YAML
-    yaml_content = '\n'.join(lines[1:end_idx])
-    try:
-        result = yaml.safe_load(yaml_content)
-        return result if isinstance(result, dict) else {}
-    except yaml.YAMLError:
-        return {}
+# Import from shared module, re-export for backward compatibility
+from _common.frontmatter import extract_frontmatter
 
 
 def extract_title(content: str) -> Optional[str]:
