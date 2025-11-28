@@ -21,6 +21,7 @@ Thumbs.db
 *~
 .idea/
 .vscode/
+.obsidian/
 
 # Mise local overrides
 .mise.local.toml
