@@ -9,11 +9,11 @@
 #   errors = extract_and_validate(markdown_content)
 
 import json
-import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import yaml
+# Import from shared module, re-export for backward compatibility
+from _common.frontmatter import extract_frontmatter
 
 try:
     import jsonschema
@@ -24,6 +24,11 @@ except ImportError:
 
 # Path to the canonical schema
 SCHEMA_PATH = Path(__file__).parent.parent.parent / '_schemas' / 'frontmatter.schema.json'
+
+
+# Re-export for backward compatibility
+__all__ = ['extract_frontmatter', 'validate_frontmatter', 'extract_and_validate',
+           'validate_file', 'validate_directory', 'load_schema']
 
 
 def load_schema() -> Dict[str, Any]:
@@ -37,40 +42,6 @@ def load_schema() -> Dict[str, Any]:
         json.JSONDecodeError: If schema is invalid JSON.
     """
     return json.loads(SCHEMA_PATH.read_text(encoding='utf-8'))
-
-
-def extract_frontmatter(content: str) -> Dict[str, Any]:
-    """Extract YAML frontmatter from markdown content.
-
-    Args:
-        content: Raw markdown file content.
-
-    Returns:
-        Dictionary of frontmatter fields, empty dict if no frontmatter.
-    """
-    if not content.startswith('---'):
-        return {}
-
-    lines = content.split('\n')
-    if len(lines) < 2:
-        return {}
-
-    # Find closing ---
-    end_idx = None
-    for i, line in enumerate(lines[1:], start=1):
-        if line.strip() == '---':
-            end_idx = i
-            break
-
-    if end_idx is None:
-        return {}
-
-    yaml_content = '\n'.join(lines[1:end_idx])
-    try:
-        result = yaml.safe_load(yaml_content)
-        return result if isinstance(result, dict) else {}
-    except yaml.YAMLError:
-        return {}
 
 
 def validate_frontmatter(
