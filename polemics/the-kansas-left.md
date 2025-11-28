@@ -1,3 +1,7 @@
+---
+category: Polemics
+---
+
 So it dawned on me that like, there are two major revolutionary activities and things in Kansas we could be doing. Nobody is trying any of these things and to my knowledge they've never been tried. The closest that's been done to trying it is the ICL campaign in Lawrence.
 
 1) Organizing migrant workers in Kansas. These are the non labor aristocratic proletariat. They by far have the most revolutionary potential and furthermore if they were organized, a disruption to the food supply chain  from an ag state like Kansas would have a major destabilizing effect on not only Kansas economy but the entire United States.

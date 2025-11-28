@@ -1,5 +1,5 @@
 ---
-category: Concepts
+category: Theory
 Confidence: high
 Date: '2024-11-20'
 Related: '{doc}`/methods/sica_methodology`, {doc}`lumpen_organizing`'

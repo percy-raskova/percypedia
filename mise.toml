@@ -54,3 +54,46 @@ description = "Run extension tests"
 [tasks."test:watch"]
 run = "pytest --tb=short -x"
 description = "Run tests (stop on first failure)"
+
+# Frontmatter Normalizer Tasks
+[tasks."fm:setup"]
+run = "pip install spacy click rapidfuzz && python -m spacy download en_core_web_lg"
+description = "Install frontmatter normalizer dependencies + SpaCy model"
+
+[tasks."fm:report"]
+run = "python -m frontmatter_normalizer report ."
+description = "Report on frontmatter status"
+dir = "_tools"
+
+[tasks."fm:dry-run"]
+run = "python -m frontmatter_normalizer normalize --dry-run --verbose ."
+description = "Dry run frontmatter normalization"
+dir = "_tools"
+
+[tasks."fm:normalize"]
+run = "python -m frontmatter_normalizer normalize ."
+description = "Normalize all frontmatter (creates backups)"
+dir = "_tools"
+
+[tasks."fm:validate"]
+run = "python -m frontmatter_normalizer validate ."
+description = "Validate frontmatter against schema"
+dir = "_tools"
+
+[tasks."fm:test"]
+run = "pytest frontmatter_normalizer/ -v"
+description = "Run frontmatter normalizer tests"
+dir = "_tools"
+env = { PYTHONPATH = "{{cwd}}/_tools" }
+
+[tasks."fm:test:short"]
+run = "pytest frontmatter_normalizer/ --tb=no -q"
+description = "Run tests with condensed output"
+dir = "_tools"
+env = { PYTHONPATH = "{{cwd}}/_tools" }
+
+[tasks."fm:compare"]
+run = "python -m frontmatter_normalizer.compare_classifiers"
+description = "Compare SpaCy vs Sentence Transformers classification"
+dir = "_tools"
+env = { PYTHONPATH = "{{cwd}}/_tools" }

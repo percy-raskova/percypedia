@@ -1,5 +1,5 @@
 ---
-category: Systems
+category: Praxis
 Confidence: high
 Date: '2024-09-28'
 Influences: Socialist state failures, peer-to-peer networks, graph databases

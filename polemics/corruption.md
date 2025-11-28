@@ -1,4 +1,5 @@
 ---
+category: Polemics
 description: An expose by Persephone Raskova about corruption in the Communist Party USA.
 cover: Images/cpusa_smaug.jpeg
 ---

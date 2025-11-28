@@ -1,4 +1,5 @@
 ---
+category: Creative
 description: A poem reflecting upon the transgender experience of picking which bathroom to use
 permalink: poetry/schrodingers_bathroom
 ---

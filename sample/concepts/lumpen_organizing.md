@@ -1,5 +1,5 @@
 ---
-category: Concepts
+category: Theory
 Confidence: high
 Date: '2024-11-15'
 Influences: George Jackson, Frantz Fanon

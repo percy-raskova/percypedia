@@ -1,3 +1,7 @@
+---
+category: Creative
+---
+
 # On The Status of Gambling under \$o¢ial$m
 
 ## SUBTITLE:  A Fermented Thought From The Mind of Miss Persephone

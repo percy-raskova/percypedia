@@ -1,5 +1,5 @@
 ---
-category: Concepts
+category: Theory
 Confidence: high
 Date: '2024-10-18'
 Related: '{doc}`/systems/druids_architecture`, {doc}`dialectical_materialism`'

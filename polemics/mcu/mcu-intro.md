@@ -1,4 +1,5 @@
 ---
+category: Polemics
 description: The Maoist Communist Union put forth three papers. One on the fundamental contradiction in Amerika, a second on the labor aristocracy, and the third about the industrial proletariat. This is my criticism of those lines, as well as highlighting where I agree with them.
 permalink: mcu_debate/intro
 ---

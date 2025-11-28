@@ -1,5 +1,5 @@
 ---
-category: Infrastructure
+category: Meta
 ---
 
 # R2 Asset Storage

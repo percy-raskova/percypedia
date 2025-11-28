@@ -11,6 +11,12 @@ sphinx-design = "*"
 sphinx-tags = "*"
 sphinx-hoverxref = "*"
 jsonschema = "*"
+# Frontmatter normalizer dependencies
+spacy = ">=3.0"
+click = ">=8.0"
+rapidfuzz = ">=3.0"
+en-core-web-lg = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl"}
+sentence-transformers = ">=2.0"
 
 [dev-packages]
 sphinx-autobuild = "*"

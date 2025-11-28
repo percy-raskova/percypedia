@@ -1,5 +1,5 @@
 ---
-category: Infrastructure
+category: Meta
 ---
 
 # Three-Layer Taxonomy
@@ -36,26 +36,34 @@ Categories determine how content appears in the website sidebar. Add `category:`
 
 ```yaml
 ---
-category: Philosophy
+category: Theory
 ---
 
 # Dialectical Materialism
 ```
 
-The `{category-nav}` directive in `index.md` automatically groups documents by category:
+The `{category-nav}` directive in `index.md` automatically groups documents by category.
 
-- **Concepts** - Theoretical foundations
-- **Methods** - Practical methodologies
-- **Systems** - Technical architectures
-- **Infrastructure** - Meta-documentation
-- **Miscellaneous** - Uncategorized (default)
+### Intent-Based Categories
+
+Categories are organized by **reader intent** - what the reader is looking for:
+
+| Category | Reader Intent | Content Type |
+|----------|--------------|--------------|
+| **Theory** | "Teach me about X" | Explanatory essays, philosophical frameworks, concept definitions |
+| **Praxis** | "Help me do X" | Methodologies, organizing guides, actionable frameworks |
+| **Polemics** | "Show me who's wrong about X" | Critiques, arguments against positions, debates |
+| **Creative** | "Show me art about X" | Poetry, satire, fiction, personal essays |
+| **Meta** | "How does this site work?" | Documentation about the knowledge base itself |
+
+This intent-based schema helps readers find content based on what they need, not just what genre it belongs to.
 
 ### Key Properties
 
 - One category per file (for clean navigation)
 - Categories are sorted alphabetically
 - Documents within categories are sorted by title
-- "Miscellaneous" always appears last
+- "Meta" always appears last
 
 ### Configuration
 
@@ -63,7 +71,7 @@ In `conf.py`:
 
 ```python
 category_nav_exclude = ['index', 'glossary', ...]  # Files to skip
-category_nav_default = 'Miscellaneous'              # Default category
+category_nav_default = 'Meta'                        # Default category
 ```
 
 ## Tags (AI/Zettelkasten Navigation)
@@ -72,7 +80,7 @@ Tags create a multi-dimensional graph for machine traversal. A file can have unl
 
 ```yaml
 ---
-category: Concepts
+category: Theory
 tags:
   - politics/marxism
   - theory/labor-aristocracy
@@ -105,7 +113,7 @@ Consider a document about lumpen organizing:
 
 ```yaml
 ---
-category: Concepts                    # Website: appears under "Concepts"
+category: Theory                      # Website: appears under "Theory"
 tags:
   - organizing/strategy               # AI: findable via organizing
   - theory/class-analysis             # AI: findable via theory
@@ -116,7 +124,7 @@ tags:
 ```
 
 - **Directory**: Lives in `sample/concepts/` (your local organization)
-- **Category**: Shows under "Concepts" in sidebar (website presentation)
+- **Category**: Shows under "Theory" in sidebar (reader intent: "teach me about X")
 - **Tags**: Discoverable via multiple paths (machine traversal)
 
 ## Implementation
@@ -224,7 +232,7 @@ slug: new-methodology
 author: Percy
 created: 2024-11-28T14:30
 updated: 2024-11-28T14:30
-category: Methods
+category: Praxis
 tags:
   - organizing/tactics
   - theory/praxis

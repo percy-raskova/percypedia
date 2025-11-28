@@ -1,5 +1,5 @@
 ---
-category: Methods
+category: Praxis
 Confidence: high
 Date: '2024-11-10'
 Implementation: MCP servers for federal APIs

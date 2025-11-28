@@ -13,6 +13,13 @@ sphinx-hoverxref
 # Schema validation
 jsonschema>=4.0
 
+# Frontmatter normalizer tool
+spacy>=3.0
+click>=8.0
+rapidfuzz>=3.0
+sentence-transformers>=2.0
+# SpaCy model (install separately): python -m spacy download en_core_web_lg
+
 # Development (not needed for CI build)
 # sphinx-autobuild
 # rst-to-myst[sphinx]

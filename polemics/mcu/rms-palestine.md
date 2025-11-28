@@ -1,4 +1,5 @@
 ---
+category: Polemics
 description: A criticism of the Revolutionary Marxist Students organization and their official position paper on the Palestinian resistance
 permalink: maoist_debate/rms_palestine
 ---

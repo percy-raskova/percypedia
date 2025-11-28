@@ -1,5 +1,5 @@
 ---
-category: Infrastructure
+category: Meta
 ---
 
 # MyST Markdown Syntax

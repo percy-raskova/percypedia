@@ -1,4 +1,5 @@
 ---
+category: Polemics
 description: A criticism of the Maoist Communist Union line on fundamental contradictions.
 permalink: mcu_debate/settler_colonialism
 ---
