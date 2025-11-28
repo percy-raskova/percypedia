@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://percypedia.com/schemas/frontmatter.schema.json",
+  "title": "Percypedia Frontmatter Schema",
+  "description": "Canonical schema for YAML frontmatter in Percypedia markdown documents",
+  "type": "object",
+  "properties": {
+    "zkid": {
+      "type": "string",
+      "pattern": "^[0-9]{12}$",
+      "description": "Zettelkasten ID in YYYYMMDDHHMM format. Immutable identifier for cross-referencing."
+    },
+    "author": {
+      "type": "string",
+      "description": "Document author. Defaults to 'Percy' if omitted."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Document title. Falls back to first H1 heading if omitted."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "Brief summary for SEO meta tags and social sharing. Keep under 160 chars."
+    },
+    "date-created": {
+      "type": "string",
+      "format": "date",
+      "description": "Creation date in YYYY-MM-DD format. Immutable after initial creation."
+    },
+    "date-edited": {
+      "type": "string",
+      "format": "date",
+      "description": "Last edit date in YYYY-MM-DD format. Updated on each revision."
+    },
+    "category": {
+      "type": "string",
+      "description": "Single category for website sidebar navigation. One document, one category."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(/[a-z0-9-]+)*$"
+      },
+      "uniqueItems": true,
+      "description": "Hierarchical tags for AI/Zettelkasten navigation. Use lowercase with slashes for hierarchy (e.g., 'theory/marxism')."
+    },
+    "publish": {
+      "type": "boolean",
+      "default": true,
+      "description": "Publication status. false = draft (excluded from build), true = published."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "review", "complete"],
+      "default": "draft",
+      "description": "Editorial workflow status. draft = work in progress, review = needs editing, complete = finished."
+    }
+  },
+  "additionalProperties": false,
+  "required": [],
+  "examples": [
+    {
+      "zkid": "202411281430",
+      "author": "Percy",
+      "title": "Labor Aristocracy",
+      "description": "Analysis of the labor aristocracy as a material basis for opportunism.",
+      "date-created": "2024-11-28",
+      "date-edited": "2024-11-28",
+      "category": "Theory",
+      "tags": ["theory/class-analysis", "politics/marxism"],
+      "publish": true,
+      "status": "complete"
+    }
+  ]
+}
