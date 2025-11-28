@@ -1,0 +1,18 @@
+# Sphinx core
+sphinx>=6.0
+myst-parser>=1.0
+
+# Theme
+furo
+
+# Extensions
+sphinx-design
+sphinx_tags
+sphinx-hoverxref
+
+# Schema validation
+jsonschema>=4.0
+
+# Development (not needed for CI build)
+# sphinx-autobuild
+# rst-to-myst[sphinx]

@@ -1,0 +1,8 @@
+[tool.esbonio.sphinx]
+pythonCommand = [".venv/bin/python"]
+buildCommand = ["sphinx-build", "-M", "html", ".", "_build"]
+
+[tool.pytest.ini_options]
+pythonpath = ["_extensions"]
+testpaths = ["_extensions"]
+addopts = "-v"

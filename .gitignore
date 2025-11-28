@@ -1,0 +1,26 @@
+# Sphinx build output
+_build/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.eggs/
+*.egg-info/
+
+# Private notes (never published)
+private/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Mise local overrides
+.mise.local.toml

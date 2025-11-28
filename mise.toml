@@ -1,0 +1,56 @@
+# mise.toml - PercyBrain Sphinx Build Tasks
+# Usage: mise run <task>
+# Note: Uses .venv binaries directly (no source needed)
+
+[tools]
+python = "3.13"
+
+[env]
+SPHINX_SOURCE = "."
+SPHINX_BUILD = "_build"
+# Add venv to PATH for all tasks
+PATH = "{{cwd}}/.venv/bin:{{env.PATH}}"
+
+[tasks.build]
+run = "sphinx-build -b html . _build/html"
+description = "Build HTML documentation"
+
+[tasks.clean]
+run = "rm -rf _build"
+description = "Clean build artifacts"
+
+[tasks.watch]
+run = "sphinx-autobuild . _build/html --port 8000"
+description = "Auto-rebuild on changes (no browser)"
+
+[tasks.preview]
+run = "sphinx-autobuild . _build/html --port 8000 --open-browser"
+description = "Live preview with auto-open browser"
+
+[tasks.linkcheck]
+run = "sphinx-build -b linkcheck . _build/linkcheck"
+description = "Check for broken links"
+
+[tasks.serve]
+run = "python -m http.server 8000 -d _build/html"
+description = "Serve built docs locally"
+
+[tasks.pdf]
+run = "sphinx-build -b latex . _build/latex && make -C _build/latex"
+description = "Build PDF via LaTeX"
+
+[tasks.deps]
+run = "pip install -r requirements.txt"
+description = "Install Python dependencies"
+
+[tasks.ci]
+run = "pip install -r requirements.txt && sphinx-build -b html . _build/html"
+description = "CI build (install deps + build)"
+
+[tasks.test]
+run = "pytest"
+description = "Run extension tests"
+
+[tasks."test:watch"]
+run = "pytest --tb=short -x"
+description = "Run tests (stop on first failure)"

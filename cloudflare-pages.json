@@ -1,0 +1,15 @@
+{
+  "_comment": "Cloudflare Pages configuration - apply these settings in the dashboard",
+  "build_command": "./build.sh",
+  "build_output_directory": "_build/html",
+  "root_directory": "",
+  "environment_variables": {
+    "PYTHON_VERSION": "3.13"
+  },
+  "deployment_branch": "main",
+  "_notes": {
+    "caching": "Cloudflare caches pipenv dependencies between builds via Pipfile.lock",
+    "local_dev": "Use 'mise run build' or 'mise run preview' locally",
+    "private_notes": "The 'private/' directory is excluded from builds and gitignored"
+  }
+}
