@@ -12,7 +12,7 @@ import re
 from pathlib import Path
 from typing import Set
 
-import yaml
+from _common.frontmatter import extract_frontmatter
 
 
 def get_unpublished_docs(app) -> Set[str]:
@@ -29,24 +29,9 @@ def get_unpublished_docs(app) -> Set[str]:
 
         try:
             content = md_file.read_text(encoding='utf-8')
-            if not content.startswith('---'):
-                continue
+            frontmatter = extract_frontmatter(content)
 
-            # Find closing delimiter
-            lines = content.split('\n')
-            end_idx = None
-            for i, line in enumerate(lines[1:], start=1):
-                if line.strip() == '---':
-                    end_idx = i
-                    break
-
-            if end_idx is None:
-                continue
-
-            yaml_content = '\n'.join(lines[1:end_idx])
-            frontmatter = yaml.safe_load(yaml_content)
-
-            if isinstance(frontmatter, dict) and frontmatter.get('publish') is False:
+            if frontmatter.get('publish') is False:
                 docname = str(rel_path.with_suffix(''))
                 unpublished.add(docname)
 
