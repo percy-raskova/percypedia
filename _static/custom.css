@@ -1,0 +1,324 @@
+/* ============================================
+   PercyBrain Blood Moon Theme
+   Synced with Neovim percybrain-theme.lua
+   ============================================ */
+
+/* Blood Moon Color Palette (CSS variables for reuse) */
+:root {
+    /* Base */
+    --blood-bg: #1a0000;
+    --blood-bg-dark: #0d0000;
+    --blood-bg-highlight: #2a0a0a;
+
+    /* Text */
+    --blood-fg: #e8e8e8;
+    --blood-fg-dark: #b0b0b0;
+    --blood-fg-gutter: #5a2020;
+
+    /* Accents */
+    --blood-gold: #ffd700;
+    --blood-gold-dim: #ccaa00;
+    --blood-crimson: #dc143c;
+    --blood-crimson-dim: #a01028;
+
+    /* Semantic */
+    --blood-red: #ff4444;
+    --blood-orange: #ff8844;
+    --blood-yellow: #ffcc44;
+    --blood-green: #44ff88;
+    --blood-cyan: #44ccff;
+    --blood-blue: #4488ff;
+    --blood-purple: #cc88ff;
+    --blood-magenta: #ff44cc;
+}
+
+/* ============================================
+   GLOSSARY STYLING
+   ============================================ */
+
+dl.glossary dt {
+    font-weight: 700;
+    font-size: 1.15em;
+    color: var(--blood-gold);
+    border-left: 4px solid var(--blood-crimson);
+    padding-left: 0.75em;
+    margin-top: 1.75em;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+dl.glossary dd {
+    background: linear-gradient(135deg, var(--blood-bg-dark) 0%, var(--blood-bg-highlight) 100%);
+    border-radius: 0 8px 8px 0;
+    padding: 1em 1.25em;
+    margin-left: 0;
+    margin-bottom: 0.5em;
+    border-left: 4px solid var(--blood-bg-highlight);
+    transition: all 0.2s ease;
+}
+
+dl.glossary dd:hover {
+    border-left-color: var(--blood-crimson);
+    background: linear-gradient(135deg, var(--blood-bg-highlight) 0%, #3a1515 100%);
+    box-shadow: 0 4px 20px rgba(220, 20, 60, 0.2);
+}
+
+dl.glossary dd a {
+    color: var(--blood-cyan);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+}
+
+dl.glossary dd a:hover {
+    color: var(--blood-gold);
+    text-decoration-style: solid;
+}
+
+/* ============================================
+   TERM REFERENCES (inline {term}`...`)
+   ============================================ */
+
+a.reference.internal[href*="glossary"] {
+    color: var(--blood-purple);
+    background: rgba(204, 136, 255, 0.1);
+    padding: 1px 6px;
+    border-radius: 4px;
+    border-bottom: 2px solid var(--blood-purple);
+    transition: all 0.15s ease;
+}
+
+a.reference.internal[href*="glossary"]:hover {
+    background: var(--blood-purple);
+    color: var(--blood-bg);
+    text-shadow: none;
+}
+
+/* ============================================
+   HEADINGS (match Neovim markdown highlights)
+   ============================================ */
+
+h1 {
+    color: var(--blood-gold) !important;
+    border-bottom: 3px solid var(--blood-crimson);
+    padding-bottom: 0.4em;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+h2 {
+    color: var(--blood-crimson) !important;
+    border-bottom: 2px solid var(--blood-crimson-dim);
+    padding-bottom: 0.3em;
+}
+
+h3 {
+    color: var(--blood-orange) !important;
+    border-bottom: 1px solid var(--blood-bg-highlight);
+    padding-bottom: 0.25em;
+}
+
+h4 {
+    color: var(--blood-yellow) !important;
+}
+
+h5 {
+    color: var(--blood-cyan) !important;
+}
+
+h6 {
+    color: var(--blood-purple) !important;
+}
+
+/* ============================================
+   ADMONITIONS (notes, warnings, tips)
+   ============================================ */
+
+.admonition {
+    border-radius: 8px;
+    border-left-width: 5px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    background: var(--blood-bg-dark) !important;
+}
+
+.admonition-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    letter-spacing: 0.08em;
+}
+
+/* Note - cyan */
+.admonition.note {
+    border-left-color: var(--blood-cyan);
+}
+.admonition.note .admonition-title {
+    color: var(--blood-cyan);
+}
+
+/* Warning - orange */
+.admonition.warning {
+    border-left-color: var(--blood-orange);
+}
+.admonition.warning .admonition-title {
+    color: var(--blood-orange);
+}
+
+/* Danger/Error - red */
+.admonition.danger, .admonition.error {
+    border-left-color: var(--blood-red);
+}
+.admonition.danger .admonition-title, .admonition.error .admonition-title {
+    color: var(--blood-red);
+}
+
+/* Tip/Hint - green */
+.admonition.tip, .admonition.hint {
+    border-left-color: var(--blood-green);
+}
+.admonition.tip .admonition-title, .admonition.hint .admonition-title {
+    color: var(--blood-green);
+}
+
+/* Important - gold */
+.admonition.important {
+    border-left-color: var(--blood-gold);
+}
+.admonition.important .admonition-title {
+    color: var(--blood-gold);
+}
+
+/* ============================================
+   CODE BLOCKS (match Neovim syntax)
+   ============================================ */
+
+div.highlight {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--blood-bg-highlight);
+}
+
+/* Inline code */
+code.literal {
+    background: var(--blood-bg-highlight) !important;
+    color: var(--blood-green) !important;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* ============================================
+   LINKS (match Neovim link colors)
+   ============================================ */
+
+a.reference.internal {
+    transition: all 0.15s ease;
+}
+
+a.reference.internal:hover {
+    color: var(--blood-gold) !important;
+    text-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+}
+
+a.reference.external {
+    color: var(--blood-cyan);
+}
+
+a.reference.external:hover {
+    color: var(--blood-gold);
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+
+table.docutils {
+    border-collapse: collapse;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+table.docutils th {
+    background: var(--blood-bg-dark) !important;
+    color: var(--blood-gold);
+    border-bottom: 2px solid var(--blood-crimson);
+}
+
+table.docutils td {
+    border-color: var(--blood-bg-highlight);
+}
+
+table.docutils tr:hover td {
+    background: var(--blood-bg-highlight);
+}
+
+/* ============================================
+   SIDEBAR ENHANCEMENTS
+   ============================================ */
+
+.sidebar-tree .current-page > .reference {
+    background: var(--blood-bg-highlight);
+    border-left: 3px solid var(--blood-gold);
+    border-radius: 0 4px 4px 0;
+    padding-left: 8px;
+    margin-left: -3px;
+}
+
+.sidebar-tree .reference:hover {
+    color: var(--blood-gold) !important;
+}
+
+/* Caption styling */
+.sidebar-tree .caption {
+    color: var(--blood-crimson);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    letter-spacing: 0.1em;
+}
+
+/* ============================================
+   SEARCH BOX
+   ============================================ */
+
+.search-button {
+    border-color: var(--blood-crimson) !important;
+}
+
+.search-button:hover {
+    background: var(--blood-bg-highlight) !important;
+    border-color: var(--blood-gold) !important;
+}
+
+/* ============================================
+   SCROLLBAR (Blood Moon style)
+   ============================================ */
+
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--blood-bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--blood-crimson-dim);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--blood-crimson);
+}
+
+/* ============================================
+   SELECTION HIGHLIGHT
+   ============================================ */
+
+::selection {
+    background: var(--blood-gold);
+    color: var(--blood-bg);
+}
+
+::-moz-selection {
+    background: var(--blood-gold);
+    color: var(--blood-bg);
+}
