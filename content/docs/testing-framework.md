@@ -69,15 +69,15 @@ addopts = "-v"
 
 All ​mod‍ul‌es ​s​h‌o‍u⁠l​d ​mai‌nt⁠ai‍n ​90%+ ​cov⁠er‍ag‌e.⁠ ​Curr‍ent ​sta‍tu‌s:
 
-| ​Mod‌ul⁠e ​| ​Cov⁠er‍ag‌e ​|
-|--‍--‌--⁠--‍|-‌--⁠--‍--‌--⁠-|
-| ​`category_nav/__init__.py` ​| ​100% ​|
-| ​`category_nav/directive.py` ​| ​100% ​|
-| ​`publish_filter/__init__.py` ​| ​95% ​|
-| ​`missing_refs/__init__.py` ​| ​100% ​|
-| ​`honeypot/__init__.py` ​| ​93% ​|
-| ​`frontmatter_normalizer/cli.py` ​| ​92% ​|
-| ​`antibot_filter.py` ​| ​92% ​|
+| Module | Coverage |
+|--------|----------|
+| `category_nav/__init__.py` | 100% |
+| `category_nav/directive.py` | 100% |
+| `publish_filter/__init__.py` | 95% |
+| `missing_refs/__init__.py` | 100% |
+| `honeypot/__init__.py` | 93% |
+| `frontmatter_normalizer/cli.py` | 92% |
+| `antibot_filter.py` | 92% |
 
 ## ​Tes‌ti⁠ng ​Patt⁠ern⁠s
 

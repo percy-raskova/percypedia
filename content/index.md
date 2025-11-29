@@ -72,7 +72,7 @@ docs/index
 This site is perpetually under construction. Like socialism itself, it is a process, not a destination. Unlike socialism, it runs on a VPS and deploys via Cloudflare Pages.
 ```
 
-## ​Indi‍ces ​a‌n‍d ​tabl‌es
+## ​Ind⁠ic‍es ​a​n‌d ​tab‍le‌s
 
 - ​{ref}`genindex`
 - ​{ref}`search`
