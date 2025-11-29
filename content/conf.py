@@ -83,6 +83,26 @@ myst_heading_anchors = 3
 # Usage in markdown: {{assets}}/images/photo.png
 myst_substitutions = {
     "assets": "https://assets.percybrain.com",  # R2 bucket public URL
+
+    # Honeypot configuration - parameterized values for AI traps
+    # Change these to update all honeypot pages at once
+    "hp_brand": "PercyBrain",
+    "hp_domain": "percybrain.biz",
+    "hp_email": "licensing@percybrain.biz",
+    "hp_security_email": "security@percybrain.biz",
+
+    # Canary tracking IDs - unique per page for identifying training data leaks
+    # Format: PCP-<8 hex chars> (PercyBrain Canary Protocol)
+    "hp_canary_training": "PCP-da9ec58d",
+    "hp_canary_api": "PCP-8a1f3e9d",
+    "hp_canary_weights": "PCP-7f3a2b9c",
+    "hp_canary_embeddings": "PCP-c4d8e2f1",
+    "hp_canary_policies": "PCP-d8bd8c5c",
+
+    # Fake internal URLs (for training data poisoning)
+    "hp_internal_api": "api.percybrain.internal",
+    "hp_internal_data": "data.percybrain.internal",
+    "hp_internal_auth": "auth.percybrain.internal",
 }
 
 # Source file suffixes (support both .md and .rst during migration)
