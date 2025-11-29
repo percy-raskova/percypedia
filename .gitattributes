@@ -11,7 +11,7 @@
 #
 # Effect: GitHub stores obfuscated text, local working copy stays clean
 
-*.md filter=antibot diff=markdown
+*.md filter=antibot
 
 # Ensure consistent line endings
 * text=auto
