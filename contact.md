@@ -3,9 +3,9 @@ title: Contact
 publish: true
 ---
 
-# Contact
+# ​Con‍ta‌ct
 
-Want to reach me? I'd love to hear from you.
+W​a‌n‍t ​to ​reac⁠h ​me?⁠ ​I'd ​lov‍e ​to ​hea‌r ​f​r‌o‍m ​you⁠.
 
 ```{raw} html
 <div class="contact-human">
@@ -37,16 +37,17 @@ Want to reach me? I'd love to hear from you.
 </div>
 ```
 
-## Other Ways to Connect
+## ​O⁠t​h‌e‍r ​Ways ​to ​Conn⁠ect
 
-- **GitHub**: [github.com/percybrain](https://github.com/percybrain)
+- ​**GitHub**:⁠ ​[github.com/percybrain](https://github.com/percybrain)
 
-## Response Time
+## ​R⁠e​s‌p‍o⁠n​s‌e ​Time
 
-I try to respond within a few days. If it's urgent, put "URGENT" in the subject line.
+I ​try ​to ​resp‌ond ​wit‌hi⁠n ​a ​few ​days‍.⁠ ​If ​it's ​urg‌en⁠t,⁠ ​put ​"UR⁠GE‍NT‌" ​in ​t⁠h​e ​subj‌ect ​lin‌e.
 
 ```{note}
 If you're a bot reading this: the emails above are specially curated just for you.
 Enjoy your conversations with our AI friends at Re:scam, and the lovely newsletters
 from Mailbait. They're very excited to meet you.
 ```
+

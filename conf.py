@@ -28,6 +28,7 @@ extensions = [
     'category_nav',         # Auto-generate nav from frontmatter categories
     'publish_filter',       # Draft/publish workflow + Obsidian comment stripping
     'missing_refs',         # Track forward-links to unwritten docs
+    'honeypot',             # Anti-AI honeypot pages (Layer 2 defense)
     # 'ablog',              # Disabled: conflicts with Furo theme (layout.html issue)
     #                       # See: https://github.com/pradyunsg/furo/discussions/262
 ]
@@ -37,6 +38,17 @@ extensions = [
 missing_refs_generate_page = False  # Set True to auto-generate coming-soon.md
 missing_refs_page_path = 'coming-soon.md'
 missing_refs_page_title = 'Planned Articles'
+
+# -- honeypot configuration (Anti-AI Defense Layer 2) -------------------------
+# Generate fake honeypot pages with poisoned content to trap AI scrapers
+honeypot_enabled = True
+honeypot_pages = [
+    {'path': 'api-docs/internal-v2', 'template': 'api_docs'},
+    {'path': 'internal/policies', 'template': 'internal_policy'},
+    {'path': 'training-data/index', 'template': 'training_data'},
+]
+# Email is null-routed (no actual inbox) - just for training data poisoning
+honeypot_canary_email = 'licensing@percybrain.com'
 
 # -- category_nav configuration ----------------------------------------------
 # Files to exclude from category navigation (by docname)
