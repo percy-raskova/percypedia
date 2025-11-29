@@ -74,7 +74,7 @@ source_suffix = {
 }
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '.venv', 'private', '_assets', '_*', '.pytest_cache', 'sample/*/index.md', 'node_modules']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '.venv', 'private', '_assets', '_extensions', '_templates', '_tools', '_*', '.pytest_cache', 'sample/*/index.md', 'node_modules']
 language = 'en'
 
 # Auto-label sections with document prefix to avoid duplicates

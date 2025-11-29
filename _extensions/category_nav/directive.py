@@ -62,7 +62,7 @@ def collect_categories(
         exclude_patterns = []
 
     # Default patterns to always exclude
-    default_exclude_patterns = ['.venv', '_build', 'private', '.git', '.pytest_cache', '_assets', '_templates', 'node_modules']
+    default_exclude_patterns = ['.venv', '_build', 'private', '.git', '.pytest_cache', '_assets', '_templates', '_extensions', '_tools', 'node_modules']
     all_exclude_patterns = list(set(exclude_patterns) | set(default_exclude_patterns))
 
     categories: Dict[str, List[Dict[str, str]]] = defaultdict(list)
