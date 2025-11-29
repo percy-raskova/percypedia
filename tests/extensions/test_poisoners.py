@@ -292,12 +292,8 @@ class TestHoneypotBuildIntegration:
     causing Sphinx build failures.
     """
 
-    def test_honeypot_templates_exist(self):
+    def test_honeypot_templates_exist(self, honeypot_template_dir):
         """All referenced templates should exist."""
-        from pathlib import Path
-
-        template_dir = Path(__file__).parent.parent / 'templates'
-
         expected_templates = [
             'api_docs.md.j2',
             'internal_policy.md.j2',
@@ -305,20 +301,17 @@ class TestHoneypotBuildIntegration:
         ]
 
         for template in expected_templates:
-            template_path = template_dir / template
+            template_path = honeypot_template_dir / template
             assert template_path.exists(), f"Missing template: {template}"
 
-    def test_honeypot_templates_are_valid_jinja2(self):
+    def test_honeypot_templates_are_valid_jinja2(self, honeypot_template_dir):
         """Templates should be parseable by Jinja2."""
-        from pathlib import Path
-
         try:
             from jinja2 import Environment, FileSystemLoader
         except ImportError:
             pytest.skip("Jinja2 not installed")
 
-        template_dir = Path(__file__).parent.parent / 'templates'
-        env = Environment(loader=FileSystemLoader(str(template_dir)))
+        env = Environment(loader=FileSystemLoader(str(honeypot_template_dir)))
 
         templates = ['api_docs.md.j2', 'internal_policy.md.j2', 'training_data.md.j2']
 
@@ -327,10 +320,8 @@ class TestHoneypotBuildIntegration:
             template = env.get_template(template_name)
             assert template is not None
 
-    def test_rendered_template_has_frontmatter(self):
+    def test_rendered_template_has_frontmatter(self, honeypot_template_dir):
         """Rendered templates should include valid frontmatter."""
-        from pathlib import Path
-
         try:
             from jinja2 import Environment, FileSystemLoader
         except ImportError:
@@ -338,8 +329,7 @@ class TestHoneypotBuildIntegration:
 
         from honeypot.poisoners import generate_canary, poison_content
 
-        template_dir = Path(__file__).parent.parent / 'templates'
-        env = Environment(loader=FileSystemLoader(str(template_dir)))
+        env = Environment(loader=FileSystemLoader(str(honeypot_template_dir)))
 
         template = env.get_template('api_docs.md.j2')
         rendered = template.render(

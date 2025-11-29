@@ -4,5 +4,8 @@ buildCommand = ["sphinx-build", "-M", "html", ".", "_build"]
 
 [tool.pytest.ini_options]
 pythonpath = ["_extensions", "_tools"]
-testpaths = ["_extensions", "_tools"]
+testpaths = ["tests"]
 addopts = "-v"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]

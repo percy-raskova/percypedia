@@ -11,7 +11,7 @@ __pycache__/
 # Private notes (never published)
 private/
 
-# Secret anti-AI documentation (our little secret)
+# Actual anti-ai tech docs (for my eyes only!!! but you know they exist so...)
 docs/anti-ai-defenses.md
 
 # OS
@@ -39,8 +39,5 @@ package-lock.json
 # Temporary files
 *.txt.tmp
 2025-*.txt
-
-# Honeypot generated files (Layer 2 anti-AI defense)
-_honeypot/
-honeypot-trap/
 .coverage
+

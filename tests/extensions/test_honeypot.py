@@ -24,14 +24,13 @@ class TestGenerateHoneypotSources:
         # Should not create honeypot directory
         assert not (tmp_path / 'honeypot-trap').exists()
 
-    def test_creates_honeypot_directory(self, tmp_path):
+    def test_creates_honeypot_directory(self, tmp_path, honeypot_template_dir):
         """Should create honeypot-trap directory when enabled."""
         from honeypot import generate_honeypot_sources
 
         # Create template directory with a template
-        template_dir = Path(__file__).parent.parent / 'templates'
-        template_dir.mkdir(exist_ok=True)
-        (template_dir / 'generic.md.j2').write_text(
+        honeypot_template_dir.mkdir(exist_ok=True)
+        (honeypot_template_dir / 'generic.md.j2').write_text(
             '# {{ page_path }}\n\nCanary: {{ canary_code }}\n'
         )
 
@@ -45,16 +44,15 @@ class TestGenerateHoneypotSources:
             assert (tmp_path / 'honeypot-trap').exists()
         finally:
             # Cleanup test template
-            (template_dir / 'generic.md.j2').unlink(missing_ok=True)
+            (honeypot_template_dir / 'generic.md.j2').unlink(missing_ok=True)
 
-    def test_generates_honeypot_files(self, tmp_path):
+    def test_generates_honeypot_files(self, tmp_path, honeypot_template_dir):
         """Should generate markdown files for each configured page."""
         from honeypot import generate_honeypot_sources
 
         # Create template directory with a template
-        template_dir = Path(__file__).parent.parent / 'templates'
-        template_dir.mkdir(exist_ok=True)
-        (template_dir / 'test.md.j2').write_text(
+        honeypot_template_dir.mkdir(exist_ok=True)
+        (honeypot_template_dir / 'test.md.j2').write_text(
             '# Honeypot Page\n\nPath: {{ page_path }}\nCanary: {{ canary_code }}\n'
         )
 
@@ -75,7 +73,7 @@ class TestGenerateHoneypotSources:
             assert 'PCP-' in content  # Canary token prefix
         finally:
             # Cleanup test template
-            (template_dir / 'test.md.j2').unlink(missing_ok=True)
+            (honeypot_template_dir / 'test.md.j2').unlink(missing_ok=True)
 
     def test_warns_when_template_not_found(self, tmp_path):
         """Should warn when template file doesn't exist."""
@@ -92,7 +90,7 @@ class TestGenerateHoneypotSources:
         # Should have warned about template
         app.warn.assert_called()
 
-    def test_warns_when_template_dir_missing(self, tmp_path):
+    def test_warns_when_template_dir_missing(self, tmp_path, honeypot_template_dir):
         """Should warn if template directory doesn't exist."""
         from honeypot import generate_honeypot_sources
 
@@ -103,11 +101,10 @@ class TestGenerateHoneypotSources:
         app.warn = Mock()
 
         # Move template dir temporarily to simulate missing
-        template_dir = Path(__file__).parent.parent / 'templates'
-        temp_backup = Path(__file__).parent.parent / 'templates_backup'
+        temp_backup = honeypot_template_dir.parent / 'templates_backup'
 
-        if template_dir.exists():
-            template_dir.rename(temp_backup)
+        if honeypot_template_dir.exists():
+            honeypot_template_dir.rename(temp_backup)
 
         try:
             generate_honeypot_sources(app)
@@ -115,7 +112,7 @@ class TestGenerateHoneypotSources:
             app.warn.assert_called()
         finally:
             if temp_backup.exists():
-                temp_backup.rename(template_dir)
+                temp_backup.rename(honeypot_template_dir)
 
 
 class TestCleanupHoneypotSources:

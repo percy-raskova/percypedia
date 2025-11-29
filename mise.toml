@@ -84,14 +84,18 @@ description = "Validate frontmatter against schema"
 dir = "_tools"
 
 [tasks."fm:test"]
-run = "pytest frontmatter_normalizer/ -v"
+run = "pytest tests/tools/normalizer -v"
 description = "Run frontmatter normalizer tests"
-dir = "_tools"
-env = { PYTHONPATH = "{{cwd}}/_tools" }
 
 [tasks."fm:test:short"]
-run = "pytest frontmatter_normalizer/ --tb=no -q"
+run = "pytest tests/tools/normalizer --tb=no -q"
 description = "Run tests with condensed output"
-dir = "_tools"
-env = { PYTHONPATH = "{{cwd}}/_tools" }
+
+[tasks."test:extensions"]
+run = "pytest tests/extensions -v"
+description = "Run extension tests only"
+
+[tasks."test:tools"]
+run = "pytest tests/tools -v"
+description = "Run tools tests only"
 
