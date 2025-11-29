@@ -8,4 +8,5 @@ testpaths = ["tests"]
 addopts = "-v"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "property: marks property-based tests (requires hypothesis)",
 ]

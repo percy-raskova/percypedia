@@ -99,3 +99,15 @@ description = "Run extension tests only"
 run = "pytest tests/tools -v"
 description = "Run tools tests only"
 
+[tasks."test:integration"]
+run = "pytest tests/integration -v -m slow"
+description = "Run integration tests (slow)"
+
+[tasks."test:property"]
+run = "pytest tests/integration -v -m property"
+description = "Run property-based tests (requires hypothesis)"
+
+[tasks."test:fast"]
+run = "pytest -m 'not slow and not property'"
+description = "Run fast tests only (skip slow/property)"
+
