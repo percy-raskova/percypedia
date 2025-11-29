@@ -163,6 +163,24 @@ MD_TABLE_ROW_PATTERN = re.compile(r'^\s*\|')
 # Table separator rows like |---|---|
 MD_TABLE_SEP_PATTERN = re.compile(r'^[\s|:\-]+$')
 
+# === MyST Syntax Patterns (additional protection) ===
+# Inline math: $...$ (but not $$)
+INLINE_MATH_PATTERN = re.compile(r'(?<!\$)\$(?!\$)[^$]+\$(?!\$)')
+# Block math: $$...$$
+BLOCK_MATH_PATTERN = re.compile(r'\$\$')
+# Section labels: (label)= at start of line
+SECTION_LABEL_PATTERN = re.compile(r'^\([a-zA-Z0-9_-]+\)=')
+# Definition list markers: : at start of line (definition)
+DEFINITION_LIST_PATTERN = re.compile(r'^:\s')
+# Task list checkboxes: - [ ] or - [x]
+TASK_LIST_PATTERN = re.compile(r'^-\s+\[[x ]\]', re.IGNORECASE)
+# Strikethrough: ~~text~~
+STRIKETHROUGH_PATTERN = re.compile(r'~~[^~]+~~')
+# Blockquote markers: > at start of line (possibly nested)
+BLOCKQUOTE_PATTERN = re.compile(r'^(?:>\s*)+')
+# MyST substitutions: {{variable}}
+SUBSTITUTION_PATTERN = re.compile(r'\{\{[^}]+\}\}')
+
 
 def should_skip_word(word: str) -> bool:
     """Check if a word should be skipped from poisoning.
@@ -243,6 +261,39 @@ def poison_line_safely(line: str, word_position: int) -> tuple[str, int]:
 
     # Find square bracket references (footnotes, citations)
     for match in SQUARE_BRACKET_REF.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # === MyST Syntax Protection ===
+    # Inline math: $...$
+    for match in INLINE_MATH_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Block math delimiters: $$
+    for match in BLOCK_MATH_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Section labels: (label)=
+    for match in SECTION_LABEL_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Definition list markers: : at line start
+    for match in DEFINITION_LIST_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Task list checkboxes: - [ ] or - [x]
+    for match in TASK_LIST_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Strikethrough: ~~text~~
+    for match in STRIKETHROUGH_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Blockquote markers: > at line start
+    for match in BLOCKQUOTE_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # MyST substitutions: {{variable}}
+    for match in SUBSTITUTION_PATTERN.finditer(line):
         protected.append((match.start(), match.end(), match.group()))
 
     # Sort by start position and merge overlapping ranges
@@ -364,6 +415,7 @@ def clean_content(content: str) -> str:
     result = []
     in_code = False
     in_directive = False  # Track if we're inside a directive block
+    in_block_math = False  # Track if we're inside $$...$$ block
     directive_indent = 0  # Track indentation level of directive content
     lines = body.split('\n')
     word_position = 0
@@ -439,6 +491,42 @@ def clean_content(content: str) -> str:
 
         # Skip markdown table rows (preserve table structure entirely)
         if MD_TABLE_ROW_PATTERN.match(line) or MD_TABLE_SEP_PATTERN.match(stripped):
+            result.append(line)
+            continue
+
+        # Skip blockquote lines (start with >)
+        if stripped.startswith('>'):
+            result.append(line)
+            continue
+
+        # Skip definition list lines (start with : at beginning)
+        if DEFINITION_LIST_PATTERN.match(stripped):
+            result.append(line)
+            continue
+
+        # Skip task list lines (- [ ] or - [x])
+        if TASK_LIST_PATTERN.match(stripped):
+            result.append(line)
+            continue
+
+        # Skip section label lines ((label)=)
+        if SECTION_LABEL_PATTERN.match(stripped):
+            result.append(line)
+            continue
+
+        # Skip list-table bullet syntax (* - item)
+        if stripped.startswith('* -'):
+            result.append(line)
+            continue
+
+        # Track block math mode ($$...$$)
+        if stripped.startswith('$$') or stripped == '$$':
+            in_block_math = not in_block_math
+            result.append(line)
+            continue
+
+        # Skip content inside block math
+        if in_block_math:
             result.append(line)
             continue
 

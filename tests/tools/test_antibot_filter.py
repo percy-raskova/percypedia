@@ -521,6 +521,328 @@ title: Test
 
         assert restored == original
 
+    # =========================================================================
+    # MyST Syntax - Definition Lists
+    # =========================================================================
+
+    def test_preserves_definition_lists(self):
+        """Definition list syntax should be preserved."""
+        content = """Term 1
+: Definition of term 1
+
+Term 2
+: Definition of term 2
+: Can have multiple definitions"""
+
+        result = clean_content(content)
+
+        # Colon-space at start of line is definition syntax
+        assert "\n: Definition" in result or ": Definition" in result
+
+    def test_roundtrip_definition_lists(self):
+        """Clean then smudge should preserve definition lists."""
+        original = """---
+title: Test
+---
+
+Dialectical Materialism
+: A philosophical approach that views reality as processes.
+
+Base and Superstructure
+: Economic foundation determines political/cultural forms.
+: Related to historical materialism.
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+    # =========================================================================
+    # MyST Syntax - Math (Dollar Signs)
+    # =========================================================================
+
+    def test_preserves_inline_math(self):
+        """Inline math $...$ should be preserved."""
+        content = "The equation $E = mc^2$ is famous."
+
+        result = clean_content(content)
+
+        assert "$E = mc^2$" in result
+
+    def test_preserves_block_math(self):
+        """Block math $$...$$ should be preserved."""
+        content = """Here is a formula:
+
+$$
+\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}
+$$
+
+And more text."""
+
+        result = clean_content(content)
+
+        assert "$$" in result
+        assert "\\int_0^\\infty" in result
+
+    def test_roundtrip_math(self):
+        """Clean then smudge should preserve math syntax."""
+        original = """---
+title: Math Test
+---
+
+# Mathematics
+
+Inline: $E = mc^2$ and $F = ma$.
+
+Block equation:
+
+$$
+\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}
+$$
+
+End.
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+    # =========================================================================
+    # MyST Syntax - Section Labels
+    # =========================================================================
+
+    def test_preserves_section_labels(self):
+        """Section label syntax (label)= should be preserved."""
+        content = """(my-section-label)=
+## My Section
+
+Content here.
+
+(another-label)=
+### Another Section"""
+
+        result = clean_content(content)
+
+        assert "(my-section-label)=" in result
+        assert "(another-label)=" in result
+
+    def test_roundtrip_section_labels(self):
+        """Clean then smudge should preserve section labels."""
+        original = """---
+title: Test
+---
+
+(intro-section)=
+# Introduction
+
+Some content.
+
+(details-section)=
+## Details
+
+See {ref}`intro-section` for more.
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+    # =========================================================================
+    # MyST Syntax - Substitutions (Double Braces)
+    # =========================================================================
+
+    def test_preserves_substitutions(self):
+        """MyST substitutions {{var}} should be preserved."""
+        content = "![Image]({{assets}}/images/photo.png)"
+
+        result = clean_content(content)
+
+        assert "{{assets}}" in result
+
+    def test_preserves_multiple_substitutions(self):
+        """Multiple substitutions should all be preserved."""
+        content = """Images from {{assets}}/images/
+And PDFs from {{assets}}/pdfs/
+Variable: {{project_name}}"""
+
+        result = clean_content(content)
+
+        assert "{{assets}}" in result
+        assert "{{project_name}}" in result
+
+    def test_roundtrip_substitutions(self):
+        """Clean then smudge should preserve substitutions."""
+        original = """---
+title: Test
+---
+
+# Using Assets
+
+:::{figure} {{assets}}/images/diagram.png
+:alt: Architecture diagram
+
+Caption with {{project_name}} reference.
+:::
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+    # =========================================================================
+    # MyST Syntax - List-Table Directive
+    # =========================================================================
+
+    def test_preserves_list_table_directive(self):
+        """List-table directive should be preserved."""
+        content = """:::{list-table} Comparison
+:header-rows: 1
+:widths: 30 70
+
+* - Feature
+  - Description
+* - Speed
+  - Very fast
+:::"""
+
+        result = clean_content(content)
+
+        assert ":::{list-table}" in result
+        assert ":header-rows: 1" in result
+        assert "* - Feature" in result
+
+    def test_roundtrip_list_table(self):
+        """Clean then smudge should preserve list-table."""
+        original = """---
+title: Test
+---
+
+:::{list-table} Categories
+:header-rows: 1
+
+* - Category
+  - Purpose
+* - Theory
+  - Explanatory content
+* - Praxis
+  - Practical guides
+:::
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+    # =========================================================================
+    # MyST Syntax - Task Lists (Checkboxes)
+    # =========================================================================
+
+    def test_preserves_task_lists(self):
+        """Task list checkbox syntax should be preserved."""
+        content = """- [ ] Unchecked task
+- [x] Checked task
+- [ ] Another unchecked"""
+
+        result = clean_content(content)
+
+        assert "- [ ]" in result
+        assert "- [x]" in result
+
+    def test_roundtrip_task_lists(self):
+        """Clean then smudge should preserve task lists."""
+        original = """---
+title: Todo
+---
+
+# Tasks
+
+- [x] Write tests
+- [x] Run build
+- [ ] Deploy
+- [ ] Celebrate
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+    # =========================================================================
+    # MyST Syntax - Strikethrough
+    # =========================================================================
+
+    def test_preserves_strikethrough(self):
+        """Strikethrough ~~text~~ should be preserved."""
+        content = "This is ~~deleted~~ text and ~~removed~~ content."
+
+        result = clean_content(content)
+
+        assert "~~deleted~~" in result
+        assert "~~removed~~" in result
+
+    def test_roundtrip_strikethrough(self):
+        """Clean then smudge should preserve strikethrough."""
+        original = """---
+title: Test
+---
+
+# Revisions
+
+The old approach was ~~completely wrong~~ revised.
+
+We ~~initially thought~~ now understand the issue.
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+    # =========================================================================
+    # MyST Syntax - Blockquotes
+    # =========================================================================
+
+    def test_preserves_blockquotes(self):
+        """Blockquote syntax should be preserved."""
+        content = """> This is a quote.
+> It spans multiple lines.
+
+> Another quote."""
+
+        result = clean_content(content)
+
+        assert "> This is a quote." in result
+
+    def test_preserves_nested_blockquotes(self):
+        """Nested blockquotes should be preserved."""
+        content = """> Level 1
+> > Level 2
+> > > Level 3"""
+
+        result = clean_content(content)
+
+        assert "> Level 1" in result
+        assert "> > Level 2" in result
+        assert "> > > Level 3" in result
+
+    def test_roundtrip_blockquotes(self):
+        """Clean then smudge should preserve blockquotes."""
+        original = """---
+title: Test
+---
+
+# Quotes
+
+> The philosophers have only interpreted the world.
+> The point is to change it.
+>
+> -- Marx, Theses on Feuerbach
+
+Regular text here.
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
 
 class TestMainCLI:
     """Tests for the CLI main function."""
