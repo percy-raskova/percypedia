@@ -7,10 +7,16 @@ Central configuration for:
 - Field migration mappings
 """
 
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
 import yaml
+
+# Add _extensions to path for centralized imports
+_EXTENSIONS_PATH = Path(__file__).parent.parent.parent / '_extensions'
+if str(_EXTENSIONS_PATH) not in sys.path:
+    sys.path.insert(0, str(_EXTENSIONS_PATH))
 
 # =============================================================================
 # Schema Fields
@@ -160,21 +166,8 @@ DEFAULT_TAG_VOCABULARY: Dict[str, List[str]] = {
 # Default Exclusion Patterns
 # =============================================================================
 
-DEFAULT_EXCLUDE_PATTERNS: List[str] = [
-    "_build",
-    "_build/*",
-    ".venv",
-    ".venv/*",
-    "private",
-    "private/*",
-    ".git",
-    ".git/*",
-    "__pycache__",
-    "__pycache__/*",
-    "*.pyc",
-    ".obsidian",
-    ".obsidian/*",
-]
+# Import centralized patterns (includes infrastructure dirs, build artifacts, etc.)
+from _common.paths import EXCLUDE_PATTERNS as DEFAULT_EXCLUDE_PATTERNS
 
 # =============================================================================
 # Default Values for New Files

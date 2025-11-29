@@ -18,6 +18,7 @@ from sphinx.util.docutils import SphinxDirective
 # Import from shared module, re-export for backward compatibility
 from _common.frontmatter import extract_frontmatter
 from _common.traversal import iter_markdown_files
+from _common.paths import EXCLUDE_PATTERNS
 
 
 def extract_title(content: str) -> Optional[str]:
@@ -61,9 +62,8 @@ def collect_categories(
     if exclude_patterns is None:
         exclude_patterns = []
 
-    # Default patterns to always exclude
-    default_exclude_patterns = ['.venv', '_build', 'private', '.git', '.pytest_cache', '_assets', '_templates', '_extensions', '_tools', 'node_modules']
-    all_exclude_patterns = list(set(exclude_patterns) | set(default_exclude_patterns))
+    # Combine with centralized exclude patterns
+    all_exclude_patterns = list(set(exclude_patterns) | set(EXCLUDE_PATTERNS))
 
     categories: Dict[str, List[Dict[str, str]]] = defaultdict(list)
     srcdir = Path(srcdir)

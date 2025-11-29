@@ -3,6 +3,7 @@
 # Features:
 # 1. Excludes documents with `publish: false` from the build
 # 2. Strips Obsidian-style comments (%%...%%) from output
+# 3. Protects critical files from accidental exclusion
 #
 # Usage in frontmatter:
 #   publish: false  -> Document is excluded from build
@@ -16,8 +17,20 @@ from _common.frontmatter import extract_frontmatter
 from _common.traversal import iter_markdown_files
 
 
+# Critical files that must NEVER be excluded from builds
+# Even if marked publish: false (e.g., by automated tools)
+PROTECTED_DOCNAMES = {
+    'index',      # Root document - build fails without this
+    'glossary',   # Referenced in root toctree
+}
+
+
 def get_unpublished_docs(app) -> Set[str]:
-    """Scan source files and return docnames with publish: false."""
+    """Scan source files and return docnames with publish: false.
+
+    Protected files (index.md, glossary.md) are never excluded,
+    even if marked publish: false.
+    """
     unpublished = set()
     srcdir = Path(app.srcdir)
 
@@ -29,13 +42,17 @@ def get_unpublished_docs(app) -> Set[str]:
         skip_dot_dirs=True,
     ):
         rel_path = md_file.relative_to(srcdir)
+        docname = str(rel_path.with_suffix(''))
+
+        # Never exclude protected files
+        if docname in PROTECTED_DOCNAMES:
+            continue
 
         try:
             content = md_file.read_text(encoding='utf-8')
             frontmatter = extract_frontmatter(content)
 
             if frontmatter.get('publish') is False:
-                docname = str(rel_path.with_suffix(''))
                 unpublished.add(docname)
 
         except Exception:

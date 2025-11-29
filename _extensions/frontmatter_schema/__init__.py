@@ -15,6 +15,7 @@ from typing import Any, Dict, List, Optional
 # Import from shared module, re-export for backward compatibility
 from _common.frontmatter import extract_frontmatter
 from _common.traversal import iter_markdown_files
+from _common.paths import SCHEMAS_DIR, EXCLUDE_PATTERNS
 
 try:
     import jsonschema
@@ -23,8 +24,8 @@ except ImportError:
     HAS_JSONSCHEMA = False
 
 
-# Path to the canonical schema
-SCHEMA_PATH = Path(__file__).parent.parent.parent / '_schemas' / 'frontmatter.schema.json'
+# Path to the canonical schema (from centralized paths)
+SCHEMA_PATH = SCHEMAS_DIR / 'frontmatter.schema.json'
 
 
 # Re-export for backward compatibility
@@ -130,7 +131,7 @@ def validate_directory(
         Only files with errors are included.
     """
     if exclude_patterns is None:
-        exclude_patterns = ['.venv', '_build', 'private', '.git', '.pytest_cache']
+        exclude_patterns = EXCLUDE_PATTERNS
 
     if schema is None:
         schema = load_schema()
