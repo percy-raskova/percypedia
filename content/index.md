@@ -52,6 +52,9 @@ If ​t​h‌e‍s⁠e ​pos⁠it‍io‌ns ​offe‍nd ​you‍,⁠ ​t​
 
 ## ​Nav‌ig⁠at‍e
 
+```{category-nav}
+```
+
 ```{toctree}
 :caption: Reference
 :maxdepth: 1

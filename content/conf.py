@@ -148,7 +148,13 @@ hoverxref_tooltip_class = 'rst-content'
 # Theme: Furo (synced with Kitty terminal color scheme)
 html_theme = 'furo'
 
+# Disable source viewing (anti-AI: don't expose raw markdown)
+html_copy_source = False
+html_show_sourcelink = False
+
 html_theme_options = {
+    # Disable top-of-page buttons (view source, edit)
+    "top_of_page_buttons": [],
     # Light mode (inverted Blood Moon)
     "light_css_variables": {
         "color-brand-primary": "#dc143c",      # Crimson

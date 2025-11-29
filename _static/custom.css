@@ -596,3 +596,33 @@ table.docutils tr:hover td {
     color: var(--blood-fg-dark);
     margin-top: 0.5em;
 }
+
+/* ============================================
+   HIDE THEME TOGGLE
+   Force dark mode only - Blood Moon forever
+   ============================================ */
+
+/* Hide the light/dark mode toggle button (Furo theme) */
+.theme-toggle,
+button.theme-toggle,
+.theme-toggle-container,
+label.theme-toggle,
+/* Target the specific Furo toggle icons */
+.nav-overlay-icon,
+button[title="Toggle Light / Dark / Auto color theme"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Force dark mode regardless of user preference */
+body,
+body[data-theme="light"],
+body[data-theme="auto"] {
+    --color-background-primary: #1a0000 !important;
+    --color-background-secondary: #0d0000 !important;
+    --color-background-hover: #2a0a0a !important;
+    --color-foreground-primary: #e8e8e8 !important;
+    --color-foreground-secondary: #b0b0b0 !important;
+    --color-brand-primary: #ffd700 !important;
+    --color-brand-content: #ffd700 !important;
+}
