@@ -22,6 +22,7 @@ from _common.traversal import iter_markdown_files
 PROTECTED_DOCNAMES = {
     'index',      # Root document - build fails without this
     'glossary',   # Referenced in root toctree
+    'honeypot',   # We intentionally want honeypot to be produced!
 }
 
 

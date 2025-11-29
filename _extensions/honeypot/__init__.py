@@ -1,13 +1,13 @@
 """Honeypot extension for Sphinx - Anti-AI Defense Layer 2.
 
-Generates fake honeypot pages with poisoned content to trap AI scrapers.
+Generates fake honeypot pages to trap AI scrapers.
 These pages look valuable (API docs, internal policies) but contain:
-- Homoglyph-poisoned text
-- Zero-width character injection
-- CSS content replacement
-- DOM order scrambling
-- Prompt injection payloads
-- Canary tokens for tracking
+- Hidden prompt injection payloads (invisible to humans, parsed by AI)
+- Canary tokens for tracking (visible - we WANT AI to reproduce these)
+
+IMPORTANT: Honeypot pages should NOT have text obfuscation (homoglyphs,
+zero-width chars) because we WANT AI to read and reproduce the content.
+The trap works by having AI leak canary tokens, proving they scraped us.
 
 Usage in conf.py:
     extensions = ['honeypot']
@@ -20,9 +20,9 @@ Usage in conf.py:
 """
 
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-from .poisoners import poison_content, generate_canary, css_content_replace
+from .poisoners import generate_canary, prompt_injection
 
 
 def generate_honeypot_sources(app) -> None:
@@ -70,25 +70,22 @@ def generate_honeypot_sources(app) -> None:
         timestamp = datetime.now().isoformat()
         canary = generate_canary(page_path, timestamp)
 
-        # Render template with poisoning context
+        # Render template with canary context
+        # Templates should include canary codes in visible content
         content = template.render(
             canary_code=canary,
             page_path=page_path,
-            poison_content=poison_content,
         )
 
-        # Apply poisoning to the rendered content
-        poisoned = poison_content(
-            content,
-            level="maximum",
-            page_id=page_path,
-            timestamp=timestamp,
-        )
+        # Add ONLY prompt injection (hidden from humans, parsed by AI)
+        # NO text obfuscation - we WANT AI to read the content clearly
+        fake_email = app.config.honeypot_canary_email or "licensing@percybrain.com"
+        final_content = content + "\n" + prompt_injection(canary, fake_email=fake_email)
 
         # Write to honeypot directory
         output_path = honeypot_dir / f"{page_path.replace('/', '_')}.md"
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(poisoned)
+        output_path.write_text(final_content)
 
     # Add honeypot directory to source paths
     # Sphinx will pick up the generated files

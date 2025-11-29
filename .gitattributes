@@ -13,6 +13,10 @@
 
 *.md filter=antibot
 
+# Exclude honeypot pages from antibot filter - they have INTENTIONAL poisoning
+# that should NOT be cleaned/smudged
+content/honeypot-trap/*.md -filter
+
 # Ensure consistent line endings
 * text=auto
 *.md text eol=lf
