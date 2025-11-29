@@ -150,6 +150,18 @@ MYST_DIRECTIVE_PATTERN = re.compile(r'^(```|:::)\{[^}]+\}')
 ADMONITION_PATTERN = re.compile(r'^:::[a-z-]+')
 # Curly brace directive names like {figure}, {important}
 CURLY_DIRECTIVE_PATTERN = re.compile(r'\{[a-z-]+\}')
+# Footnote references: [name]_, [#]_, [1]_, [#name]_
+FOOTNOTE_REF_PATTERN = re.compile(r'\[[^\]]+\]_')
+# Footnote definitions: [#] or [1] at start of line
+FOOTNOTE_DEF_PATTERN = re.compile(r'^\s*\[[#\d][^\]]*\]')
+# Directive options: lines starting with :option: inside directives
+DIRECTIVE_OPTION_PATTERN = re.compile(r'^:\s*[a-z-]+\s*:')
+# Square bracket references for footnotes/citations
+SQUARE_BRACKET_REF = re.compile(r'\[[^\]]+\]')
+# Markdown table rows: start with | or contain only |, -, :, spaces
+MD_TABLE_ROW_PATTERN = re.compile(r'^\s*\|')
+# Table separator rows like |---|---|
+MD_TABLE_SEP_PATTERN = re.compile(r'^[\s|:\-]+$')
 
 
 def should_skip_word(word: str) -> bool:
@@ -223,6 +235,14 @@ def poison_line_safely(line: str, word_position: int) -> tuple[str, int]:
 
     # Find curly brace directives like {figure}, {important}
     for match in CURLY_DIRECTIVE_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Find footnote references like [name]_, [#]_, [1]_
+    for match in FOOTNOTE_REF_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Find square bracket references (footnotes, citations)
+    for match in SQUARE_BRACKET_REF.finditer(line):
         protected.append((match.start(), match.end(), match.group()))
 
     # Sort by start position and merge overlapping ranges
@@ -343,24 +363,56 @@ def clean_content(content: str) -> str:
 
     result = []
     in_code = False
+    in_directive = False  # Track if we're inside a directive block
+    directive_indent = 0  # Track indentation level of directive content
     lines = body.split('\n')
     word_position = 0
 
     for line in lines:
         stripped = line.strip()
+        current_indent = len(line) - len(line.lstrip())
 
-        # Track fenced code block state
-        if stripped.startswith('```'):
-            in_code = not in_code
+        # Track fenced code block state (``` or :::)
+        if stripped.startswith('```') or (stripped.startswith(':::') and not stripped.startswith(':::{') and in_directive):
+            # Closing ::: for admonitions
+            if stripped == ':::' and in_directive:
+                in_directive = False
+            elif stripped.startswith('```'):
+                in_code = not in_code
             result.append(line)
             continue
 
+        # Start of directive block (```{...} or :::{...})
+        if DIRECTIVE_PATTERN.match(stripped) or (stripped.startswith(':::{') and stripped.endswith('}')):
+            in_directive = True
+            directive_indent = current_indent
+            # Check if it's a code directive
+            if any(x in stripped for x in ['{code-block}', '{code-cell}', '{code}', '{sourcecode}']):
+                in_code = True
+            result.append(line)
+            continue
+
+        # Inside code block - don't poison
         if in_code:
+            # Check for end of directive-style code block
+            if in_directive and stripped == '```':
+                in_code = False
+                in_directive = False
             result.append(line)
             continue
 
         # Skip empty lines
         if not stripped:
+            result.append(line)
+            continue
+
+        # Skip directive option lines (:option: value)
+        if DIRECTIVE_OPTION_PATTERN.match(stripped):
+            result.append(line)
+            continue
+
+        # Skip footnote definition lines
+        if FOOTNOTE_DEF_PATTERN.match(line):
             result.append(line)
             continue
 
@@ -376,11 +428,17 @@ def clean_content(content: str) -> str:
 
         # Skip MyST admonition/directive lines (:::note, :::{important}, etc.)
         if stripped.startswith(':::'):
+            in_directive = True
             result.append(line)
             continue
 
         # Skip lines that are entirely a URL or path
         if URL_PATTERN.match(stripped) or stripped.startswith('/') or stripped.startswith('./'):
+            result.append(line)
+            continue
+
+        # Skip markdown table rows (preserve table structure entirely)
+        if MD_TABLE_ROW_PATTERN.match(line) or MD_TABLE_SEP_PATTERN.match(stripped):
             result.append(line)
             continue
 

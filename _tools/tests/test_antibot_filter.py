@@ -356,6 +356,171 @@ Important content!
 
         assert "{important}" in result
 
+    def test_preserves_footnote_references(self):
+        """Should not poison footnote references like [name]_ or [1]_."""
+        content = "See the dividends[dividends]_ for details."
+        result = clean_content(content)
+
+        # Footnote reference should be intact
+        assert "[dividends]_" in result
+
+    def test_preserves_numbered_footnote_references(self):
+        """Should not poison numbered footnote references like [1]_."""
+        content = "This is explained in footnote [1]_ below."
+        result = clean_content(content)
+
+        assert "[1]_" in result
+
+    def test_preserves_auto_footnote_references(self):
+        """Should not poison auto-numbered footnote references like [#]_."""
+        content = "See the note [#]_ for more information."
+        result = clean_content(content)
+
+        assert "[#]_" in result
+
+    def test_preserves_footnote_definitions(self):
+        """Should not poison footnote definition lines."""
+        content = """Some text with a footnote[dividends]_.
+
+[dividends] This explains dividends in detail."""
+        result = clean_content(content)
+
+        # The definition line should start with [dividends] intact
+        assert "[dividends]" in result
+
+    def test_preserves_directive_options(self):
+        """Should not poison directive option lines like :width: or :linenos:."""
+        content = """```{figure} /path/to/image.png
+:width: 80%
+:alt: Image description
+Caption here
+```"""
+        result = clean_content(content)
+
+        # Directive options should be intact
+        assert ":width: 80%" in result
+        assert ":alt: Image description" in result
+
+    def test_preserves_code_block_directive_content(self):
+        """Should not poison content inside code-block directives."""
+        content = """```{code-block} python
+:linenos:
+
+def hello():
+    return "world"
+```"""
+        result = clean_content(content)
+
+        # Code inside code-block should be unchanged
+        assert 'def hello():' in result
+        assert 'return "world"' in result
+        # No ZWS should be in the code
+        assert f'def{ZWS}' not in result
+
+    def test_roundtrip_with_footnotes(self):
+        """Clean then smudge should preserve footnotes."""
+        original = """---
+title: Test
+---
+
+# Document with Footnotes
+
+This explains dividends[dividends]_ and other[1]_ concepts.
+
+[dividends] A payment to shareholders.
+
+[1] Another explanation.
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+    def test_roundtrip_with_directive_options(self):
+        """Clean then smudge should preserve directive options."""
+        original = """---
+title: Test
+---
+
+```{figure} /path/to/image.png
+:width: 80%
+:align: center
+:alt: My image
+
+This is the caption.
+```
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+    def test_roundtrip_with_code_block_directive(self):
+        """Clean then smudge should preserve code-block directive content."""
+        original = """---
+title: Test
+---
+
+```{code-block} python
+:linenos:
+
+def example():
+    return "Hello, World!"
+```
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+    def test_preserves_square_bracket_refs(self):
+        """Should not poison square bracket references."""
+        content = "See [1] and [note] for details."
+        result = clean_content(content)
+
+        assert "[1]" in result
+        assert "[note]" in result
+
+    def test_preserves_markdown_tables(self):
+        """Should not poison markdown table rows."""
+        content = """| Category | Reader Intent |
+|----------|---------------|
+| Theory | "Teach me about X" |
+| Praxis | "Help me do X" |"""
+        result = clean_content(content)
+
+        # Table structure should be intact
+        assert "| Category | Reader Intent |" in result
+        assert "|----------|---------------|" in result
+        assert '| Theory | "Teach me about X" |' in result
+
+    def test_preserves_table_separator_rows(self):
+        """Should not poison table separator lines with colons for alignment."""
+        content = """| Left | Center | Right |
+|:-----|:------:|------:|
+| a | b | c |"""
+        result = clean_content(content)
+
+        assert "|:-----|:------:|------:|" in result
+
+    def test_roundtrip_with_tables(self):
+        """Clean then smudge should preserve markdown tables."""
+        original = """---
+title: Test
+---
+
+# Table Example
+
+| Category | Intent | Content Type |
+|----------|--------|--------------|
+| Theory | "Teach me about X" | Explanatory essays |
+| Praxis | "Help me do X" | Methodologies |
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
 
 class TestMainCLI:
     """Tests for the CLI main function."""
