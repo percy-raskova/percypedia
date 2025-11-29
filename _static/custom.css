@@ -626,3 +626,20 @@ body[data-theme="auto"] {
     --color-brand-primary: #ffd700 !important;
     --color-brand-content: #ffd700 !important;
 }
+
+/* ============================================
+   FOOTER CONTACT
+   ============================================ */
+
+.footer-contact {
+    text-align: center;
+    padding: 1em 0;
+    margin-top: 1em;
+    border-top: 1px solid var(--blood-crimson-dim);
+    color: var(--blood-fg-dark);
+    font-size: 0.9em;
+}
+
+.footer-email .email-protect {
+    font-size: 1em;
+}

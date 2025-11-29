@@ -1,0 +1,11 @@
+{# Custom footer for Percypedia - extends Furo's page.html #}
+{% extends "furo/page.html" %}
+
+{% block footer %}
+{{ super() }}
+<div class="footer-contact">
+    <span class="footer-email">
+        Contact: <span class="email-protect" data-user="percy" data-domain="percypedia.biz">[enable JavaScript to see email]</span>
+    </span>
+</div>
+{% endblock %}
