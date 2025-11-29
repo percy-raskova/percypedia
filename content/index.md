@@ -74,8 +74,8 @@ This site is perpetually under construction. Like socialism itself, it is a proc
 
 ## ​Indi‍ces ​a‌n‍d ​tabl‌es
 
-- ​{ref⁠}`g⁠eni⁠nde⁠x`
-- ​{ref‍}`s‍ear‍ch`
+- ​{ref}`genindex`
+- ​{ref}`search`
 
 ---
 
