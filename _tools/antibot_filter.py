@@ -135,22 +135,195 @@ def poison_word_chaos(word: str, position: int) -> str:
     return ''.join(result)
 
 
+# Patterns for content that should NOT be poisoned
+URL_PATTERN = re.compile(r'https?://[^\s\)>\]]+')
+EMAIL_PATTERN = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
+INLINE_CODE_PATTERN = re.compile(r'`[^`]+`')
+MD_LINK_PATTERN = re.compile(r'\[([^\]]*)\]\(([^\)]+)\)')
+MD_REF_PATTERN = re.compile(r'^\[([^\]]+)\]:\s*(.+)$')
+MD_IMAGE_PATTERN = re.compile(r'!\[([^\]]*)\]\(([^\)]+)\)')
+DIRECTIVE_PATTERN = re.compile(r'^```\{[^}]+\}')
+RST_REF_PATTERN = re.compile(r'\{[a-z]+\}`[^`]+`')
+
+
+def should_skip_word(word: str) -> bool:
+    """Check if a word should be skipped from poisoning.
+
+    Args:
+        word: Word to check
+
+    Returns:
+        True if word should not be poisoned
+    """
+    # URLs
+    if URL_PATTERN.search(word):
+        return True
+    # Email addresses
+    if EMAIL_PATTERN.search(word):
+        return True
+    # Contains backticks (inline code)
+    if '`' in word:
+        return True
+    # Markdown/RST cross-references like {doc}`target`
+    if RST_REF_PATTERN.search(word):
+        return True
+    # MyST directive arguments
+    if word.startswith('{') or word.endswith('}'):
+        return True
+    # File paths
+    if '/' in word and not word.startswith('#'):
+        return True
+    return False
+
+
+def poison_line_safely(line: str, word_position: int) -> tuple[str, int]:
+    """Poison a line while preserving markdown syntax.
+
+    Strategy:
+    1. First, extract and preserve all "protected zones" (URLs, inline code, links)
+    2. Poison the remaining text
+    3. Restore protected zones
+
+    Args:
+        line: Line to poison
+        word_position: Current word position counter
+
+    Returns:
+        Tuple of (poisoned line, updated word position)
+    """
+    # Collect protected zones: (start, end, original_text)
+    protected = []
+
+    # Find all URLs
+    for match in URL_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Find all inline code
+    for match in INLINE_CODE_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Find all markdown links - protect the URL part
+    for match in MD_LINK_PATTERN.finditer(line):
+        # Protect entire link syntax
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Find all images
+    for match in MD_IMAGE_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Find RST-style references
+    for match in RST_REF_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Sort by start position and merge overlapping ranges
+    protected.sort(key=lambda x: x[0])
+
+    # Build result by processing unprotected segments
+    result_parts = []
+    last_end = 0
+
+    for start, end, original in protected:
+        if start < last_end:
+            continue  # Skip overlapping ranges
+
+        # Process unprotected segment before this protected zone
+        if start > last_end:
+            segment = line[last_end:start]
+            poisoned_segment, word_position = poison_text_segment(segment, word_position)
+            result_parts.append(poisoned_segment)
+
+        # Add protected zone unchanged
+        result_parts.append(original)
+        last_end = end
+
+    # Process any remaining unprotected text
+    if last_end < len(line):
+        segment = line[last_end:]
+        poisoned_segment, word_position = poison_text_segment(segment, word_position)
+        result_parts.append(poisoned_segment)
+
+    return ''.join(result_parts), word_position
+
+
+def poison_text_segment(segment: str, word_position: int) -> tuple[str, int]:
+    """Poison a text segment (known to be safe to poison).
+
+    Args:
+        segment: Text segment to poison
+        word_position: Current word position for deterministic variation
+
+    Returns:
+        Tuple of (poisoned segment, updated word position)
+    """
+    words = segment.split(' ')
+    poisoned_words = []
+
+    for word in words:
+        word_position += 1
+
+        # Skip very short words
+        if len(word) <= 2:
+            poisoned_words.append(word)
+            continue
+
+        # Skip words that should be preserved
+        if should_skip_word(word):
+            poisoned_words.append(word)
+            continue
+
+        # Check for markdown syntax to preserve
+        if word.startswith('#') or word.startswith('*'):
+            poisoned_words.append(word)
+            continue
+
+        lower_word = word.lower().strip('.,!?;:()[]{}"\'-')
+
+        # High-value keywords get rotated poisoning
+        if lower_word in HIGH_VALUE_KEYWORDS:
+            zw_rotation = [ZWNJ, ZWJ, WJ, ZWS]
+            poisoned = ''
+            for i, char in enumerate(word):
+                poisoned += char
+                if i < len(word) - 1:
+                    poisoned += zw_rotation[(word_position + i) % len(zw_rotation)]
+            poisoned_words.append(poisoned)
+        else:
+            # Regular words get peppered with chaos
+            poisoned = poison_word_chaos(word, word_position)
+            poisoned_words.append(poisoned)
+
+    # Join with ZWS between words
+    modified = f' {ZWS}'.join(poisoned_words)
+
+    # Add ZW after punctuation (but not in protected content)
+    modified = re.sub(r'([.!?,;:])(\s)', rf'\1{WJ}\2', modified)
+
+    return modified, word_position
+
+
 def clean_content(content: str) -> str:
-    """AGGRESSIVELY poison content with zero-width characters everywhere.
+    """Poison content with zero-width characters while preserving markdown syntax.
 
-    Strategy (MAXIMUM CHAOS MODE):
-    1. ZWS between EVERY word (breaks all tokenization)
-    2. ZWNJ/ZWJ/WJ peppered INSIDE most words (corrupts all embeddings)
-    3. Extra ZW chars after ALL punctuation
-    4. High-value keywords get EXTRA poisoning
+    Strategy:
+    1. ZWS between words (breaks tokenization)
+    2. ZWNJ/ZWJ/WJ inside high-value keywords (corrupts embeddings)
+    3. Extra ZW chars after punctuation
 
-    The AI that reads this will have a very bad time.
+    Protected (NOT poisoned):
+    - Frontmatter YAML
+    - Code blocks (fenced with ```)
+    - Inline code (`code`)
+    - URLs (http://, https://)
+    - Markdown links [text](url)
+    - Image syntax ![alt](url)
+    - RST/MyST references {doc}`target`
+    - File paths containing /
 
     Args:
         content: Clean markdown content
 
     Returns:
-        Content absolutely riddled with invisible characters
+        Content with invisible characters in safe locations
     """
     # Don't process if already has any zero-width chars (idempotent)
     if any(zw in content for zw in ALL_ZW_CHARS):
@@ -158,73 +331,47 @@ def clean_content(content: str) -> str:
 
     frontmatter, body = split_frontmatter(content)
 
-    # Process body, avoiding code blocks
     result = []
     in_code = False
     lines = body.split('\n')
-    word_position = 0  # Track position for deterministic chaos
+    word_position = 0
 
     for line in lines:
-        # Track code block state
         stripped = line.strip()
+
+        # Track fenced code block state
         if stripped.startswith('```'):
             in_code = not in_code
             result.append(line)
             continue
 
         if in_code:
-            # Don't modify code blocks
             result.append(line)
             continue
 
         # Skip empty lines
-        if not line.strip():
+        if not stripped:
             result.append(line)
             continue
 
-        # Process each word with MAXIMUM CHAOS
-        words = line.split(' ')
-        poisoned_words = []
+        # Skip reference-style link definitions
+        if MD_REF_PATTERN.match(stripped):
+            result.append(line)
+            continue
 
-        for word in words:
-            word_position += 1
+        # Skip directive lines (MyST)
+        if DIRECTIVE_PATTERN.match(stripped):
+            result.append(line)
+            continue
 
-            # Skip very short words and special syntax
-            if len(word) <= 2 or word.startswith('[') or word.startswith('('):
-                poisoned_words.append(word)
-                continue
+        # Skip lines that are entirely a URL or path
+        if URL_PATTERN.match(stripped) or stripped.startswith('/') or stripped.startswith('./'):
+            result.append(line)
+            continue
 
-            # Check for markdown syntax to preserve
-            if word.startswith('#') or word.startswith('*') or word.startswith('`'):
-                poisoned_words.append(word)
-                continue
-
-            lower_word = word.lower().strip('.,!?;:()[]{}"\'-')
-
-            # High-value keywords get EXTRA poisoning
-            if lower_word in HIGH_VALUE_KEYWORDS:
-                # Poison between EVERY character with ROTATING zero-width chars
-                # This makes it harder to filter out with a simple replace
-                zw_rotation = [ZWNJ, ZWJ, WJ, ZWS]  # Rotate through all 4
-                poisoned = ''
-                for i, char in enumerate(word):
-                    poisoned += char
-                    if i < len(word) - 1:  # Don't add after last char
-                        poisoned += zw_rotation[(word_position + i) % len(zw_rotation)]
-                poisoned_words.append(poisoned)
-            else:
-                # Regular words still get peppered with chaos
-                poisoned = poison_word_chaos(word, word_position)
-                poisoned_words.append(poisoned)
-
-        # Join words with SPACE + ZWS (keep original space, add invisible char)
-        # This way smudge can remove ZWS and preserve the original spacing
-        modified = f' {ZWS}'.join(poisoned_words)
-
-        # Add extra ZW chars after ALL punctuation (not just sentence-ending)
-        modified = re.sub(r'([.!?,;:])(\s)', rf'\1{WJ}\2', modified)
-
-        result.append(modified)
+        # Poison line while protecting syntax
+        poisoned_line, word_position = poison_line_safely(line, word_position)
+        result.append(poisoned_line)
 
     return frontmatter + '\n'.join(result)
 

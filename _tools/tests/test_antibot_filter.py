@@ -263,6 +263,73 @@ class TestPoisonKeyword:
         assert result == ""
 
 
+class TestProtectedContent:
+    """Tests for content that should NOT be poisoned."""
+
+    def test_preserves_plain_urls(self):
+        """Should not poison plain URLs."""
+        content = "Check out https://www.example.com/path/page for more info."
+        result = clean_content(content)
+
+        assert "https://www.example.com/path/page" in result
+
+    def test_preserves_markdown_link_urls(self):
+        """Should not poison URLs inside markdown links."""
+        content = "See [this link](https://github.com/user/repo) for details."
+        result = clean_content(content)
+
+        assert "https://github.com/user/repo" in result
+        # Link syntax should be intact
+        assert "[this link](https://github.com/user/repo)" in result
+
+    def test_preserves_image_urls(self):
+        """Should not poison image URLs."""
+        content = "Here's an image: ![alt](https://example.com/image.png)"
+        result = clean_content(content)
+
+        assert "https://example.com/image.png" in result
+
+    def test_preserves_inline_code(self):
+        """Should not poison inline code."""
+        content = "Use `function_name()` to call it."
+        result = clean_content(content)
+
+        assert "`function_name()`" in result
+
+    def test_preserves_myst_references(self):
+        """Should not poison MyST cross-references."""
+        content = "See {doc}`theory/labor-aristocracy` for more."
+        result = clean_content(content)
+
+        assert "{doc}`theory/labor-aristocracy`" in result
+
+    def test_preserves_file_paths(self):
+        """Should not poison file paths."""
+        content = "The file is at _tools/antibot_filter.py in the repo."
+        result = clean_content(content)
+
+        assert "_tools/antibot_filter.py" in result
+
+    def test_roundtrip_with_urls(self):
+        """Clean then smudge should preserve content with URLs."""
+        original = """---
+title: Test
+---
+
+# Links
+
+Check https://example.com for info.
+
+See [GitHub](https://github.com/user/repo) and ![img](https://example.com/img.png).
+
+Use `code_example()` and {doc}`theory/test`.
+"""
+        cleaned = clean_content(original)
+        restored = smudge_content(cleaned)
+
+        assert restored == original
+
+
 class TestMainCLI:
     """Tests for the CLI main function."""
 
