@@ -236,6 +236,7 @@ html_extra_path = [
     str(PROJECT_ROOT / 'humans.txt'),   # Credits + traps
     str(PROJECT_ROOT / 'ai.txt'),       # AI policy file
     str(PROJECT_ROOT / '_headers'),     # Cloudflare security + anti-AI headers
+    str(PROJECT_ROOT / '_assets'),      # Images and media files
 ]
 html_css_files = ['custom.css']
 html_js_files = ['sidebar-collapse.js', 'contact.js']
