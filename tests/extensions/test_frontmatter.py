@@ -79,7 +79,8 @@ class TestExtractFrontmatterCharacterization:
         self, extract_frontmatter, unicode_frontmatter
     ):
         result = extract_frontmatter(unicode_frontmatter)
-        assert 'title' in result
+        assert result['title'] == 'Teoría del Valor'
+        assert result['author'] == 'Carlos Marx'
 
     def test_windows_line_endings_handled(
         self, extract_frontmatter, windows_line_endings
@@ -184,7 +185,8 @@ class TestSharedExtractFrontmatter:
         self, extract_frontmatter, unicode_frontmatter
     ):
         result = extract_frontmatter(unicode_frontmatter)
-        assert 'title' in result
+        assert result['title'] == 'Teoría del Valor'
+        assert result['author'] == 'Carlos Marx'
 
     def test_windows_line_endings_handled(
         self, extract_frontmatter, windows_line_endings

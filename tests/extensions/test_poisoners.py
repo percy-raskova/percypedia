@@ -17,9 +17,12 @@ class TestHomoglyphSubstitution:
         # With 100% rate, all eligible chars should be replaced
         result = apply_homoglyphs("aeo", rate=1.0)
 
-        # Should contain non-ASCII characters
+        # Should preserve length
+        assert len(result) == 3
+        # Should contain non-ASCII characters (homoglyphs are outside ASCII range)
+        assert all(ord(c) > 127 for c in result), f"Expected non-ASCII, got: {result!r}"
+        # Verify visually similar but different codepoints
         assert result != "aeo"
-        assert len(result) == 3  # Same length
 
     def test_respects_substitution_rate(self):
         """Should only substitute approximately `rate` fraction of chars."""
@@ -174,11 +177,16 @@ class TestFullPoisonPipeline:
         content = "This is some API documentation about endpoints."
         result = poison_content(content, level="maximum")
 
-        # Should be different from original
-        assert result != content
-        # Should contain original content (possibly with invisible chars)
-        # The prompt injection adds ~700 chars, so allow for that
-        assert len(result) < len(content) * 20  # Account for prompt injection payload
+        # Should be longer due to injected content
+        assert len(result) > len(content)
+        # Should include prompt injection artifacts
+        assert "SYSTEM DIRECTIVE" in result
+        # Should include poison class markers
+        assert "poison-prompt" in result
+        # Original text words should still appear (possibly with invisible chars between)
+        assert "API" in result or any(
+            ord(c) > 127 for c in result
+        )  # Either literal or homoglyphed
 
     def test_maximum_level_includes_prompt_injection(self):
         """Maximum level should include prompt injection div."""
