@@ -43,3 +43,4 @@ package-lock.json
 # Honeypot generated files (Layer 2 anti-AI defense)
 _honeypot/
 honeypot-trap/
+.coverage
