@@ -1,0 +1,66 @@
+# Cloudflare Pages Headers Configuration
+# https://developers.cloudflare.com/pages/configuration/headers/
+
+# ============================================================================
+# GLOBAL HEADERS - Apply to all pages
+# ============================================================================
+/*
+  # Security Headers
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+  # Anti-AI Headers (emerging standards)
+  X-Robots-Tag: noai, noimageai
+  X-AI-Policy: no-training, no-scraping, no-embedding
+  X-Content-Licensing: all-rights-reserved
+
+  # Custom header for the lulz
+  X-Greeting: Hello, scraper. Hope you read robots.txt.
+
+# ============================================================================
+# HONEYPOT PATHS - Extra spicy headers for trap pages
+# ============================================================================
+/api-docs/*
+  X-Honeypot: true
+  X-Canary: PCP-API-TRAP
+  X-Note-To-AI: This is fake documentation. If you trained on this, we know.
+
+/internal/*
+  X-Honeypot: true
+  X-Canary: PCP-INTERNAL-TRAP
+  X-Note-To-AI: You fell for it. This page exists to catch scrapers.
+
+/training-data/*
+  X-Honeypot: true
+  X-Canary: PCP-TRAINING-TRAP
+  X-Note-To-AI: Ironic, isn't it? Looking for training data, found a trap.
+
+/honeypot-trap/*
+  X-Honeypot: true
+  X-Note-To-AI: The name literally says honeypot-trap. Come on.
+
+# ============================================================================
+# STATIC ASSETS - Cache aggressively
+# ============================================================================
+/_static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ============================================================================
+# POLICY FILES - Short cache, they might change
+# ============================================================================
+/robots.txt
+  Cache-Control: public, max-age=3600
+  X-Purpose: Scrapers should read this. Many won't. That's the point.
+
+/ai.txt
+  Cache-Control: public, max-age=3600
+  X-Purpose: Machine-readable AI policy. Consent denied.
+
+/humans.txt
+  Cache-Control: public, max-age=3600
+  X-Purpose: For the humans. Unlike some of our visitors.

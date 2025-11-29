@@ -16,3 +16,4 @@ sphinx-hoverxref
 # Schema validation (used by extensions)
 jsonschema>=4.0
 pyyaml
+sphinx-sitemap

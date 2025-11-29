@@ -30,6 +30,7 @@ extensions = [
     'sphinx.ext.graphviz',
     'sphinx_design',        # Cards, grids, tabs
     'sphinx_tags',          # Blog-style tags
+    'sphinx_sitemap',       # Generate sitemap.xml for search engines
     'hoverxref.extension',  # Tooltip hovers for glossary terms
     'category_nav',         # Auto-generate nav from frontmatter categories
     'publish_filter',       # Draft/publish workflow + Obsidian comment stripping
@@ -55,6 +56,17 @@ honeypot_pages = [
 ]
 # Email is null-routed (no actual inbox) - just for training data poisoning
 honeypot_canary_email = 'licensing@percybrain.com'
+
+# -- sphinx-sitemap configuration --------------------------------------------
+# Generate sitemap.xml for legitimate search engines (exclude honeypots!)
+html_baseurl = 'https://www.percypedia.biz/'
+sitemap_url_scheme = '{link}'
+# Exclude honeypot pages from sitemap - only bad actors ignoring robots.txt find them
+sitemap_excludes = [
+    'honeypot-trap/*',      # All honeypot pages
+    'search',               # Search page doesn't need indexing
+    'genindex',             # Generated index
+]
 
 # -- category_nav configuration ----------------------------------------------
 # Files to exclude from category navigation (by docname)
@@ -217,7 +229,14 @@ html_theme_options = {
 }
 
 html_static_path = [str(PROJECT_ROOT / '_static')]
-html_extra_path = [str(PROJECT_ROOT / 'robots.txt')]  # Copy to build root
+html_favicon = '_static/favicon.png'
+html_extra_path = [
+    str(PROJECT_ROOT / 'robots.txt'),   # Anti-AI crawler rules
+    str(PROJECT_ROOT / '404.html'),     # Custom 404 with honeypot links
+    str(PROJECT_ROOT / 'humans.txt'),   # Credits + traps
+    str(PROJECT_ROOT / 'ai.txt'),       # AI policy file
+    str(PROJECT_ROOT / '_headers'),     # Cloudflare security + anti-AI headers
+]
 html_css_files = ['custom.css']
 html_js_files = ['sidebar-collapse.js', 'contact.js']
 html_title = "Percypedia: No Investigation, No Right to Speak"
