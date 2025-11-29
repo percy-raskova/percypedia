@@ -1,0 +1,38 @@
+# Git attributes for PercyBrain knowledge base
+# Anti-AI Defense Layer 1: Source-level obfuscation
+
+# Apply antibot filter to all markdown files
+# This inserts zero-width characters when staging (clean)
+# and removes them when checking out (smudge)
+#
+# Setup (run once after cloning):
+#   git config filter.antibot.clean "python3 _tools/antibot_filter.py --clean"
+#   git config filter.antibot.smudge "python3 _tools/antibot_filter.py --smudge"
+#
+# Effect: GitHub stores obfuscated text, local working copy stays clean
+
+*.md filter=antibot diff=markdown
+
+# Ensure consistent line endings
+* text=auto
+*.md text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary

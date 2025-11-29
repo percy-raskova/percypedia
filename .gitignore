@@ -39,3 +39,7 @@ package-lock.json
 # Temporary files
 *.txt.tmp
 2025-*.txt
+
+# Honeypot generated files (Layer 2 anti-AI defense)
+_honeypot/
+honeypot-trap/
