@@ -4,8 +4,11 @@
 {% block footer %}
 {{ super() }}
 <div class="footer-contact">
-    <span class="footer-email">
-        Contact: <span class="email-protect" data-user="percy" data-domain="percypedia.biz">[enable JavaScript to see email]</span>
-    </span>
+    <p class="footer-tagline">Built with spite, Sphinx, and an alarming amount of caffeine.</p>
+    <p class="footer-email">
+        Yell at me: <span class="email-protect" data-user="percy" data-domain="percypedia.biz">[enable JS]</span>
+        · <a href="{{ pathto('contact') }}">Contact</a>
+    </p>
+    <p class="footer-disclaimer">No AI was harmed in the making of this website. Several were mildly confused.</p>
 </div>
 {% endblock %}

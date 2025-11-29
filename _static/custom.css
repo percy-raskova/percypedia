@@ -633,13 +633,36 @@ body[data-theme="auto"] {
 
 .footer-contact {
     text-align: center;
-    padding: 1em 0;
-    margin-top: 1em;
+    padding: 1.5em 0 1em 0;
+    margin-top: 1.5em;
     border-top: 1px solid var(--blood-crimson-dim);
     color: var(--blood-fg-dark);
-    font-size: 0.9em;
+    font-size: 0.85em;
 }
 
-.footer-email .email-protect {
-    font-size: 1em;
+.footer-contact p {
+    margin: 0.4em 0;
+}
+
+.footer-tagline {
+    color: var(--blood-fg-dark);
+    font-style: italic;
+}
+
+.footer-email {
+    color: var(--blood-fg);
+}
+
+.footer-email a {
+    color: var(--blood-cyan);
+    text-decoration: none;
+}
+
+.footer-email a:hover {
+    color: var(--blood-gold);
+}
+
+.footer-disclaimer {
+    color: var(--blood-fg-gutter);
+    font-size: 0.9em;
 }
