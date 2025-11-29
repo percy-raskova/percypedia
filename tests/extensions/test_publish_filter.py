@@ -73,6 +73,47 @@ After''']
         strip_obsidian_comments(None, 'test', source)
         assert source[0] == ''
 
+    def test_handles_nested_comments_greedy(self):
+        """Documents behavior: nested %% creates multiple comment regions."""
+        from publish_filter import strip_obsidian_comments
+
+        # Current behavior: %% matches to nearest %%
+        # So `%% outer %% inner %% %%` becomes ` inner ` (outer stripped, inner visible)
+        source = ['%% outer %% inner %% %%']
+        strip_obsidian_comments(None, 'test', source)
+
+        # This characterizes current (possibly buggy) behavior
+        assert source[0] == ' inner '
+
+    def test_handles_adjacent_comments(self):
+        """Multiple adjacent comments should all be stripped."""
+        from publish_filter import strip_obsidian_comments
+
+        source = ['%%a%%%%b%%%%c%%']
+        strip_obsidian_comments(None, 'test', source)
+
+        assert source[0] == ''
+
+    def test_handles_unmatched_percent_signs(self):
+        """Single %% without closing should not break."""
+        from publish_filter import strip_obsidian_comments
+
+        source = ['Text with %% unmatched']
+        strip_obsidian_comments(None, 'test', source)
+
+        # Unmatched %% should remain
+        assert '%% unmatched' in source[0]
+
+    def test_handles_unicode_in_comments(self):
+        """Unicode content in comments should be stripped correctly."""
+        from publish_filter import strip_obsidian_comments
+
+        source = ['Visible %%Teoría del Valor%% end']
+        strip_obsidian_comments(None, 'test', source)
+
+        assert source[0] == 'Visible  end'
+        assert 'Teoría' not in source[0]
+
 
 class TestGetUnpublishedDocs:
     """Tests for detecting unpublished documents."""

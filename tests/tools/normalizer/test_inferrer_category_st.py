@@ -254,3 +254,106 @@ class TestSentenceTransformerVsSpaCyComparison:
 
         # Should truncate and still classify
         assert result.category in ("Theory", "Creative", "Polemics")
+
+
+class TestSentenceTransformerRobustness:
+    """Tests for ML inferrer robustness to malformed and edge-case content."""
+
+    def test_handles_empty_string(self, st_category_inferrer):
+        """Should handle empty string gracefully."""
+        result = st_category_inferrer.infer("")
+
+        # Should return a result, not crash
+        assert result.category is not None
+        assert result.needs_review is True
+
+    def test_handles_only_whitespace(self, st_category_inferrer):
+        """Should handle whitespace-only content."""
+        result = st_category_inferrer.infer("   \n\n\t  ")
+
+        assert result.category is not None
+        assert result.needs_review is True
+
+    def test_handles_only_punctuation(self, st_category_inferrer):
+        """Should handle punctuation-only content."""
+        result = st_category_inferrer.infer("!@#$%^&*()...???")
+
+        assert result.category is not None
+        assert result.needs_review is True
+
+    def test_handles_unicode_content(self, st_category_inferrer):
+        """Should handle unicode characters correctly."""
+        unicode_content = """# Teoría del Valor
+
+La teoría del valor-trabajo explica cómo el trabajo humano
+crea valor en las mercancías. Marx desarrolló esta teoría
+basándose en los economistas clásicos.
+"""
+        result = st_category_inferrer.infer(unicode_content)
+
+        # Should return a valid result without crashing
+        assert result.category is not None
+        valid_categories = {"Theory", "Praxis", "Polemics", "Creative", "Meta"}
+        assert result.category in valid_categories
+        assert 0.0 <= result.confidence <= 1.0
+
+    def test_handles_mixed_language_content(self, st_category_inferrer):
+        """Should handle content mixing multiple languages."""
+        mixed_content = """# Revolutionary Theory
+
+La revolución es necesaria. The working class must organize.
+Die Arbeiterklasse. La lutte continue. 工人阶级万岁！
+"""
+        result = st_category_inferrer.infer(mixed_content)
+
+        assert result.category is not None
+        # Mixed content may have lower confidence
+        assert 0.0 <= result.confidence <= 1.0
+
+    def test_handles_code_heavy_content(self, st_category_inferrer):
+        """Should handle content that is mostly code."""
+        code_content = """# Configuration Reference
+
+```python
+def process_data(input):
+    return [x * 2 for x in input]
+
+class DataProcessor:
+    def __init__(self):
+        self.cache = {}
+```
+"""
+        result = st_category_inferrer.infer(code_content)
+
+        assert result.category is not None
+        # Code-heavy content might classify as Meta (documentation)
+        assert result.category in ("Meta", "Theory", "Praxis")
+
+    def test_handles_null_bytes(self, st_category_inferrer):
+        """Should handle content with null bytes."""
+        content_with_null = "# Title\n\nContent with \x00 null byte."
+
+        result = st_category_inferrer.infer(content_with_null)
+
+        assert result.category is not None
+
+    def test_handles_control_characters(self, st_category_inferrer):
+        """Should handle content with control characters."""
+        content = "# Title\r\n\r\nContent with \t tabs and \x1b escapes."
+
+        result = st_category_inferrer.infer(content)
+
+        assert result.category is not None
+
+    def test_handles_repeated_content(self, st_category_inferrer):
+        """Should handle repetitive/spammy content."""
+        spam_content = "theory " * 1000
+
+        result = st_category_inferrer.infer(spam_content)
+
+        # Should return a valid result without crashing
+        assert result.category is not None
+        valid_categories = {"Theory", "Praxis", "Polemics", "Creative", "Meta"}
+        assert result.category in valid_categories
+        # Repetitive content may have varying confidence
+        assert 0.0 <= result.confidence <= 1.0

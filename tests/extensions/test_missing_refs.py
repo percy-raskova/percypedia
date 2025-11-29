@@ -65,6 +65,39 @@ class TestMissingRefsCollection:
         assert collector.missing['concepts/dialectics']['category'] == 'concepts'
         assert collector.missing['top-level-doc']['category'] is None
 
+    def test_handles_unicode_target_paths(self):
+        """Should handle unicode characters in target paths."""
+        from missing_refs import MissingRefsCollector
+
+        collector = MissingRefsCollector()
+        collector.record_missing('theory/teoría-del-valor', 'index')
+        collector.record_missing('concepts/dialéctica', 'index')
+
+        assert 'theory/teoría-del-valor' in collector.missing
+        assert 'concepts/dialéctica' in collector.missing
+        assert collector.missing['theory/teoría-del-valor']['category'] == 'theory'
+
+    def test_handles_unicode_referrer_paths(self):
+        """Should handle unicode characters in referrer document names."""
+        from missing_refs import MissingRefsCollector
+
+        collector = MissingRefsCollector()
+        collector.record_missing('future/topic', 'teoría/introducción')
+
+        refs = collector.missing['future/topic']['referenced_by']
+        assert 'teoría/introducción' in refs
+
+    def test_handles_special_characters_in_paths(self):
+        """Should handle special characters like hyphens and underscores."""
+        from missing_refs import MissingRefsCollector
+
+        collector = MissingRefsCollector()
+        collector.record_missing('theory/class_struggle-2024', 'index')
+        collector.record_missing('concepts/labor-power_definition', 'docs/intro')
+
+        assert 'theory/class_struggle-2024' in collector.missing
+        assert 'concepts/labor-power_definition' in collector.missing
+
 
 class TestJsonOutput:
     """Tests for JSON file output."""
