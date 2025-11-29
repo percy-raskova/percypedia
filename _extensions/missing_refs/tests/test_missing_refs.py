@@ -197,3 +197,186 @@ class TestSphinxIntegration:
         event_names = [call[0][0] for call in app.connect.call_args_list]
         assert 'warn-missing-reference' in event_names or 'missing-reference' in event_names
         assert 'build-finished' in event_names
+
+
+class TestCollectorGlobals:
+    """Tests for global collector instance management."""
+
+    def test_get_collector_creates_instance(self):
+        """get_collector should create a new instance if none exists."""
+        from missing_refs import get_collector, reset_collector
+
+        reset_collector()  # Start clean
+        collector = get_collector()
+
+        assert collector is not None
+        from missing_refs import MissingRefsCollector
+        assert isinstance(collector, MissingRefsCollector)
+
+    def test_get_collector_returns_same_instance(self):
+        """get_collector should return the same instance on subsequent calls."""
+        from missing_refs import get_collector, reset_collector
+
+        reset_collector()
+        collector1 = get_collector()
+        collector2 = get_collector()
+
+        assert collector1 is collector2
+
+    def test_reset_collector_clears_instance(self):
+        """reset_collector should clear the global instance."""
+        from missing_refs import get_collector, reset_collector
+
+        reset_collector()
+        collector1 = get_collector()
+        reset_collector()
+        collector2 = get_collector()
+
+        assert collector1 is not collector2
+
+
+class TestOnMissingReference:
+    """Tests for the missing-reference event handler."""
+
+    def test_records_doc_reference(self):
+        """Should record doc-type references."""
+        from missing_refs import on_missing_reference, get_collector, reset_collector
+
+        reset_collector()
+
+        # Mock node with doc reference
+        node = {'reftype': 'doc', 'reftarget': 'theory/future-topic'}
+        env = Mock()
+        env.docname = 'index'
+
+        result = on_missing_reference(None, env, node, None)
+
+        assert result is None  # Let Sphinx continue
+        collector = get_collector()
+        assert 'theory/future-topic' in collector.missing
+
+    def test_ignores_non_doc_references(self):
+        """Should ignore non-doc reference types."""
+        from missing_refs import on_missing_reference, get_collector, reset_collector
+
+        reset_collector()
+
+        # Mock node with non-doc reference
+        node = {'reftype': 'ref', 'reftarget': 'some-label'}
+        env = Mock()
+        env.docname = 'index'
+
+        on_missing_reference(None, env, node, None)
+
+        collector = get_collector()
+        assert 'some-label' not in collector.missing
+
+    def test_handles_missing_docname(self):
+        """Should handle env without docname attribute."""
+        from missing_refs import on_missing_reference, get_collector, reset_collector
+
+        reset_collector()
+
+        node = {'reftype': 'doc', 'reftarget': 'some/topic'}
+        env = Mock(spec=[])  # No docname attribute
+
+        on_missing_reference(None, env, node, None)
+
+        collector = get_collector()
+        assert 'some/topic' in collector.missing
+        assert 'unknown' in collector.missing['some/topic']['referenced_by']
+
+
+class TestOnBuildFinished:
+    """Tests for the build-finished event handler."""
+
+    def test_skips_on_exception(self, tmp_path):
+        """Should not write files if build had an exception."""
+        from missing_refs import on_build_finished, get_collector, reset_collector
+
+        reset_collector()
+        collector = get_collector()
+        collector.record_missing('test/topic', 'index')
+
+        app = Mock()
+        app.outdir = str(tmp_path)
+
+        # Call with exception (simulating failed build)
+        on_build_finished(app, Exception("Build failed"))
+
+        # Should not create output file
+        assert not (tmp_path / 'missing_refs.json').exists()
+
+    def test_skips_when_no_missing_refs(self, tmp_path):
+        """Should not write files when nothing is missing."""
+        from missing_refs import on_build_finished, reset_collector
+
+        reset_collector()  # Empty collector
+
+        app = Mock()
+        app.outdir = str(tmp_path)
+
+        on_build_finished(app, None)
+
+        assert not (tmp_path / 'missing_refs.json').exists()
+
+    def test_writes_json_file(self, tmp_path):
+        """Should write JSON file on successful build."""
+        from missing_refs import on_build_finished, get_collector, reset_collector
+
+        reset_collector()
+        collector = get_collector()
+        collector.record_missing('theory/topic', 'index')
+
+        app = Mock()
+        app.outdir = str(tmp_path)
+        app.config.missing_refs_generate_page = False
+
+        on_build_finished(app, None)
+
+        json_path = tmp_path / 'missing_refs.json'
+        assert json_path.exists()
+        data = json.loads(json_path.read_text())
+        assert data['count'] == 1
+
+    def test_writes_markdown_when_configured(self, tmp_path):
+        """Should write markdown page when configured."""
+        from missing_refs import on_build_finished, get_collector, reset_collector
+
+        reset_collector()
+        collector = get_collector()
+        collector.record_missing('theory/topic', 'index')
+
+        srcdir = tmp_path / 'src'
+        srcdir.mkdir()
+
+        app = Mock()
+        app.outdir = str(tmp_path / 'build')
+        app.srcdir = str(srcdir)
+        app.config.missing_refs_generate_page = True
+        app.config.missing_refs_page_path = 'coming-soon.md'
+        app.config.missing_refs_page_title = 'Planned Articles'
+
+        on_build_finished(app, None)
+
+        md_path = srcdir / 'coming-soon.md'
+        assert md_path.exists()
+        assert 'Theory' in md_path.read_text()
+
+    def test_resets_collector_after_write(self, tmp_path):
+        """Should reset collector after writing output."""
+        from missing_refs import on_build_finished, get_collector, reset_collector
+
+        reset_collector()
+        collector = get_collector()
+        collector.record_missing('theory/topic', 'index')
+
+        app = Mock()
+        app.outdir = str(tmp_path)
+        app.config.missing_refs_generate_page = False
+
+        on_build_finished(app, None)
+
+        # Get collector again - should be fresh
+        new_collector = get_collector()
+        assert len(new_collector.missing) == 0

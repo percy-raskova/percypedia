@@ -3,6 +3,6 @@ pythonCommand = [".venv/bin/python"]
 buildCommand = ["sphinx-build", "-M", "html", ".", "_build"]
 
 [tool.pytest.ini_options]
-pythonpath = ["_extensions"]
-testpaths = ["_extensions"]
+pythonpath = ["_extensions", "_tools"]
+testpaths = ["_extensions", "_tools"]
 addopts = "-v"

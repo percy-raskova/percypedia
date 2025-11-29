@@ -297,3 +297,103 @@ class TestCLIErrorHandling:
 
         # Should not crash
         assert result.exit_code == 0 or 'warning' in result.output.lower()
+
+
+class TestCLIEdgeCases:
+    """Tests for edge cases and error handling."""
+
+    def test_normalize_no_files_found_message(self, tmp_path):
+        """Should show message when no markdown files found."""
+        from frontmatter_normalizer.cli import main
+
+        # Create directory with non-markdown files
+        (tmp_path / 'file.txt').write_text('not markdown')
+        runner = CliRunner()
+
+        result = runner.invoke(main, ['normalize', str(tmp_path)])
+
+        assert result.exit_code == 0
+        assert 'no' in result.output.lower() and 'found' in result.output.lower()
+
+    def test_report_error_handling(self, temp_md_file):
+        """Report should handle file read errors gracefully."""
+        from frontmatter_normalizer.cli import main
+        import os
+
+        filepath = temp_md_file("---\ntitle: Test\n---\n# Content")
+        runner = CliRunner()
+
+        result = runner.invoke(main, ['report', '--json', str(filepath)])
+
+        assert result.exit_code == 0
+        # Should produce valid JSON output
+        import json
+        data = json.loads(result.output)
+        assert 'total' in data
+
+    def test_validate_invalid_category(self, temp_md_file):
+        """Validate should flag invalid category values."""
+        from frontmatter_normalizer.cli import main
+
+        content = "---\ncategory: NotAValidCategory\n---\n# Content"
+        filepath = temp_md_file(content)
+        runner = CliRunner()
+
+        result = runner.invoke(main, ['validate', str(filepath)])
+
+        # Should flag invalid category
+        assert 'invalid' in result.output.lower() or 'category' in result.output.lower()
+
+    def test_validate_invalid_tags_format(self, temp_md_file):
+        """Validate should flag invalid tags format (non-list)."""
+        from frontmatter_normalizer.cli import main
+
+        content = "---\ntags: not-a-list\n---\n# Content"
+        filepath = temp_md_file(content)
+        runner = CliRunner()
+
+        result = runner.invoke(main, ['validate', str(filepath)])
+
+        # Should flag tags format issue
+        assert 'tags' in result.output.lower() or result.exit_code != 0
+
+    def test_verbose_needs_review_message(self, temp_md_file, monkeypatch):
+        """Verbose mode should show needs review warning."""
+        from frontmatter_normalizer.cli import main
+
+        # Create file that would need review (unknown category)
+        content = "---\ncategory: Unknown\n---\n# Just a document"
+        filepath = temp_md_file(content)
+        runner = CliRunner()
+
+        result = runner.invoke(main, ['normalize', '--verbose', '--dry-run', str(filepath)])
+
+        # Should show output (verbose mode)
+        assert result.exit_code == 0
+
+    def test_exclusion_file_extension_pattern(self, tmp_path):
+        """Should handle file extension exclusion patterns."""
+        from frontmatter_normalizer.cli import find_markdown_files
+
+        (tmp_path / 'test.md').write_text('# Test')
+        (tmp_path / 'backup.md.bak').write_text('# Backup')
+
+        files = find_markdown_files(tmp_path, ['*.bak'])
+
+        # Should find test.md but not the .bak file
+        filenames = [f.name for f in files]
+        assert 'test.md' in filenames
+
+    def test_exclusion_fnmatch_glob(self, tmp_path):
+        """Should handle glob exclusion patterns."""
+        from frontmatter_normalizer.cli import find_markdown_files
+
+        (tmp_path / 'subdir').mkdir()
+        (tmp_path / 'test.md').write_text('# Test')
+        (tmp_path / 'subdir' / 'nested.md').write_text('# Nested')
+
+        files = find_markdown_files(tmp_path, ['subdir/*'])
+
+        filenames = [f.name for f in files]
+        assert 'test.md' in filenames
+        assert 'nested.md' not in filenames

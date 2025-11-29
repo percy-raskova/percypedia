@@ -217,3 +217,116 @@ Final thoughts. The end!
         restored = smudge_content(cleaned)
 
         assert restored == original
+
+
+class TestSplitFrontmatterEdgeCases:
+    """Additional edge case tests for frontmatter splitting."""
+
+    def test_handles_unclosed_frontmatter(self):
+        """Should treat unclosed frontmatter as body."""
+        content = """---
+title: Test
+No closing delimiter
+"""
+        frontmatter, body = split_frontmatter(content)
+
+        # Without closing delimiter, whole thing should be body
+        assert frontmatter == ""
+        assert body == content
+
+
+class TestPoisonKeyword:
+    """Tests for the poison_keyword function."""
+
+    def test_inserts_zwnj_between_chars(self):
+        """Should insert ZWNJ between every character."""
+        from antibot_filter import poison_keyword, ZWNJ
+
+        result = poison_keyword("abc")
+
+        assert result == f"a{ZWNJ}b{ZWNJ}c"
+
+    def test_handles_single_char(self):
+        """Should handle single character input."""
+        from antibot_filter import poison_keyword
+
+        result = poison_keyword("a")
+
+        assert result == "a"
+
+    def test_handles_empty_string(self):
+        """Should handle empty string."""
+        from antibot_filter import poison_keyword
+
+        result = poison_keyword("")
+
+        assert result == ""
+
+
+class TestMainCLI:
+    """Tests for the CLI main function."""
+
+    def test_main_requires_mode_argument(self, monkeypatch, capsys):
+        """Should exit with error if no mode argument provided."""
+        import sys
+        from antibot_filter import main
+
+        monkeypatch.setattr(sys, 'argv', ['antibot_filter.py'])
+
+        with pytest.raises(SystemExit) as excinfo:
+            main()
+
+        assert excinfo.value.code == 1
+        captured = capsys.readouterr()
+        assert 'Usage' in captured.err
+
+    def test_main_clean_mode(self, monkeypatch):
+        """Should clean content when --clean mode specified."""
+        import sys
+        from io import StringIO
+        from antibot_filter import main, ZWS
+
+        monkeypatch.setattr(sys, 'argv', ['antibot_filter.py', '--clean'])
+        monkeypatch.setattr(sys, 'stdin', StringIO("Hello world test"))
+
+        stdout = StringIO()
+        monkeypatch.setattr(sys, 'stdout', stdout)
+
+        main()
+
+        output = stdout.getvalue()
+        assert ZWS in output  # Should have added ZWS
+
+    def test_main_smudge_mode(self, monkeypatch):
+        """Should smudge content when --smudge mode specified."""
+        import sys
+        from io import StringIO
+        from antibot_filter import main, ZWS
+
+        monkeypatch.setattr(sys, 'argv', ['antibot_filter.py', '--smudge'])
+        monkeypatch.setattr(sys, 'stdin', StringIO(f"Hello{ZWS}world"))
+
+        stdout = StringIO()
+        monkeypatch.setattr(sys, 'stdout', stdout)
+
+        main()
+
+        output = stdout.getvalue()
+        assert ZWS not in output
+        assert output == "Helloworld"
+
+    def test_main_unknown_mode_error(self, monkeypatch, capsys):
+        """Should exit with error for unknown mode."""
+        import sys
+        from io import StringIO
+        from antibot_filter import main
+
+        monkeypatch.setattr(sys, 'argv', ['antibot_filter.py', '--invalid'])
+        monkeypatch.setattr(sys, 'stdin', StringIO("content"))
+
+        with pytest.raises(SystemExit) as excinfo:
+            main()
+
+        assert excinfo.value.code == 1
+        captured = capsys.readouterr()
+        assert 'Unknown mode' in captured.err
