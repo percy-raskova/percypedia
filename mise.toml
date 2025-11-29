@@ -6,13 +6,16 @@
 python = "3.13"
 
 [env]
-SPHINX_SOURCE = "."
+SPHINX_SOURCE = "content"
 SPHINX_BUILD = "_build"
+# Centralized paths for tools
+PERCYPEDIA_PROJECT_ROOT = "{{cwd}}"
+PERCYPEDIA_CONTENT_ROOT = "{{cwd}}/content"
 # Add venv to PATH for all tasks
 PATH = "{{cwd}}/.venv/bin:{{env.PATH}}"
 
 [tasks.build]
-run = "sphinx-build -b html . _build/html"
+run = "sphinx-build -b html content _build/html"
 description = "Build HTML documentation"
 
 [tasks.clean]
@@ -20,15 +23,15 @@ run = "rm -rf _build"
 description = "Clean build artifacts"
 
 [tasks.watch]
-run = "sphinx-autobuild . _build/html --port 8000"
+run = "sphinx-autobuild content _build/html --port 8000"
 description = "Auto-rebuild on changes (no browser)"
 
 [tasks.preview]
-run = "sphinx-autobuild . _build/html --port 8000 --open-browser"
+run = "sphinx-autobuild content _build/html --port 8000 --open-browser"
 description = "Live preview with auto-open browser"
 
 [tasks.linkcheck]
-run = "sphinx-build -b linkcheck . _build/linkcheck"
+run = "sphinx-build -b linkcheck content _build/linkcheck"
 description = "Check for broken links"
 
 [tasks.serve]
@@ -36,7 +39,7 @@ run = "python -m http.server 8000 -d _build/html"
 description = "Serve built docs locally"
 
 [tasks.pdf]
-run = "sphinx-build -b latex . _build/latex && make -C _build/latex"
+run = "sphinx-build -b latex content _build/latex && make -C _build/latex"
 description = "Build PDF via LaTeX"
 
 [tasks.deps]
@@ -44,7 +47,7 @@ run = "pip install -r requirements.txt"
 description = "Install Python dependencies"
 
 [tasks.ci]
-run = "pip install -r requirements.txt && sphinx-build -b html . _build/html"
+run = "pip install -r requirements.txt && sphinx-build -b html content _build/html"
 description = "CI build (install deps + build)"
 
 [tasks.test]
@@ -61,22 +64,22 @@ run = "pip install spacy click rapidfuzz && python -m spacy download en_core_web
 description = "Install frontmatter normalizer dependencies + SpaCy model"
 
 [tasks."fm:report"]
-run = "python -m frontmatter_normalizer report ."
+run = "python -m frontmatter_normalizer report ../content"
 description = "Report on frontmatter status"
 dir = "_tools"
 
 [tasks."fm:dry-run"]
-run = "python -m frontmatter_normalizer normalize --dry-run --verbose ."
+run = "python -m frontmatter_normalizer normalize --dry-run --verbose ../content"
 description = "Dry run frontmatter normalization"
 dir = "_tools"
 
 [tasks."fm:normalize"]
-run = "python -m frontmatter_normalizer normalize ."
+run = "python -m frontmatter_normalizer normalize ../content"
 description = "Normalize all frontmatter (creates backups)"
 dir = "_tools"
 
 [tasks."fm:validate"]
-run = "python -m frontmatter_normalizer validate ."
+run = "python -m frontmatter_normalizer validate ../content"
 description = "Validate frontmatter against schema"
 dir = "_tools"
 
@@ -92,8 +95,3 @@ description = "Run tests with condensed output"
 dir = "_tools"
 env = { PYTHONPATH = "{{cwd}}/_tools" }
 
-[tasks."fm:compare"]
-run = "python -m frontmatter_normalizer.compare_classifiers"
-description = "Compare SpaCy vs Sentence Transformers classification"
-dir = "_tools"
-env = { PYTHONPATH = "{{cwd}}/_tools" }

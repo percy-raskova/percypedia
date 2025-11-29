@@ -14,6 +14,6 @@ export PIPENV_PIPFILE=Pipfile.ci
 pipenv install --deploy
 
 echo "==> Building Sphinx documentation..."
-pipenv run sphinx-build -b html . _build/html
+pipenv run sphinx-build -b html content _build/html
 
 echo "==> Build complete! Output in _build/html"
