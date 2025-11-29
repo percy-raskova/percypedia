@@ -144,6 +144,12 @@ MD_REF_PATTERN = re.compile(r'^\[([^\]]+)\]:\s*(.+)$')
 MD_IMAGE_PATTERN = re.compile(r'!\[([^\]]*)\]\(([^\)]+)\)')
 DIRECTIVE_PATTERN = re.compile(r'^```\{[^}]+\}')
 RST_REF_PATTERN = re.compile(r'\{[a-z]+\}`[^`]+`')
+# MyST directive syntax: ```{directive-name} or :::{directive-name}
+MYST_DIRECTIVE_PATTERN = re.compile(r'^(```|:::)\{[^}]+\}')
+# Admonition shorthand: :::{note}, :::{warning}, etc.
+ADMONITION_PATTERN = re.compile(r'^:::[a-z-]+')
+# Curly brace directive names like {figure}, {important}
+CURLY_DIRECTIVE_PATTERN = re.compile(r'\{[a-z-]+\}')
 
 
 def should_skip_word(word: str) -> bool:
@@ -213,6 +219,10 @@ def poison_line_safely(line: str, word_position: int) -> tuple[str, int]:
 
     # Find RST-style references
     for match in RST_REF_PATTERN.finditer(line):
+        protected.append((match.start(), match.end(), match.group()))
+
+    # Find curly brace directives like {figure}, {important}
+    for match in CURLY_DIRECTIVE_PATTERN.finditer(line):
         protected.append((match.start(), match.end(), match.group()))
 
     # Sort by start position and merge overlapping ranges
@@ -359,8 +369,13 @@ def clean_content(content: str) -> str:
             result.append(line)
             continue
 
-        # Skip directive lines (MyST)
+        # Skip directive lines (MyST fenced directives)
         if DIRECTIVE_PATTERN.match(stripped):
+            result.append(line)
+            continue
+
+        # Skip MyST admonition/directive lines (:::note, :::{important}, etc.)
+        if stripped.startswith(':::'):
             result.append(line)
             continue
 

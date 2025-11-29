@@ -329,6 +329,33 @@ Use `code_example()` and {doc}`theory/test`.
 
         assert restored == original
 
+    def test_preserves_myst_admonitions(self):
+        """Should not poison MyST admonition syntax."""
+        content = """:::{note}
+This is a note.
+:::"""
+        result = clean_content(content)
+
+        assert ":::{note}" in result
+
+    def test_preserves_curly_brace_directives(self):
+        """Should not poison {directive} names."""
+        content = """```{figure} /path/to/image.png
+Caption here
+```"""
+        result = clean_content(content)
+
+        assert "{figure}" in result
+
+    def test_preserves_important_directive(self):
+        """Should not poison {important} and similar."""
+        content = """```{important}
+Important content!
+```"""
+        result = clean_content(content)
+
+        assert "{important}" in result
+
 
 class TestMainCLI:
     """Tests for the CLI main function."""
