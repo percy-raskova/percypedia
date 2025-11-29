@@ -84,4 +84,4 @@ User-agent: DuckDuckBot
 Allow: /
 
 # Sitemap location
-Sitemap: https://percybrain.com/sitemap.xml
+Sitemap: https://www.percypedia.biz/sitemap.xml

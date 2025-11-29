@@ -217,6 +217,7 @@ html_theme_options = {
 }
 
 html_static_path = [str(PROJECT_ROOT / '_static')]
+html_extra_path = [str(PROJECT_ROOT / 'robots.txt')]  # Copy to build root
 html_css_files = ['custom.css']
 html_js_files = ['sidebar-collapse.js', 'contact.js']
 html_title = "Percypedia: No Investigation, No Right to Speak"
