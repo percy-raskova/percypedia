@@ -1,6 +1,6 @@
 #!/bin/bash
 # Cloudflare Pages build script for PercyBrain
-# Uses pipenv for dependency management (cached between builds)
+# Uses Pipfile.ci (minimal deps) for fast CI builds
 #
 # For local development, use: mise run build
 
@@ -9,7 +9,8 @@ set -e  # Exit on error
 echo "==> Installing pipenv..."
 pip install pipenv
 
-echo "==> Installing dependencies from Pipfile.lock..."
+echo "==> Installing minimal build dependencies from Pipfile.ci..."
+export PIPENV_PIPFILE=Pipfile.ci
 pipenv install --deploy
 
 echo "==> Building Sphinx documentation..."

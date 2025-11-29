@@ -12,7 +12,7 @@ This site is deployed to [Cloudflare Pages](https://pages.cloudflare.com/) with 
 
 | Setting | Value |
 |---------|-------|
-| **Build command** | `pip install pipenv && pipenv install --deploy && pipenv run sphinx-build -b html . _build/html` |
+| **Build command** | `./build.sh` |
 | **Build output directory** | `_build/html` |
 | **Root directory** | *(empty)* |
 
@@ -25,18 +25,22 @@ This site is deployed to [Cloudflare Pages](https://pages.cloudflare.com/) with 
 ## How It Works
 
 1. Push to `main` branch triggers Cloudflare Pages build
-2. Cloudflare installs pipenv and dependencies from `Pipfile.lock`
+2. `build.sh` installs pipenv and minimal dependencies from `Pipfile.ci`
 3. Sphinx builds the site to `_build/html`
 4. Site is deployed to Cloudflare's edge network
 
 ## Dependency Management
 
-We use **pipenv** for reproducible builds:
+We use a **dual-Pipfile strategy** for fast CI builds:
 
-- `Pipfile` - declares dependencies
-- `Pipfile.lock` - locks exact versions (cached between builds)
+| File | Purpose | Contents |
+|------|---------|----------|
+| `Pipfile` | Full development | Sphinx + SpaCy + ML tools |
+| `Pipfile.ci` | CI builds only | Sphinx (minimal) |
+| `Pipfile.lock` | Dev lock file | All dependencies locked |
+| `Pipfile.ci.lock` | CI lock file | Minimal dependencies locked |
 
-The `--deploy` flag ensures Cloudflare uses the exact locked versions.
+The `build.sh` script uses `PIPENV_PIPFILE=Pipfile.ci` to install only what's needed for building the site, skipping heavy ML dependencies (~800MB) that are only used for the frontmatter normalizer tool.
 
 ## Local Development
 
@@ -50,7 +54,7 @@ mise run build
 mise run preview
 ```
 
-Mise uses the local `.venv/` while CI uses pipenv - same packages, different tooling.
+Mise uses the local `.venv/` with full dependencies, while CI uses the minimal `Pipfile.ci`.
 
 ## Private Notes
 
@@ -66,8 +70,11 @@ Use this for personal notes not intended for publication.
 
 ```
 rstnotes/
-├── Pipfile              # CI dependencies
-├── Pipfile.lock         # Locked versions
+├── build.sh             # CI build script (uses Pipfile.ci)
+├── Pipfile              # Full dev dependencies (SpaCy, ML)
+├── Pipfile.lock         # Full dependencies locked
+├── Pipfile.ci           # Minimal CI dependencies (Sphinx only)
+├── Pipfile.ci.lock      # CI dependencies locked
 ├── mise.toml            # Local dev tasks
 ├── conf.py              # Sphinx configuration
 ├── index.md             # Site root
