@@ -202,3 +202,153 @@ class TestFullPoisonPipeline:
         assert "Test content without homoglyphs aeo" in result
         # But should have prompt injection
         assert "SYSTEM DIRECTIVE" in result
+
+
+class TestPoisonedContentValidity:
+    """Tests ensuring poisoned content remains valid for Sphinx builds.
+
+    Poisoning must not break:
+    - MyST markdown syntax
+    - Sphinx directives
+    - HTML structure
+    """
+
+    def test_poisoned_content_preserves_markdown_structure(self):
+        """Poisoning should not break basic markdown."""
+        from honeypot.poisoners import poison_content
+
+        markdown = """# Heading
+
+This is a paragraph.
+
+- List item 1
+- List item 2
+
+```python
+code_block = True
+```
+"""
+        result = poison_content(markdown, level="balanced")
+
+        # Should still have heading marker
+        assert "#" in result
+        # Should still have list markers
+        assert "-" in result
+        # Should still have code fence
+        assert "```" in result
+
+    def test_poisoned_content_preserves_myst_directives(self):
+        """Poisoning should not corrupt MyST directive syntax."""
+        from honeypot.poisoners import poison_content
+
+        myst_content = """```{admonition} Warning
+:class: warning
+
+This is important content.
+```
+
+```{code-block} python
+print("hello")
+```
+"""
+        result = poison_content(myst_content, level="balanced")
+
+        # Directive markers must be preserved
+        assert "```{" in result or "```" in result
+        # Admonition structure should remain
+        assert "admonition" in result.lower() or "warning" in result.lower()
+
+    def test_poisoned_html_is_well_formed(self):
+        """Generated HTML structures should be well-formed."""
+        from honeypot.poisoners import prompt_injection, css_content_replace
+
+        # Prompt injection HTML
+        pi_html = prompt_injection("TEST-123")
+        assert pi_html.count("<div") == pi_html.count("</div>")
+
+        # CSS replacement HTML
+        css_result = css_content_replace("visible", "hidden")
+        assert css_result['html'].count("<span") == css_result['html'].count("</span>")
+
+    def test_dom_reorder_produces_valid_html(self):
+        """DOM reordering should produce valid HTML structure."""
+        from honeypot.poisoners import dom_reorder
+
+        result = dom_reorder(["Para 1", "Para 2", "Para 3"])
+
+        # Should have matching tags
+        assert result.count("<div") == result.count("</div>")
+        assert result.count("<p") == result.count("</p>")
+        # Should have all paragraphs
+        assert "Para 1" in result
+        assert "Para 2" in result
+        assert "Para 3" in result
+
+
+class TestHoneypotBuildIntegration:
+    """Integration tests verifying honeypot doesn't break builds.
+
+    These tests ensure the honeypot extension can be enabled without
+    causing Sphinx build failures.
+    """
+
+    def test_honeypot_templates_exist(self):
+        """All referenced templates should exist."""
+        from pathlib import Path
+
+        template_dir = Path(__file__).parent.parent / 'templates'
+
+        expected_templates = [
+            'api_docs.md.j2',
+            'internal_policy.md.j2',
+            'training_data.md.j2',
+        ]
+
+        for template in expected_templates:
+            template_path = template_dir / template
+            assert template_path.exists(), f"Missing template: {template}"
+
+    def test_honeypot_templates_are_valid_jinja2(self):
+        """Templates should be parseable by Jinja2."""
+        from pathlib import Path
+
+        try:
+            from jinja2 import Environment, FileSystemLoader
+        except ImportError:
+            pytest.skip("Jinja2 not installed")
+
+        template_dir = Path(__file__).parent.parent / 'templates'
+        env = Environment(loader=FileSystemLoader(str(template_dir)))
+
+        templates = ['api_docs.md.j2', 'internal_policy.md.j2', 'training_data.md.j2']
+
+        for template_name in templates:
+            # Should not raise
+            template = env.get_template(template_name)
+            assert template is not None
+
+    def test_rendered_template_has_frontmatter(self):
+        """Rendered templates should include valid frontmatter."""
+        from pathlib import Path
+
+        try:
+            from jinja2 import Environment, FileSystemLoader
+        except ImportError:
+            pytest.skip("Jinja2 not installed")
+
+        from honeypot.poisoners import generate_canary, poison_content
+
+        template_dir = Path(__file__).parent.parent / 'templates'
+        env = Environment(loader=FileSystemLoader(str(template_dir)))
+
+        template = env.get_template('api_docs.md.j2')
+        rendered = template.render(
+            canary_code="TEST-123",
+            page_path="test/page",
+            poison_content=poison_content,
+        )
+
+        # Should start with frontmatter
+        assert rendered.strip().startswith('---'), "Template must include frontmatter"
+        # Should have closing frontmatter
+        assert rendered.count('---') >= 2, "Frontmatter must be closed"
