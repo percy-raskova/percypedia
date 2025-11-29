@@ -1,0 +1,17 @@
+# Full development dependencies
+# For local development with frontmatter normalizer ML tools
+#
+# Install: pip install -r requirements-dev.txt
+# SpaCy model: python -m spacy download en_core_web_lg
+
+# Include base CI requirements
+-r requirements.txt
+
+# Frontmatter normalizer ML dependencies (not needed for site build)
+spacy>=3.0
+rapidfuzz>=3.0
+sentence-transformers>=2.0
+
+# Development tools
+sphinx-autobuild
+pytest
