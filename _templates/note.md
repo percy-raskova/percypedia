@@ -20,11 +20,6 @@ tags: []
 # === Publishing ===
 publish: false
 status: draft
-
-# === Optional Metadata ===
-# confidence: high | medium | low
-# related: []
-# influences: []
 ---
 
 # {{title}}

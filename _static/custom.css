@@ -396,3 +396,203 @@ table.docutils tr:hover td {
     background: var(--blood-gold);
     color: var(--blood-bg);
 }
+
+/* ============================================
+   🚨 ATTENTION COMRADE - OMINOUS WARNING 🚨
+   Accessibility be damned edition
+   ============================================ */
+
+@keyframes ominous-pulse {
+    0%, 100% {
+        box-shadow:
+            0 0 10px var(--blood-crimson),
+            0 0 20px var(--blood-crimson),
+            0 0 40px var(--blood-red),
+            inset 0 0 20px rgba(220, 20, 60, 0.3);
+        border-color: var(--blood-crimson);
+    }
+    50% {
+        box-shadow:
+            0 0 20px var(--blood-red),
+            0 0 40px var(--blood-crimson),
+            0 0 80px var(--blood-red),
+            0 0 120px rgba(255, 68, 68, 0.4),
+            inset 0 0 40px rgba(255, 68, 68, 0.4);
+        border-color: var(--blood-red);
+    }
+}
+
+@keyframes text-glow {
+    0%, 100% {
+        text-shadow:
+            0 0 10px var(--blood-gold),
+            0 0 20px var(--blood-gold),
+            0 0 30px var(--blood-orange);
+    }
+    50% {
+        text-shadow:
+            0 0 20px var(--blood-gold),
+            0 0 40px var(--blood-gold),
+            0 0 60px var(--blood-orange),
+            0 0 80px var(--blood-red);
+    }
+}
+
+@keyframes scan-line {
+    0% {
+        background-position: 0 -100%;
+    }
+    100% {
+        background-position: 0 200%;
+    }
+}
+
+@keyframes flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.8; }
+    94% { opacity: 1; }
+    96% { opacity: 0.9; }
+    97% { opacity: 1; }
+}
+
+/* The main comrade warning box */
+.admonition.comrade-warning {
+    border: 3px solid var(--blood-crimson);
+    border-radius: 0 !important;
+    background: linear-gradient(135deg, #0d0000 0%, #1a0000 50%, #2a0505 100%) !important;
+    position: relative;
+    /* Static glow - no animation to avoid clipping issues */
+    box-shadow:
+        0 0 15px var(--blood-crimson),
+        0 0 30px var(--blood-crimson),
+        0 0 60px var(--blood-red),
+        inset 0 0 20px rgba(220, 20, 60, 0.3);
+    /* Extra padding to compensate for negative title margin */
+    padding-top: 0 !important;
+}
+
+/* Scan line overlay effect */
+.admonition.comrade-warning::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255, 68, 68, 0.03) 2px,
+        rgba(255, 68, 68, 0.03) 4px
+    );
+    pointer-events: none;
+    animation: scan-line 8s linear infinite;
+}
+
+/* The title with maximum drama */
+.admonition.comrade-warning .admonition-title {
+    color: var(--blood-gold) !important;
+    font-size: 1.1em !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase;
+    font-weight: 900 !important;
+    background: linear-gradient(90deg, var(--blood-crimson-dim), transparent, var(--blood-crimson-dim)) !important;
+    padding: 0.6em 1em !important;
+    margin: 0 0 1em 0 !important;
+    border-bottom: 2px solid var(--blood-crimson);
+    text-align: center;
+    /* Static text glow */
+    text-shadow:
+        0 0 10px var(--blood-gold),
+        0 0 20px var(--blood-gold),
+        0 0 30px var(--blood-orange);
+}
+
+/* Emoji in title */
+.admonition.comrade-warning .admonition-title::before {
+    content: '🚨 ';
+}
+
+.admonition.comrade-warning .admonition-title::after {
+    content: ' 🚨';
+}
+
+/* Make strong text extra menacing */
+.admonition.comrade-warning strong {
+    color: var(--blood-red);
+    text-shadow: 0 0 10px var(--blood-red);
+}
+
+/* Italic text gets a creepy glow */
+.admonition.comrade-warning em {
+    color: var(--blood-orange);
+    font-style: normal;
+    text-shadow: 0 0 8px var(--blood-orange);
+}
+
+/* ============================================
+   BOT HONEYPOT SYSTEM
+   Hidden from humans, visible to scrapers
+   ============================================ */
+
+/* Hide honeypot zone from humans (bots ignore CSS) */
+.bot-trap {
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    /* Screen readers should also skip this */
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+}
+
+/* Extra insurance: hide on print too */
+@media print {
+    .bot-trap {
+        display: none !important;
+    }
+}
+
+/* ============================================
+   HUMAN CONTACT SECTION
+   Clean, accessible, click-to-copy
+   ============================================ */
+
+.contact-human {
+    background: var(--blood-bg-dark);
+    border-left: 4px solid var(--blood-gold);
+    padding: 1.5em;
+    border-radius: 0 8px 8px 0;
+    margin: 1.5em 0;
+}
+
+.email-protect {
+    font-family: monospace;
+    font-size: 1.1em;
+    color: var(--blood-cyan);
+    cursor: pointer;
+    padding: 4px 8px;
+    background: var(--blood-bg-highlight);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.email-protect:hover {
+    background: var(--blood-gold);
+    color: var(--blood-bg);
+}
+
+.email-protect.copied {
+    background: var(--blood-green);
+    color: var(--blood-bg);
+}
+
+.contact-note {
+    font-size: 0.85em;
+    color: var(--blood-fg-dark);
+    margin-top: 0.5em;
+}

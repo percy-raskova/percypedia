@@ -38,7 +38,6 @@ Zettelkasten ID. Immutable identifier in `YYYYMMDDHHMM` format.
 | Type | string |
 | Pattern | `^[0-9]{12}$` |
 | Required | No |
-| Consumed by | Future database integration |
 
 ```yaml
 zkid: 202411281430
@@ -53,7 +52,6 @@ Document author name.
 | Type | string |
 | Required | No |
 | Default | Percy |
-| Consumed by | Future multi-author display |
 
 ### Document Fields
 
@@ -77,7 +75,6 @@ Brief summary for SEO meta tags and social sharing.
 | Type | string |
 | Max length | 160 characters |
 | Required | No |
-| Consumed by | Future meta tag generation |
 
 ### Timestamp Fields
 
@@ -90,7 +87,6 @@ Document creation date. Should be immutable after initial creation.
 | Type | string |
 | Format | `YYYY-MM-DD` |
 | Required | No |
-| Consumed by | Future sorting/display |
 
 #### date-edited
 
@@ -101,7 +97,6 @@ Last modification date. Update on each revision.
 | Type | string |
 | Format | `YYYY-MM-DD` |
 | Required | No |
-| Consumed by | Future "recently updated" features |
 
 ### Navigation Fields
 
@@ -185,7 +180,6 @@ Editorial workflow status. More granular than `publish` for tracking document ma
 | Values | `draft`, `review`, `complete` |
 | Default | draft |
 | Required | No |
-| Consumed by | Future workflow tooling |
 
 | Status | Meaning |
 |--------|---------|
@@ -201,23 +195,32 @@ The JSON Schema lives at `_schemas/frontmatter.schema.json`.
 
 ### Programmatic Validation
 
+From within the repository (with `_extensions` in PYTHONPATH):
+
 ```python
-from frontmatter_schema import validate_frontmatter, validate_file
+from frontmatter_schema import validate_frontmatter, validate_file, validate_directory
+from pathlib import Path
 
 # Validate a dictionary
 errors = validate_frontmatter({
     'title': 'Test',
-    'status': 'invalid'  # Will error
+    'status': 'invalid'  # Will error - not a valid enum value
 })
 
-# Validate a file
+# Validate a single file
 errors = validate_file(Path('docs/example.md'))
 
-# Validate all files in a directory
-from frontmatter_schema import validate_directory
+# Validate all markdown files in a directory
 results = validate_directory(Path('.'))
 for filepath, errors in results.items():
     print(f"{filepath}: {errors}")
+```
+
+Use the mise tasks for validation without manual path setup:
+
+```bash
+mise run fm:validate   # Validate all frontmatter
+mise run fm:report     # Report on frontmatter status
 ```
 
 ### Running Tests

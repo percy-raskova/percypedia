@@ -40,7 +40,7 @@ We use a **dual-Pipfile strategy** for fast CI builds:
 | `Pipfile.lock` | Dev lock file | All dependencies locked |
 | `Pipfile.ci.lock` | CI lock file | Minimal dependencies locked |
 
-The `build.sh` script uses `PIPENV_PIPFILE=Pipfile.ci` to install only what's needed for building the site, skipping heavy ML dependencies (~800MB) that are only used for the frontmatter normalizer tool.
+The `build.sh` script uses `PIPENV_PIPFILE=Pipfile.ci` to install only what's needed for building the site, skipping ML dependencies (SpaCy, sentence-transformers) that are only used for the frontmatter normalizer tool.
 
 ## Local Development
 

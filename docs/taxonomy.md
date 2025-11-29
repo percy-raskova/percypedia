@@ -63,7 +63,7 @@ This intent-based schema helps readers find content based on what they need, not
 - One category per file (for clean navigation)
 - Categories are sorted alphabetically
 - Documents within categories are sorted by title
-- "Meta" always appears last
+- The default category (Miscellaneous) always appears last
 
 ### Configuration
 
@@ -71,7 +71,7 @@ In `conf.py`:
 
 ```python
 category_nav_exclude = ['index', 'glossary', ...]  # Files to skip
-category_nav_default = 'Meta'                        # Default category
+category_nav_default = 'Miscellaneous'               # Default category (appears last)
 ```
 
 ## Tags (AI/Zettelkasten Navigation)
@@ -146,7 +146,17 @@ Three custom Sphinx extensions plus a shared module power this workflow:
 ### _common (`_extensions/_common/`)
 
 Shared utilities used by all extensions:
-- `frontmatter.py` - Single source of truth for YAML frontmatter extraction
+
+**frontmatter.py** - Single source of truth for YAML frontmatter extraction
+- `extract_frontmatter(content)` - Parse YAML from markdown string
+- Returns `(frontmatter_dict, body_content)` tuple
+
+**traversal.py** - Unified directory walking
+- `iter_markdown_files(srcdir, exclude_patterns, ...)` - Iterate markdown files
+- Parameters:
+  - `skip_underscore_files` - Skip `_index.md` etc. (default: True)
+  - `skip_underscore_dirs` - Skip `_build/` etc. (default: True)
+  - `skip_dot_dirs` - Skip `.git/` etc. (default: True)
 
 ### External Extensions
 
@@ -226,12 +236,11 @@ Comments are stripped during the Sphinx build - they never reach the HTML output
 
 ```yaml
 ---
-id: 202411281430
+zkid: 202411281430
 title: "New Methodology"
-slug: new-methodology
 author: Percy
-created: 2024-11-28T14:30
-updated: 2024-11-28T14:30
+date-created: 2024-11-28T14:30
+date-edited: 2024-11-28T14:30
 category: Praxis
 tags:
   - organizing/tactics

@@ -165,7 +165,7 @@ html_theme_options = {
 
 html_static_path = ['_static']
 html_css_files = ['custom.css']
-html_js_files = ['sidebar-collapse.js']
+html_js_files = ['sidebar-collapse.js', 'contact.js']
 html_title = "Percypedia: No Investigation, No Right to Speak"
 
 # Custom RST prolog for tag role

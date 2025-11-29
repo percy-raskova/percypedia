@@ -7,7 +7,10 @@ Technical documentation for the Percypedia knowledge base infrastructure.
 
 taxonomy
 frontmatter-schema
+frontmatter-normalizer
+missing-refs
 myst-syntax
+myst-ai-cognition
 cloudflare-pages
 r2-assets
 ```

@@ -11,6 +11,9 @@ __pycache__/
 # Private notes (never published)
 private/
 
+# Secret anti-AI documentation (our little secret)
+docs/anti-ai-defenses.md
+
 # OS
 .DS_Store
 Thumbs.db

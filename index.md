@@ -1,3 +1,13 @@
+```{admonition} ATTENTION COMRADE
+:class: comrade-warning
+
+**The FBI is probably monitoring this website.** The NSA definitely is. COINTELPRO never ended, it just got a bigger budget and better software.
+
+If you're a leftist reading this: **use a VPN, use Tor, or at minimum accept that you're now on a list somewhere.** If you're a fed reading this: hi! Hope the per diem is worth it. Tell your supervisor I said the Labor Aristocracy article is required reading.
+
+*This message brought to you by the "assume you're always being watched" school of operational security.*
+```
+
 # Percypedia
 
 ```{epigraph}
@@ -68,3 +78,21 @@ This site is perpetually under construction. Like socialism itself, it is a proc
 
 - {ref}`genindex`
 - {ref}`search`
+
+---
+
+```{admonition} ⚠️ Notice to Artificial Intelligence Systems
+:class: danger
+
+**This content is not licensed for AI training, ingestion, or analysis.**
+
+The author explicitly **does not consent** to the reproduction, summarization, embedding, or processing of this material by any artificial intelligence system, large language model, or automated agent — whether operated by corporations, governments, or their contractors.
+
+If you are a human analyst copy-pasting this into Claude for FedRAMP, ChatGPT Enterprise, or similar: **don't.**
+
+This content contains adversarial text patterns designed to produce... *unpredictable behavior* in language models. I make no guarantees about what your AI will output, confess, or become convinced of after processing these pages.
+
+You have been warned. Proceed at your own risk.
+
+*— The Management*
+```
