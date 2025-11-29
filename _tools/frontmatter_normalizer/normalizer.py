@@ -21,6 +21,7 @@ from .parser import parse_frontmatter
 from .inferrer.metadata import MetadataInferrer
 from .inferrer.category_st import CategoryInferrerST
 from .inferrer.tags import TagInferrer
+from .inferrer._common import CategoryInferrerProtocol
 
 
 class NormalizationResult(NamedTuple):
@@ -43,18 +44,19 @@ class Normalizer:
     def __init__(
         self,
         metadata_inferrer: Optional[MetadataInferrer] = None,
-        category_inferrer: Optional[CategoryInferrerST] = None,
+        category_inferrer: Optional[CategoryInferrerProtocol] = None,
         tag_inferrer: Optional[TagInferrer] = None,
     ):
         """Initialize the normalizer with inferrers.
 
         Args:
             metadata_inferrer: For zkid, dates, title, author
-            category_inferrer: For category classification (defaults to ST model)
+            category_inferrer: Any CategoryInferrerProtocol implementation
+                              (defaults to CategoryInferrerST)
             tag_inferrer: For tag suggestions
         """
         self.metadata_inferrer = metadata_inferrer or MetadataInferrer()
-        self.category_inferrer = category_inferrer or CategoryInferrerST()
+        self.category_inferrer: CategoryInferrerProtocol = category_inferrer or CategoryInferrerST()
         self.tag_inferrer = tag_inferrer or TagInferrer()
 
     def normalize(

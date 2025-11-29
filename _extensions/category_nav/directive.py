@@ -17,6 +17,7 @@ from sphinx.util.docutils import SphinxDirective
 
 # Import from shared module, re-export for backward compatibility
 from _common.frontmatter import extract_frontmatter
+from _common.traversal import iter_markdown_files
 
 
 def extract_title(content: str) -> Optional[str]:
@@ -61,24 +62,22 @@ def collect_categories(
         exclude_patterns = []
 
     # Default patterns to always exclude
-    default_exclude_patterns = ['.venv', '_build', 'private', '.git', '.pytest_cache', '_assets', '_templates']
-    all_exclude_patterns = set(exclude_patterns) | set(default_exclude_patterns)
+    default_exclude_patterns = ['.venv', '_build', 'private', '.git', '.pytest_cache', '_assets', '_templates', 'node_modules']
+    all_exclude_patterns = list(set(exclude_patterns) | set(default_exclude_patterns))
 
     categories: Dict[str, List[Dict[str, str]]] = defaultdict(list)
     srcdir = Path(srcdir)
 
-    for md_file in srcdir.rglob('*.md'):
-        # Skip files starting with underscore
-        if md_file.name.startswith('_'):
-            continue
-
-        # Skip files in excluded directories
-        rel_path = md_file.relative_to(srcdir)
-        if any(part in all_exclude_patterns or part.startswith('.')
-               for part in rel_path.parts[:-1]):  # Check all parent dirs
-            continue
-
+    # Use shared traversal - category_nav skips underscore files but not all underscore dirs
+    for md_file in iter_markdown_files(
+        srcdir,
+        exclude_patterns=all_exclude_patterns,
+        skip_underscore_files=True,
+        skip_underscore_dirs=False,  # Only skip dirs in exclude_patterns
+        skip_dot_dirs=True,
+    ):
         # Calculate docname (path relative to srcdir, without extension)
+        rel_path = md_file.relative_to(srcdir)
         docname = str(rel_path.with_suffix(''))
 
         # Skip excluded files
@@ -150,15 +149,11 @@ class CategoryNavDirective(SphinxDirective):
         result_nodes: List[nodes.Node] = []
 
         for category, docs in categories.items():
-            # Create section for category
+            # Create section for category (no title - caption provides it)
             section = nodes.section()
             section['ids'] = [nodes.make_id(f'category-{category}')]
 
-            # Add category title
-            title = nodes.title(text=category)
-            section += title
-
-            # Create toctree for this category
+            # Create toctree for this category (caption serves as heading)
             toc = toctree()
             toc['parent'] = self.env.docname
             toc['entries'] = [(doc['title'], doc['docname']) for doc in docs]
@@ -168,8 +163,8 @@ class CategoryNavDirective(SphinxDirective):
             toc['hidden'] = False
             toc['numbered'] = 0
             toc['titlesonly'] = False
-            toc['caption'] = None
-            toc['rawcaption'] = ''
+            toc['caption'] = category
+            toc['rawcaption'] = category
             toc['rawentries'] = []
 
             section += toc

@@ -12,6 +12,8 @@ from typing import Dict, List, NamedTuple, Optional, Set, Union
 
 import yaml
 
+from ._common import strip_frontmatter
+
 try:
     from rapidfuzz import fuzz
     HAS_RAPIDFUZZ = True
@@ -162,13 +164,7 @@ class TagInferrer:
         Filters out common words and short words.
         """
         # Strip frontmatter if present
-        body = content
-        if content.startswith('---'):
-            lines = content.split('\n')
-            for i, line in enumerate(lines[1:], start=1):
-                if line.strip() == '---':
-                    body = '\n'.join(lines[i + 1:])
-                    break
+        body = strip_frontmatter(content)
 
         # Extract words (alphanumeric sequences)
         words = re.findall(r'\b[a-zA-Z]{3,}\b', body.lower())

@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional
 
 # Import from shared module, re-export for backward compatibility
 from _common.frontmatter import extract_frontmatter
+from _common.traversal import iter_markdown_files
 
 try:
     import jsonschema
@@ -136,15 +137,17 @@ def validate_directory(
 
     results = {}
 
-    for md_file in dirpath.rglob('*.md'):
-        # Skip excluded directories
-        rel_path = md_file.relative_to(dirpath)
-        if any(part in exclude_patterns or part.startswith('_') or part.startswith('.')
-               for part in rel_path.parts[:-1]):
-            continue
-
+    # Use shared traversal - frontmatter_schema skips underscore dirs but NOT underscore files
+    for md_file in iter_markdown_files(
+        dirpath,
+        exclude_patterns=exclude_patterns,
+        skip_underscore_files=False,  # Validate _file.md too
+        skip_underscore_dirs=True,
+        skip_dot_dirs=True,
+    ):
         errors = validate_file(md_file, schema)
         if errors:
+            rel_path = md_file.relative_to(dirpath)
             results[str(rel_path)] = errors
 
     return results

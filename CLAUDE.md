@@ -6,30 +6,56 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Percypedia is a personal encyclopedia/knowledge base built with Sphinx and MyST Markdown. It uses a three-layer taxonomy: directories (local organization), categories (website navigation), and tags (AI/Zettelkasten traversal). The site deploys to Cloudflare Pages.
 
-## Commands
+## Quick Reference: Mise Commands
 
-### Local Development
+**ALWAYS use `mise run` for all project tasks.** This is the standard task runner.
 
+| Command | When to Use |
+|---------|-------------|
+| `mise run build` | After editing content or extensions - builds HTML to `_build/html` |
+| `mise run test` | After modifying `_extensions/` code - runs pytest |
+| `mise run test:watch` | During TDD - stops on first failure |
+| `mise run preview` | To view changes - live reload on port 8000 |
+| `mise run clean` | Before fresh builds or when seeing stale output |
+
+### All Available Commands
+
+**Build & Preview:**
 ```bash
 mise run build       # Build HTML to _build/html
 mise run preview     # Live preview with auto-reload (port 8000)
 mise run watch       # Auto-rebuild without opening browser
 mise run serve       # Serve built docs (no auto-rebuild)
 mise run clean       # Remove _build directory
-mise run test        # Run extension tests
-mise run test:watch  # Run tests, stop on first failure
+mise run linkcheck   # Check for broken links
+mise run pdf         # Build PDF via LaTeX
 ```
 
-### CI Build
+**Extension Development:**
+```bash
+mise run test        # Run extension tests
+mise run test:watch  # TDD mode - stop on first failure
+```
+
+**Frontmatter Tools:**
+```bash
+mise run fm:validate   # Validate frontmatter against schema
+mise run fm:report     # Report on frontmatter status
+mise run fm:normalize  # Normalize all frontmatter (creates backups)
+mise run fm:dry-run    # Dry run normalization (no changes)
+mise run fm:test       # Run frontmatter normalizer tests
+```
+
+### CI Build (Cloudflare Pages only)
 
 ```bash
-./build.sh           # Full pipenv-based build (Cloudflare Pages)
+./build.sh           # Full pipenv-based build - DO NOT use locally
 ```
 
 ### Dependency Management
 
-- Local dev: `.venv/` with `requirements.txt`
-- CI: `Pipfile` + `Pipfile.lock` (pipenv)
+- **Local dev**: `.venv/` with `requirements.txt` (auto-activated by mise)
+- **CI only**: `Pipfile` + `Pipfile.lock` (pipenv)
 - Python 3.13 required
 
 ## Architecture
@@ -61,7 +87,8 @@ Four local extensions plus a shared module power the system:
 - Optional: Set `missing_refs_generate_page = True` in conf.py to auto-generate a "Planned Articles" page
 
 **_common** - Shared utilities for extensions
-- `frontmatter.py` - Single source of truth for YAML frontmatter extraction
+- `frontmatter.py` - YAML frontmatter extraction (single source of truth)
+- `traversal.py` - Unified `iter_markdown_files()` for directory walking
 - Used by: category_nav, frontmatter_schema, publish_filter
 
 ### Frontmatter Schema
@@ -86,10 +113,4 @@ publish: false              # Draft (excluded) or true/missing (included)
 
 ### Extension Testing
 
-Tests use pytest. Run from repo root:
-
-```bash
-PYTHONPATH=_extensions pytest _extensions/ -v
-```
-
-Test files are colocated: `_extensions/category_nav/tests/test_category_nav.py`
+Test files are colocated: `_extensions/<name>/tests/test_<name>.py`

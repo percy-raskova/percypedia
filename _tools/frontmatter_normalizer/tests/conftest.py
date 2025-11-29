@@ -313,16 +313,6 @@ def field_migrations():
 # once per test, reducing test time by ~70%.
 
 @pytest.fixture(scope="session")
-def spacy_category_inferrer():
-    """Shared SpaCy-based category inferrer - loads model once for entire session."""
-    from frontmatter_normalizer.inferrer.category import CategoryInferrer
-    inferrer = CategoryInferrer()
-    # Force model loading now by running a dummy inference
-    inferrer.infer("# Test\n\nContent to force model load.")
-    return inferrer
-
-
-@pytest.fixture(scope="session")
 def st_category_inferrer():
     """Shared Sentence Transformers category inferrer - loads model once for entire session."""
     from frontmatter_normalizer.inferrer.category_st import CategoryInferrerST

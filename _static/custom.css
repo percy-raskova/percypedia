@@ -261,17 +261,59 @@ table.docutils tr:hover td {
     margin-left: -3px;
 }
 
+/* Document links - smaller font */
+.sidebar-tree .reference {
+    font-size: 0.85em !important;
+    color: var(--blood-gold-dim);
+}
+
 .sidebar-tree .reference:hover {
     color: var(--blood-gold) !important;
 }
 
-/* Caption styling */
+/* Category caption styling - larger, prominent */
 .sidebar-tree .caption {
     color: var(--blood-crimson);
     font-weight: 700;
     text-transform: uppercase;
-    font-size: 0.8em;
-    letter-spacing: 0.1em;
+    font-size: 1.0em;
+    letter-spacing: 0.08em;
+    margin-top: 1.2em;
+    margin-bottom: 0.4em;
+    padding: 0.3em 0;
+    border-bottom: 1px solid var(--blood-crimson-dim);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sidebar-tree .caption:first-child {
+    margin-top: 0;
+}
+
+/* Collapsible indicator arrow */
+.sidebar-tree .caption::after {
+    content: '▼';
+    font-size: 0.6em;
+    transition: transform 0.2s ease;
+    margin-left: 0.5em;
+}
+
+/* Collapsed state */
+.sidebar-tree .caption.collapsed::after {
+    transform: rotate(-90deg);
+}
+
+.sidebar-tree .caption.collapsed + ul {
+    display: none;
+}
+
+/* Hover effect on captions */
+.sidebar-tree .caption:hover {
+    color: var(--blood-gold);
+    border-bottom-color: var(--blood-gold);
 }
 
 /* ============================================
@@ -285,6 +327,38 @@ table.docutils tr:hover td {
 .search-button:hover {
     background: var(--blood-bg-highlight) !important;
     border-color: var(--blood-gold) !important;
+}
+
+/* ============================================
+   RIGHT-HAND TOC (On This Page)
+   ============================================ */
+
+/* Increase font size for better readability */
+.toc-tree {
+    font-size: 0.95em;
+}
+
+.toc-tree a {
+    color: var(--blood-fg-dark);
+}
+
+.toc-tree a:hover {
+    color: var(--blood-gold) !important;
+}
+
+/* Replace "On this page" with something more on-brand */
+.toc-title {
+    font-size: 0.7em !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--blood-crimson) !important;
+    visibility: hidden;
+}
+
+.toc-title::before {
+    content: "Navigate or Perish";
+    visibility: visible;
+    display: block;
 }
 
 /* ============================================

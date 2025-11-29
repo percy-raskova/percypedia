@@ -6,10 +6,11 @@ Commands:
 - validate: Check files against schema
 """
 
+import fnmatch
 import json
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 import click
 
@@ -22,11 +23,47 @@ from .writer import render_frontmatter, write_file
 __version__ = "0.1.0"
 
 
+def _matches_exclusion(rel_path: str, patterns: List[str]) -> bool:
+    """Check if a relative path matches any exclusion pattern.
+
+    Patterns support:
+    - Directory prefixes: '_build' matches '_build/' and '_build/anything'
+    - Wildcards: '*.pyc' matches any .pyc file
+    - Glob patterns: '_build/*' matches anything in _build/
+    """
+    for pattern in patterns:
+        # Directory pattern (e.g., '_build', '_build/*')
+        if pattern.endswith('/*'):
+            dir_prefix = pattern[:-2]
+            if rel_path.startswith(dir_prefix + '/') or rel_path == dir_prefix:
+                return True
+        # File extension pattern (e.g., '*.pyc')
+        elif pattern.startswith('*.'):
+            if fnmatch.fnmatch(rel_path, pattern) or fnmatch.fnmatch(rel_path.split('/')[-1], pattern):
+                return True
+        # Exact match or directory prefix
+        elif rel_path.startswith(pattern + '/') or rel_path == pattern:
+            return True
+        # General fnmatch pattern
+        elif fnmatch.fnmatch(rel_path, pattern):
+            return True
+
+    return False
+
+
 def find_markdown_files(
     path: Path,
     exclude_patterns: List[str],
 ) -> List[Path]:
-    """Find all markdown files in a directory, respecting exclusions."""
+    """Find all markdown files in a directory, respecting exclusions.
+
+    Args:
+        path: File or directory to search
+        exclude_patterns: List of patterns to exclude (supports fnmatch globs)
+
+    Returns:
+        Sorted list of markdown file paths
+    """
     path = Path(path)
 
     if path.is_file():
@@ -34,25 +71,8 @@ def find_markdown_files(
 
     files = []
     for md_file in path.rglob('*.md'):
-        # Check exclusion patterns
         rel_path = str(md_file.relative_to(path))
-        excluded = False
-
-        for pattern in exclude_patterns:
-            # Simple glob-like matching
-            if pattern.endswith('/*'):
-                dir_pattern = pattern[:-2]
-                if rel_path.startswith(dir_pattern + '/') or rel_path == dir_pattern:
-                    excluded = True
-                    break
-            elif rel_path.startswith(pattern + '/') or rel_path == pattern:
-                excluded = True
-                break
-            elif pattern.startswith('*.') and md_file.suffix == pattern[1:]:
-                excluded = True
-                break
-
-        if not excluded:
+        if not _matches_exclusion(rel_path, exclude_patterns):
             files.append(md_file)
 
     return sorted(files)

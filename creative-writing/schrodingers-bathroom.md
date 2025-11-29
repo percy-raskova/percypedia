@@ -4,6 +4,8 @@ description: A poem reflecting upon the transgender experience of picking which 
 permalink: poetry/schrodingers_bathroom
 ---
 
+# Schrödinger's Bathroom
+
 In the olden days
 Of misery and confusion 
 Before I could be me

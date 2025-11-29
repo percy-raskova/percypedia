@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+# Minimal CI dependencies for Sphinx build only
+# Full development deps (SpaCy, ML tools) are in Pipfile
+
+[packages]
+sphinx = ">=6.0"
+myst-parser = ">=1.0"
+furo = "*"
+sphinx-design = "*"
+sphinx-tags = "*"
+sphinx-hoverxref = "*"
+jsonschema = ">=4.0"
+pyyaml = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"

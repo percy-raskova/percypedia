@@ -25,3 +25,14 @@ Thumbs.db
 
 # Mise local overrides
 .mise.local.toml
+
+# Node.js (Playwright MCP)
+node_modules/
+package-lock.json
+
+# Playwright MCP cache
+.playwright-mcp/
+
+# Temporary files
+*.txt.tmp
+2025-*.txt

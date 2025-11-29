@@ -5,17 +5,10 @@ Embeddings are computed for category descriptions and compared against
 document embeddings using cosine similarity.
 """
 
-from typing import Dict, List, NamedTuple, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from ..config import CATEGORY_DEFINITIONS, VALID_CATEGORIES
-
-
-class CategoryResult(NamedTuple):
-    """Result of category inference."""
-    category: str
-    confidence: float
-    needs_review: bool
-    alternatives: List[Tuple[str, float]]
+from ._common import CategoryResult, cosine_similarity, strip_frontmatter
 
 
 class CategoryInferrerST:
@@ -115,7 +108,7 @@ class CategoryInferrerST:
         self._compute_category_embeddings()
 
         # Extract body text (strip frontmatter)
-        body = self._strip_frontmatter(content)
+        body = strip_frontmatter(content)
 
         # Handle very short content
         if len(body.strip()) < 20:
@@ -136,8 +129,8 @@ class CategoryInferrerST:
         scores: List[Tuple[str, float]] = []
 
         for category, cat_embedding in self._category_embeddings.items():
-            # Cosine similarity using the model's built-in method
-            similarity = self._cosine_similarity(doc_embedding, cat_embedding)
+            # Cosine similarity
+            similarity = cosine_similarity(doc_embedding, cat_embedding)
             # Normalize to 0-1 range (cosine similarity is -1 to 1)
             score = (similarity + 1) / 2
             scores.append((category, float(score)))
@@ -160,27 +153,3 @@ class CategoryInferrerST:
             needs_review=needs_review,
             alternatives=alternatives,
         )
-
-    def _strip_frontmatter(self, content: str) -> str:
-        """Remove frontmatter from content."""
-        if not content.startswith('---'):
-            return content
-
-        lines = content.split('\n')
-        for i, line in enumerate(lines[1:], start=1):
-            if line.strip() == '---':
-                return '\n'.join(lines[i + 1:])
-
-        return content
-
-    def _cosine_similarity(self, vec1, vec2) -> float:
-        """Compute cosine similarity between two vectors."""
-        import numpy as np
-
-        dot_product = np.dot(vec1, vec2)
-        norm1 = np.linalg.norm(vec1)
-        norm2 = np.linalg.norm(vec2)
-
-        if norm1 > 0 and norm2 > 0:
-            return dot_product / (norm1 * norm2)
-        return 0.0

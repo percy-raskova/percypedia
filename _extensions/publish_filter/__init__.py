@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Set
 
 from _common.frontmatter import extract_frontmatter
+from _common.traversal import iter_markdown_files
 
 
 def get_unpublished_docs(app) -> Set[str]:
@@ -20,12 +21,14 @@ def get_unpublished_docs(app) -> Set[str]:
     unpublished = set()
     srcdir = Path(app.srcdir)
 
-    for md_file in srcdir.rglob('*.md'):
-        # Skip underscore files/dirs
+    # Use shared traversal - publish_filter skips all underscore files/dirs and dot dirs
+    for md_file in iter_markdown_files(
+        srcdir,
+        skip_underscore_files=True,
+        skip_underscore_dirs=True,
+        skip_dot_dirs=True,
+    ):
         rel_path = md_file.relative_to(srcdir)
-        if any(part.startswith('_') or part.startswith('.')
-               for part in rel_path.parts):
-            continue
 
         try:
             content = md_file.read_text(encoding='utf-8')

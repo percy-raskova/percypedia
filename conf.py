@@ -74,7 +74,7 @@ source_suffix = {
 }
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '.venv', 'private', '_assets', '_*', '.pytest_cache', 'sample/*/index.md']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '.venv', 'private', '_assets', '_*', '.pytest_cache', 'sample/*/index.md', 'node_modules']
 language = 'en'
 
 # Auto-label sections with document prefix to avoid duplicates
@@ -165,6 +165,8 @@ html_theme_options = {
 
 html_static_path = ['_static']
 html_css_files = ['custom.css']
+html_js_files = ['sidebar-collapse.js']
+html_title = "Percypedia: No Investigation, No Right to Speak"
 
 # Custom RST prolog for tag role
 rst_prolog = """

@@ -13,17 +13,20 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
 
+from ..config import DEFAULTS
+from ._common import strip_frontmatter
+
 
 class MetadataInferrer:
     """Infers deterministic metadata fields from content and filesystem."""
 
-    def __init__(self, default_author: str = "Percy"):
+    def __init__(self, default_author: Optional[str] = None):
         """Initialize the metadata inferrer.
 
         Args:
-            default_author: Default author name for new files
+            default_author: Default author name for new files (defaults to config.DEFAULTS["author"])
         """
-        self.default_author = default_author
+        self.default_author = default_author if default_author is not None else DEFAULTS["author"]
 
     def infer_zkid(self, filepath: Path) -> str:
         """Generate a 12-digit Zettelkasten ID from file creation time.
@@ -94,13 +97,7 @@ class MetadataInferrer:
             Title string, or None if no H1 found
         """
         # Strip frontmatter if present
-        body = content
-        if content.startswith('---'):
-            lines = content.split('\n')
-            for i, line in enumerate(lines[1:], start=1):
-                if line.strip() == '---':
-                    body = '\n'.join(lines[i + 1:])
-                    break
+        body = strip_frontmatter(content)
 
         # Find first H1 heading (# Title format)
         match = re.search(r'^#\s+(.+)$', body, re.MULTILINE)
