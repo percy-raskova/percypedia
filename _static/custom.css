@@ -607,8 +607,6 @@ table.docutils tr:hover td {
 button.theme-toggle,
 .theme-toggle-container,
 label.theme-toggle,
-/* Target the specific Furo toggle icons */
-.nav-overlay-icon,
 button[title="Toggle Light / Dark / Auto color theme"] {
     display: none !important;
     visibility: hidden !important;
