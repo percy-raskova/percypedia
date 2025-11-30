@@ -16,12 +16,77 @@ from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
+# =============================================================================
+# Public API
+# =============================================================================
+
+__all__ = [
+    # Main class
+    'MissingRefsCollector',
+    # Global collector management
+    'get_collector',
+    'reset_collector',
+    # Sphinx event handlers
+    'on_missing_reference',
+    'on_build_finished',
+    'setup',
+    # Constants
+    '__version__',
+    'REFTYPE_DOC',
+    'UNCATEGORIZED',
+    'UNKNOWN_SOURCE',
+    'DEFAULT_PAGE_TITLE',
+    'DEFAULT_PAGE_PATH',
+    'JSON_OUTPUT_FILENAME',
+]
+
+# =============================================================================
+# Constants
+# =============================================================================
+
+# Extension metadata
+__version__ = '0.1.0'
+
+# Reference types we track
+REFTYPE_DOC = 'doc'
+
+# Category grouping
+UNCATEGORIZED = 'uncategorized'
+
+# Fallback values
+UNKNOWN_SOURCE = 'unknown'
+
+# Default configuration
+DEFAULT_PAGE_TITLE = 'Planned Articles'
+DEFAULT_PAGE_PATH = 'coming-soon.md'
+
+# Output filenames
+JSON_OUTPUT_FILENAME = 'missing_refs.json'
+
 
 class MissingRefsCollector:
     """Collects and organizes missing document references."""
 
     def __init__(self):
         self.missing: Dict[str, Dict[str, Any]] = {}
+
+    def _group_by_category(self) -> Dict[str, List[str]]:
+        """Group missing targets by their category.
+
+        Returns:
+            Dictionary mapping category names to sorted lists of target paths.
+            Targets without a category are grouped under UNCATEGORIZED.
+        """
+        by_category: Dict[str, List[str]] = defaultdict(list)
+        for target, info in self.missing.items():
+            cat = info['category'] or UNCATEGORIZED
+            by_category[cat].append(target)
+
+        # Sort targets within each category
+        for cat in by_category:
+            by_category[cat] = sorted(by_category[cat])
+
+        return dict(sorted(by_category.items()))
 
     def record_missing(self, target: str, referenced_by: str) -> None:
         """Record a missing document reference.
@@ -61,21 +126,11 @@ class MissingRefsCollector:
                 'referenced_by': sorted(info['referenced_by']),
             })
 
-        # Group by category
-        by_category: Dict[str, List[str]] = defaultdict(list)
-        for target, info in self.missing.items():
-            cat = info['category'] or 'uncategorized'
-            by_category[cat].append(target)
-
-        # Sort within categories
-        for cat in by_category:
-            by_category[cat] = sorted(by_category[cat])
-
         return {
             'generated_at': datetime.now(timezone.utc).isoformat(),
             'count': len(self.missing),
             'missing_documents': documents,
-            'by_category': dict(sorted(by_category.items())),
+            'by_category': self._group_by_category(),
         }
 
     def write_json(self, path: Path) -> None:
@@ -109,15 +164,9 @@ class MissingRefsCollector:
             "",
         ]
 
-        # Group by category
-        by_category: Dict[str, List[str]] = defaultdict(list)
-        for target, info in self.missing.items():
-            cat = info['category'] or 'Uncategorized'
-            by_category[cat].append(target)
-
-        # Output by category
-        for category in sorted(by_category.keys()):
-            targets = sorted(by_category[category])
+        # Output by category (already sorted by _group_by_category)
+        by_category = self._group_by_category()
+        for category, targets in by_category.items():
             lines.append(f"## {category.title()}")
             lines.append("")
             for target in targets:
@@ -159,29 +208,43 @@ def reset_collector() -> None:
     _collector = None
 
 
-def on_missing_reference(app, env, node, contnode):
+def on_missing_reference(
+    app: Any,
+    env: Any,
+    node: Dict[str, Any],
+    contnode: Any
+) -> None:
     """Handle missing reference events.
 
     Sphinx calls this when a reference target cannot be resolved.
     We only care about 'doc' references (links to other documents).
-    """
-    from docutils import nodes
 
+    Args:
+        app: Sphinx application instance
+        env: Build environment
+        node: The reference node with reftype and reftarget
+        contnode: Content node (unused)
+    """
     # Get reference type - we only track document references
     reftype = node.get('reftype', '')
     reftarget = node.get('reftarget', '')
 
-    if reftype == 'doc' and reftarget:
+    if reftype == REFTYPE_DOC and reftarget:
         # Get the source document
-        source_doc = env.docname if hasattr(env, 'docname') else 'unknown'
+        source_doc = env.docname if hasattr(env, 'docname') else UNKNOWN_SOURCE
         get_collector().record_missing(reftarget, source_doc)
 
     # Return None to let Sphinx continue with default handling (warning)
     return None
 
 
-def on_build_finished(app, exception):
-    """Write output files when build completes."""
+def on_build_finished(app: Any, exception: Optional[Exception]) -> None:
+    """Write output files when build completes.
+
+    Args:
+        app: Sphinx application instance
+        exception: Exception if build failed, None otherwise
+    """
     if exception:
         return  # Don't write if build failed
 
@@ -193,7 +256,7 @@ def on_build_finished(app, exception):
     outdir = Path(app.outdir)
 
     # Always write JSON
-    json_path = outdir / 'missing_refs.json'
+    json_path = outdir / JSON_OUTPUT_FILENAME
     collector.write_json(json_path)
 
     # Log summary
@@ -210,19 +273,26 @@ def on_build_finished(app, exception):
     reset_collector()
 
 
-def setup(app):
-    """Sphinx extension entry point."""
+def setup(app: Any) -> Dict[str, Any]:
+    """Sphinx extension entry point.
+
+    Args:
+        app: Sphinx application instance
+
+    Returns:
+        Extension metadata with version and parallel safety flags.
+    """
     # Configuration options
     app.add_config_value('missing_refs_generate_page', False, 'env')
-    app.add_config_value('missing_refs_page_path', 'coming-soon.md', 'env')
-    app.add_config_value('missing_refs_page_title', 'Planned Articles', 'env')
+    app.add_config_value('missing_refs_page_path', DEFAULT_PAGE_PATH, 'env')
+    app.add_config_value('missing_refs_page_title', DEFAULT_PAGE_TITLE, 'env')
 
     # Event handlers
     app.connect('missing-reference', on_missing_reference)
     app.connect('build-finished', on_build_finished)
 
     return {
-        'version': '0.1.0',
+        'version': __version__,
         'parallel_read_safe': True,
         'parallel_write_safe': True,
     }
