@@ -45,3 +45,6 @@ package-lock.json
 # Honeypot trap pages (generated at build time)
 content/honeypot-trap/
 content/docs/anti-ai-defenses.md
+
+# Large PDFs (exceeds Cloudflare Pages 25MB limit - use R2 instead)
+_assets/files/PDFs/Fanshen-a-Documentary-of-Revolution-in-a-Chinese-Village-William-Hinton.pdf
