@@ -10,20 +10,18 @@ import fnmatch
 import json
 import sys
 from pathlib import Path
-from typing import List
 
 import click
 
 from .config import DEFAULT_EXCLUDE_PATTERNS
-from .normalizer import Normalizer, NormalizationResult
+from .normalizer import Normalizer
 from .parser import parse_file
-from .writer import render_frontmatter, write_file
-
+from .writer import write_file
 
 __version__ = "0.1.0"
 
 
-def _matches_exclusion(rel_path: str, patterns: List[str]) -> bool:
+def _matches_exclusion(rel_path: str, patterns: list[str]) -> bool:
     """Check if a relative path matches any exclusion pattern.
 
     Patterns support:
@@ -42,10 +40,7 @@ def _matches_exclusion(rel_path: str, patterns: List[str]) -> bool:
             if fnmatch.fnmatch(rel_path, pattern) or fnmatch.fnmatch(rel_path.split('/')[-1], pattern):
                 return True
         # Exact match or directory prefix
-        elif rel_path.startswith(pattern + '/') or rel_path == pattern:
-            return True
-        # General fnmatch pattern
-        elif fnmatch.fnmatch(rel_path, pattern):
+        elif rel_path.startswith(pattern + '/') or rel_path == pattern or fnmatch.fnmatch(rel_path, pattern):
             return True
 
     return False
@@ -53,8 +48,8 @@ def _matches_exclusion(rel_path: str, patterns: List[str]) -> bool:
 
 def find_markdown_files(
     path: Path,
-    exclude_patterns: List[str],
-) -> List[Path]:
+    exclude_patterns: list[str],
+) -> list[Path]:
     """Find all markdown files in a directory, respecting exclusions.
 
     Args:
@@ -273,9 +268,8 @@ def validate(
                     issues.append(f"Invalid category: {frontmatter['category']}")
 
             # Check tags format
-            if 'tags' in frontmatter:
-                if not isinstance(frontmatter['tags'], list):
-                    issues.append("Tags should be a list")
+            if 'tags' in frontmatter and not isinstance(frontmatter['tags'], list):
+                issues.append("Tags should be a list")
 
             if issues:
                 invalid_count += 1

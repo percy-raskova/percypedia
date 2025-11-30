@@ -7,7 +7,7 @@ Handles:
 """
 
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import yaml
 
@@ -28,7 +28,7 @@ def _quoted_representer(dumper, data):
 yaml.add_representer(QuotedString, _quoted_representer)
 
 
-def render_frontmatter(frontmatter: Dict[str, Any], body: str) -> str:
+def render_frontmatter(frontmatter: dict[str, Any], body: str) -> str:
     """Render frontmatter dict and body to full markdown content.
 
     Args:
@@ -63,7 +63,7 @@ def render_frontmatter(frontmatter: Dict[str, Any], body: str) -> str:
     return f"---\n{yaml_content}---{body}"
 
 
-def _order_fields(frontmatter: Dict[str, Any]) -> Dict[str, Any]:
+def _order_fields(frontmatter: dict[str, Any]) -> dict[str, Any]:
     """Order frontmatter fields according to schema priority."""
     ordered = {}
 
@@ -80,7 +80,7 @@ def _order_fields(frontmatter: Dict[str, Any]) -> Dict[str, Any]:
     return ordered
 
 
-def _format_values(frontmatter: Dict[str, Any]) -> Dict[str, Any]:
+def _format_values(frontmatter: dict[str, Any]) -> dict[str, Any]:
     """Format values for YAML serialization.
 
     - Quote strings that need it (dates, zkid, special chars)
@@ -116,7 +116,7 @@ def _format_values(frontmatter: Dict[str, Any]) -> Dict[str, Any]:
 
 def write_file(
     filepath: Path,
-    frontmatter: Dict[str, Any],
+    frontmatter: dict[str, Any],
     body: str,
     backup: bool = True,
     dry_run: bool = False,

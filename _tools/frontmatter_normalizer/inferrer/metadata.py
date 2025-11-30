@@ -7,11 +7,9 @@ Handles:
 - author: default author (configurable)
 """
 
-import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional
 
 from ..config import DEFAULTS
 from ._common import strip_frontmatter
@@ -20,7 +18,7 @@ from ._common import strip_frontmatter
 class MetadataInferrer:
     """Infers deterministic metadata fields from content and filesystem."""
 
-    def __init__(self, default_author: Optional[str] = None):
+    def __init__(self, default_author: str | None = None):
         """Initialize the metadata inferrer.
 
         Args:
@@ -57,7 +55,7 @@ class MetadataInferrer:
         dt = datetime.fromtimestamp(timestamp)
         return dt.strftime('%Y%m%d%H%M')
 
-    def infer_dates(self, filepath: Path) -> Dict[str, str]:
+    def infer_dates(self, filepath: Path) -> dict[str, str]:
         """Infer date-created and date-edited from file timestamps.
 
         Args:
@@ -85,7 +83,7 @@ class MetadataInferrer:
             'date-edited': edited.strftime('%Y-%m-%d'),
         }
 
-    def infer_title(self, content: str) -> Optional[str]:
+    def infer_title(self, content: str) -> str | None:
         """Extract title from first H1 heading.
 
         Handles content with or without frontmatter.

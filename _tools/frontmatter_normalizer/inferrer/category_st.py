@@ -5,7 +5,6 @@ Embeddings are computed for category descriptions and compared against
 document embeddings using cosine similarity.
 """
 
-from typing import Dict, List, Optional, Tuple
 
 from ..config import CATEGORY_DEFINITIONS, VALID_CATEGORIES
 from ._common import CategoryResult, cosine_similarity, strip_frontmatter
@@ -21,7 +20,7 @@ class CategoryInferrerST:
     def __init__(
         self,
         model_name: str = "all-mpnet-base-v2",
-        categories: Optional[Dict[str, Dict]] = None,
+        categories: dict[str, dict] | None = None,
         confidence_threshold: float = 0.6,
     ):
         """Initialize the category inferrer.
@@ -73,7 +72,7 @@ class CategoryInferrerST:
                 # Fallback to description + keywords
                 desc = definition.get("description", "")
                 keywords = definition.get("keywords", [])
-                phrases = [desc] + keywords[:5]
+                phrases = [desc, *keywords[:5]]
 
             # Encode all phrases and average them
             embeddings = self._model.encode(phrases)
@@ -83,7 +82,7 @@ class CategoryInferrerST:
     def infer(
         self,
         content: str,
-        existing_category: Optional[str] = None,
+        existing_category: str | None = None,
     ) -> CategoryResult:
         """Infer the category from content.
 
@@ -126,7 +125,7 @@ class CategoryInferrerST:
         doc_embedding = self._model.encode(body_truncated)
 
         # Compute similarity with each category
-        scores: List[Tuple[str, float]] = []
+        scores: list[tuple[str, float]] = []
 
         for category, cat_embedding in self._category_embeddings.items():
             # Cosine similarity

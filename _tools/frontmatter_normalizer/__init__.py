@@ -7,18 +7,18 @@ This tool normalizes YAML frontmatter in markdown files to match a schema:
 - Preserves body content exactly
 """
 
-from .normalizer import normalize, Normalizer, NormalizationResult
-from .parser import parse_frontmatter, parse_file
+from .normalizer import NormalizationResult, Normalizer, normalize
+from .parser import parse_file, parse_frontmatter
 from .writer import render_frontmatter, write_file
 
 __version__ = "0.1.0"
 
 __all__ = [
-    "normalize",
-    "Normalizer",
     "NormalizationResult",
-    "parse_frontmatter",
+    "Normalizer",
+    "normalize",
     "parse_file",
+    "parse_frontmatter",
     "render_frontmatter",
     "write_file",
 ]

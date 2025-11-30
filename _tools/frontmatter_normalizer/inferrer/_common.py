@@ -7,7 +7,7 @@ This module provides shared functionality to avoid code duplication:
 - CategoryInferrerProtocol: Protocol for category inferrer implementations
 """
 
-from typing import List, NamedTuple, Optional, Protocol, Tuple, runtime_checkable
+from typing import NamedTuple, Protocol, runtime_checkable
 
 
 class CategoryResult(NamedTuple):
@@ -15,7 +15,7 @@ class CategoryResult(NamedTuple):
     category: str
     confidence: float
     needs_review: bool
-    alternatives: List[Tuple[str, float]]
+    alternatives: list[tuple[str, float]]
 
 
 @runtime_checkable
@@ -37,7 +37,7 @@ class CategoryInferrerProtocol(Protocol):
     def infer(
         self,
         content: str,
-        existing_category: Optional[str] = None,
+        existing_category: str | None = None,
     ) -> CategoryResult:
         """Infer category from content.
 

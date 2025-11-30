@@ -9,27 +9,26 @@ Orchestrates:
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional, Set
+from typing import Any, NamedTuple
 
 from .config import (
     DEFAULTS,
     FIELD_MIGRATIONS,
     SCHEMA_FIELDS,
-    VALID_CATEGORIES,
 )
-from .parser import parse_frontmatter
-from .inferrer.metadata import MetadataInferrer
-from .inferrer.category_st import CategoryInferrerST
-from .inferrer.tags import TagInferrer
 from .inferrer._common import CategoryInferrerProtocol
+from .inferrer.category_st import CategoryInferrerST
+from .inferrer.metadata import MetadataInferrer
+from .inferrer.tags import TagInferrer
+from .parser import parse_frontmatter
 
 
 class NormalizationResult(NamedTuple):
     """Result of normalizing a document."""
     changed: bool
-    frontmatter: Dict[str, Any]
+    frontmatter: dict[str, Any]
     body: str
-    inferred_fields: List[str]
+    inferred_fields: list[str]
     needs_review: bool
 
 
@@ -43,9 +42,9 @@ class Normalizer:
 
     def __init__(
         self,
-        metadata_inferrer: Optional[MetadataInferrer] = None,
-        category_inferrer: Optional[CategoryInferrerProtocol] = None,
-        tag_inferrer: Optional[TagInferrer] = None,
+        metadata_inferrer: MetadataInferrer | None = None,
+        category_inferrer: CategoryInferrerProtocol | None = None,
+        tag_inferrer: TagInferrer | None = None,
     ):
         """Initialize the normalizer with inferrers.
 
@@ -77,7 +76,7 @@ class Normalizer:
         existing_fm, body = parse_frontmatter(content)
 
         # Track what changed
-        inferred_fields: List[str] = []
+        inferred_fields: list[str] = []
         needs_review = False
 
         # Migrate old field names
@@ -87,7 +86,7 @@ class Normalizer:
         filtered_fm = self._filter_schema_fields(migrated_fm)
 
         # Start building normalized frontmatter
-        normalized: Dict[str, Any] = {}
+        normalized: dict[str, Any] = {}
 
         # Process each schema field
         # zkid
@@ -188,7 +187,7 @@ class Normalizer:
             needs_review=needs_review,
         )
 
-    def _migrate_fields(self, frontmatter: Dict[str, Any]) -> Dict[str, Any]:
+    def _migrate_fields(self, frontmatter: dict[str, Any]) -> dict[str, Any]:
         """Migrate old field names to new names."""
         result = {}
 
@@ -202,7 +201,7 @@ class Normalizer:
 
         return result
 
-    def _filter_schema_fields(self, frontmatter: Dict[str, Any]) -> Dict[str, Any]:
+    def _filter_schema_fields(self, frontmatter: dict[str, Any]) -> dict[str, Any]:
         """Keep only schema-valid fields, discard the rest."""
         return {
             k: v for k, v in frontmatter.items()
@@ -211,8 +210,8 @@ class Normalizer:
 
     def _has_changes(
         self,
-        original: Dict[str, Any],
-        normalized: Dict[str, Any],
+        original: dict[str, Any],
+        normalized: dict[str, Any],
         body: str,
         content: str,
     ) -> bool:
@@ -252,11 +251,7 @@ class Normalizer:
                 return True
 
         # Check for discarded fields
-        for key in original:
-            if key not in SCHEMA_FIELDS and key not in FIELD_MIGRATIONS:
-                return True
-
-        return False
+        return any(key not in SCHEMA_FIELDS and key not in FIELD_MIGRATIONS for key in original)
 
 
 def normalize(content: str, filepath: Path) -> NormalizationResult:

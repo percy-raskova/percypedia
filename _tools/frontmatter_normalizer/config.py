@@ -9,7 +9,7 @@ Central configuration for:
 
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import Any
 
 import yaml
 
@@ -22,7 +22,7 @@ if str(_EXTENSIONS_PATH) not in sys.path:
 # Schema Fields
 # =============================================================================
 
-SCHEMA_FIELDS: Set[str] = {
+SCHEMA_FIELDS: set[str] = {
     "zkid",
     "author",
     "title",
@@ -36,7 +36,7 @@ SCHEMA_FIELDS: Set[str] = {
 }
 
 # Ordered list for YAML output
-FIELD_ORDER: List[str] = [
+FIELD_ORDER: list[str] = [
     "zkid",
     "author",
     "title",
@@ -53,7 +53,7 @@ FIELD_ORDER: List[str] = [
 # Field Migrations (old name -> new name)
 # =============================================================================
 
-FIELD_MIGRATIONS: Dict[str, str] = {
+FIELD_MIGRATIONS: dict[str, str] = {
     "id": "zkid",
     "Date": "date-created",
     "Updated": "date-edited",
@@ -76,7 +76,7 @@ FIELD_MIGRATIONS: Dict[str, str] = {
 _CATEGORIES_YAML_PATH = Path(__file__).parent / "categories.yaml"
 
 
-def _load_categories_from_yaml(filepath: Path) -> Dict[str, Dict[str, Any]]:
+def _load_categories_from_yaml(filepath: Path) -> dict[str, dict[str, Any]]:
     """Load category definitions from YAML file.
 
     Args:
@@ -111,15 +111,15 @@ def _load_categories_from_yaml(filepath: Path) -> Dict[str, Dict[str, Any]]:
 
 
 # Load categories at module import time
-CATEGORY_DEFINITIONS: Dict[str, Dict[str, Any]] = _load_categories_from_yaml(_CATEGORIES_YAML_PATH)
+CATEGORY_DEFINITIONS: dict[str, dict[str, Any]] = _load_categories_from_yaml(_CATEGORIES_YAML_PATH)
 
-VALID_CATEGORIES: Set[str] = set(CATEGORY_DEFINITIONS.keys())
+VALID_CATEGORIES: set[str] = set(CATEGORY_DEFINITIONS.keys())
 
 # =============================================================================
 # Default Tag Vocabulary
 # =============================================================================
 
-DEFAULT_TAG_VOCABULARY: Dict[str, List[str]] = {
+DEFAULT_TAG_VOCABULARY: dict[str, list[str]] = {
     "theory": [
         "theory/marxism",
         "theory/dialectics",
@@ -167,7 +167,6 @@ DEFAULT_TAG_VOCABULARY: Dict[str, List[str]] = {
 # =============================================================================
 
 # Import centralized patterns (includes infrastructure dirs, build artifacts, etc.)
-from _common.paths import EXCLUDE_PATTERNS as DEFAULT_EXCLUDE_PATTERNS
 
 # =============================================================================
 # Default Values for New Files

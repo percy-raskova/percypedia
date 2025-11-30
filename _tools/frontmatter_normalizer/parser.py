@@ -6,7 +6,7 @@ This ensures consistent parsing between Sphinx extensions and the normalizer too
 
 import sys
 from pathlib import Path
-from typing import Dict, Any, Tuple
+from typing import Any
 
 # Add _extensions to path if not already available
 # This handles both:
@@ -18,10 +18,10 @@ if str(_extensions_path) not in sys.path:
     sys.path.insert(0, str(_extensions_path))
 
 # Import from the authoritative source
-from _common.frontmatter import parse_frontmatter, extract_frontmatter  # noqa: E402
+from _common.frontmatter import extract_frontmatter, parse_frontmatter  # noqa: E402
 
 
-def parse_file(filepath: Path) -> Tuple[Dict[str, Any], str]:
+def parse_file(filepath: Path) -> tuple[dict[str, Any], str]:
     """Parse frontmatter from a file.
 
     Args:
@@ -41,4 +41,4 @@ def parse_file(filepath: Path) -> Tuple[Dict[str, Any], str]:
     return parse_frontmatter(content)
 
 
-__all__ = ["parse_frontmatter", "parse_file", "extract_frontmatter"]
+__all__ = ["extract_frontmatter", "parse_file", "parse_frontmatter"]

@@ -8,7 +8,7 @@ Strategy: Seed + Expand
 
 import re
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional, Set, Union
+from typing import NamedTuple
 
 import yaml
 
@@ -25,8 +25,8 @@ from ..config import DEFAULT_TAG_VOCABULARY
 
 class TagResult(NamedTuple):
     """Result of tag inference."""
-    tags: List[str]
-    suggested_new: List[str]
+    tags: list[str]
+    suggested_new: list[str]
     needs_review: bool
 
 
@@ -35,8 +35,8 @@ class TagInferrer:
 
     def __init__(
         self,
-        vocabulary: Optional[Dict[str, List[str]]] = None,
-        vocabulary_file: Optional[Path] = None,
+        vocabulary: dict[str, list[str]] | None = None,
+        vocabulary_file: Path | None = None,
         fuzzy_threshold: float = 0.7,
         max_tags: int = 10,
         min_confidence: float = 0.5,
@@ -63,15 +63,15 @@ class TagInferrer:
             self._vocabulary_dict = DEFAULT_TAG_VOCABULARY
 
         # Flatten vocabulary to set
-        self.vocabulary: Set[str] = set()
+        self.vocabulary: set[str] = set()
         for tags in self._vocabulary_dict.values():
             self.vocabulary.update(tags)
 
         # Build keyword index for faster matching
-        self._keyword_index: Dict[str, List[str]] = {}
+        self._keyword_index: dict[str, list[str]] = {}
         self._build_keyword_index()
 
-    def _load_vocabulary_file(self, filepath: Path) -> Dict[str, List[str]]:
+    def _load_vocabulary_file(self, filepath: Path) -> dict[str, list[str]]:
         """Load vocabulary from YAML file."""
         filepath = Path(filepath)
         if not filepath.exists():
@@ -95,7 +95,7 @@ class TagInferrer:
     def infer(
         self,
         content: str,
-        existing_tags: Optional[List[str]] = None,
+        existing_tags: list[str] | None = None,
     ) -> TagResult:
         """Infer tags from content.
 
@@ -106,8 +106,8 @@ class TagInferrer:
         Returns:
             TagResult with matched tags, suggested new tags, and review flag
         """
-        matched_tags: Set[str] = set()
-        suggested_new: List[str] = []
+        matched_tags: set[str] = set()
+        suggested_new: list[str] = []
         needs_review = False
 
         # Handle existing tags
@@ -158,7 +158,7 @@ class TagInferrer:
         """Normalize tag to lowercase with consistent format."""
         return tag.lower().strip()
 
-    def _extract_keywords(self, content: str) -> Set[str]:
+    def _extract_keywords(self, content: str) -> set[str]:
         """Extract meaningful keywords from content.
 
         Filters out common words and short words.
@@ -183,8 +183,8 @@ class TagInferrer:
 
     def parse_string_tags(
         self,
-        tags: Union[str, List[str]]
-    ) -> List[str]:
+        tags: str | list[str]
+    ) -> list[str]:
         """Parse tags from string or list format.
 
         Handles:
