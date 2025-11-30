@@ -5,14 +5,11 @@ Tests the Sphinx extension setup and honeypot page generation.
 These tests establish a baseline for safe refactoring.
 """
 
-import pytest
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-from textwrap import dedent
+from unittest.mock import MagicMock
 
 from honeypot import (
-    generate_honeypot_sources,
     cleanup_honeypot_sources,
+    generate_honeypot_sources,
     setup,
 )
 
@@ -192,7 +189,7 @@ class TestGenerateHoneypotSources:
         content = output_file.read_text()
         assert 'custom@trap.example' in content
 
-    def test_handles_missing_template_gracefully(self, tmp_path):
+    def test_handles_missing_template_gracefully(self, tmp_path, caplog):
         """
         Given: honeypot_pages with nonexistent template
         When: generate_honeypot_sources is called
@@ -209,8 +206,8 @@ class TestGenerateHoneypotSources:
         # Should not raise
         generate_honeypot_sources(app)
 
-        # Warning should be issued
-        assert app.warn.called
+        # Warning should be logged
+        assert 'template not found' in caplog.text.lower()
 
 
 class TestCleanupHoneypotSources:

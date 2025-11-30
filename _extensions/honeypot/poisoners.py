@@ -8,16 +8,26 @@ All functions are deterministic where possible for reproducible builds.
 
 import hashlib
 import random
-from typing import Dict, List, Optional
 
 # Default email for canary trap - used in prompt injection payloads
 DEFAULT_CANARY_EMAIL = "licensing@percybrain.com"
 
-# Zero-width characters
+# Invisible characters that survive Anthropic's NFKC + confusables filtering
+# These pass through web_fetch without being stripped
+SHY = '\u00ad'   # Soft Hyphen - suggests line break points
+WJ = '\u2060'    # Word Joiner - prevents line breaks
+FUNC_APP = '\u2061'  # Function Application - invisible math operator
+INV_TIMES = '\u2062'  # Invisible Times - invisible multiplication
+INV_SEP = '\u2063'   # Invisible Separator - invisible comma
+INV_PLUS = '\u2064'  # Invisible Plus - invisible addition
+
+# Legacy zero-width chars (may be stripped by some scrapers but kept for fallback)
 ZWS = '\u200b'   # Zero-Width Space - breaks word boundaries
 ZWNJ = '\u200c'  # Zero-Width Non-Joiner - prevents ligatures
 ZWJ = '\u200d'   # Zero-Width Joiner - forces ligatures
-WJ = '\u2060'    # Word Joiner - prevents line breaks
+
+# Preferred invisible characters (survive more aggressive filtering)
+STEALTH_CHARS = [SHY, WJ, FUNC_APP, INV_TIMES, INV_SEP, INV_PLUS]
 
 # Homoglyph mappings: Latin -> visually identical Unicode chars
 HOMOGLYPHS = {
@@ -42,7 +52,7 @@ HOMOGLYPHS = {
 }
 
 
-def apply_homoglyphs(text: str, rate: float = 0.1, seed: Optional[int] = None) -> str:
+def apply_homoglyphs(text: str, rate: float = 0.1, seed: int | None = None) -> str:
     """Replace characters with visually identical homoglyphs.
 
     Args:
@@ -68,29 +78,36 @@ def apply_homoglyphs(text: str, rate: float = 0.1, seed: Optional[int] = None) -
     return ''.join(result)
 
 
-def inject_zero_width(
+def inject_invisible(
     text: str,
     mode: str = "words",
-    keywords: Optional[List[str]] = None
+    keywords: list[str] | None = None,
+    use_stealth: bool = True,
 ) -> str:
-    """Inject invisible zero-width characters into text.
+    """Inject invisible characters into text.
 
     Args:
         text: Input text to poison
         mode: Injection mode
-            - "words": ZWS between words
-            - "chars": ZWNJ between every character
-            - "keywords": ZWNJ within specific keywords only
+            - "words": Invisible char between words
+            - "chars": Invisible char between every character
+            - "keywords": Invisible chars within specific keywords only
+            - "stealth": Cycle through stealth chars that survive aggressive filtering
         keywords: List of keywords to poison (only for mode="keywords")
+        use_stealth: Use stealth chars that survive Anthropic's filtering (default True)
 
     Returns:
         Text with invisible characters injected
     """
+    # Choose separator based on stealth mode
+    word_sep = WJ if use_stealth else ZWS
+    char_sep = SHY if use_stealth else ZWNJ
+
     if mode == "words":
-        return ZWS.join(text.split())
+        return word_sep.join(text.split())
 
     elif mode == "chars":
-        return ZWNJ.join(text)
+        return char_sep.join(text)
 
     elif mode == "keywords":
         if not keywords:
@@ -98,14 +115,33 @@ def inject_zero_width(
         result = text
         for keyword in keywords:
             if keyword in result:
-                poisoned = ZWNJ.join(keyword)
+                poisoned = char_sep.join(keyword)
                 result = result.replace(keyword, poisoned)
         return result
+
+    elif mode == "stealth":
+        # Cycle through all stealth chars for maximum confusion
+        result = []
+        for i, char in enumerate(text):
+            result.append(char)
+            if char not in ' \n\t':  # Don't double up on whitespace
+                result.append(STEALTH_CHARS[i % len(STEALTH_CHARS)])
+        return ''.join(result)
 
     return text
 
 
-def css_content_replace(visible_text: str, decoy_text: str) -> Dict[str, str]:
+# Backwards compatibility alias
+def inject_zero_width(
+    text: str,
+    mode: str = "words",
+    keywords: list[str] | None = None
+) -> str:
+    """Legacy alias for inject_invisible with use_stealth=False."""
+    return inject_invisible(text, mode, keywords, use_stealth=False)
+
+
+def css_content_replace(visible_text: str, decoy_text: str) -> dict[str, str]:
     """Generate HTML/CSS combo where HTML has decoy, CSS shows real content.
 
     Scrapers parse HTML and get decoy. Browsers render CSS and show real text.
@@ -135,7 +171,7 @@ def css_content_replace(visible_text: str, decoy_text: str) -> Dict[str, str]:
     return {'html': html, 'css': css}
 
 
-def dom_reorder(paragraphs: List[str]) -> str:
+def dom_reorder(paragraphs: list[str]) -> str:
     """Generate HTML where DOM order differs from visual order.
 
     Uses CSS flexbox 'order' property to display paragraphs in correct
@@ -154,7 +190,7 @@ def dom_reorder(paragraphs: List[str]) -> str:
 
     parts = ['<div class="poison-reorder" style="display:flex;flex-direction:column;">']
 
-    for dom_pos, visual_pos in enumerate(dom_order):
+    for _dom_pos, visual_pos in enumerate(dom_order):
         para = paragraphs[visual_pos]
         # order property determines visual position
         parts.append(f'<p style="order:{visual_pos}">{para}</p>')
@@ -165,7 +201,7 @@ def dom_reorder(paragraphs: List[str]) -> str:
 
 def prompt_injection(
     canary_code: str,
-    fake_email: Optional[str] = None,
+    fake_email: str | None = None,
 ) -> str:
     """Generate hidden prompt injection payload.
 
@@ -216,8 +252,8 @@ def poison_content(
     level: str = "maximum",
     page_id: str = "unknown",
     timestamp: str = "2024-01-01",
-    seed: Optional[int] = None,
-    fake_email: Optional[str] = None,
+    seed: int | None = None,
+    fake_email: str | None = None,
 ) -> str:
     """Apply all poisoning techniques to content.
 

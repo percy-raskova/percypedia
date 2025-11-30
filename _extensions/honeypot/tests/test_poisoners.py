@@ -5,21 +5,27 @@ Tests the text poisoning functions used to create anti-AI honeypot content.
 These tests establish a baseline for safe refactoring.
 """
 
-import pytest
 
 from honeypot.poisoners import (
+    FUNC_APP,
     HOMOGLYPHS,
-    ZWS,
-    ZWNJ,
-    ZWJ,
+    INV_PLUS,
+    INV_SEP,
+    INV_TIMES,
+    SHY,
+    STEALTH_CHARS,
     WJ,
+    ZWJ,
+    ZWNJ,
+    ZWS,
     apply_homoglyphs,
-    inject_zero_width,
     css_content_replace,
     dom_reorder,
-    prompt_injection,
     generate_canary,
+    inject_invisible,
+    inject_zero_width,
     poison_content,
+    prompt_injection,
 )
 
 
@@ -98,6 +104,44 @@ class TestZeroWidthCharacters:
         assert ZWNJ == '\u200c'
         assert ZWJ == '\u200d'
         assert WJ == '\u2060'
+
+    def test_stealth_char_constants_defined(self):
+        """
+        Given: Stealth character constants (survive Anthropic filtering)
+        When: Checking their values
+        Then: They are proper Unicode invisible chars
+        """
+        assert SHY == '\u00ad'
+        assert WJ == '\u2060'
+        assert FUNC_APP == '\u2061'
+        assert INV_TIMES == '\u2062'
+        assert INV_SEP == '\u2063'
+        assert INV_PLUS == '\u2064'
+        assert len(STEALTH_CHARS) == 6
+
+    def test_inject_invisible_uses_stealth_by_default(self):
+        """
+        Given: Text with multiple words
+        When: inject_invisible called with default settings
+        Then: Uses stealth chars (WJ) instead of legacy (ZWS)
+        """
+        text = "hello world"
+        result = inject_invisible(text, mode="words")
+        assert WJ in result
+        assert ZWS not in result
+
+    def test_inject_invisible_stealth_mode_cycles_chars(self):
+        """
+        Given: Text
+        When: inject_invisible called with mode="stealth"
+        Then: Cycles through all stealth chars
+        """
+        text = "test"
+        result = inject_invisible(text, mode="stealth")
+        # Result should be longer than original (stealth chars added)
+        assert len(result) > len(text)
+        # Should contain some of the stealth chars
+        assert any(char in result for char in STEALTH_CHARS)
 
     def test_inject_zero_width_words_mode(self):
         """

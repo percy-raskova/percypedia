@@ -19,11 +19,14 @@ Usage in conf.py:
     ]
 """
 
+import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
-from .poisoners import generate_canary, prompt_injection, DEFAULT_CANARY_EMAIL
+from .poisoners import DEFAULT_CANARY_EMAIL, generate_canary, prompt_injection
+
+logger = logging.getLogger(__name__)
 
 
 def generate_honeypot_sources(app) -> None:
@@ -43,14 +46,15 @@ def generate_honeypot_sources(app) -> None:
 
     # Load Jinja2 for templates
     try:
+        import jinja2
         from jinja2 import Environment, FileSystemLoader
     except ImportError:
-        app.warn("Jinja2 not available, skipping honeypot generation")
+        logger.warning('Jinja2 not available, skipping honeypot generation')
         return
 
     template_dir = Path(__file__).parent / 'templates'
     if not template_dir.exists():
-        app.warn(f"Honeypot template directory not found: {template_dir}")
+        logger.warning('Honeypot template directory not found: %s', template_dir)
         return
 
     env = Environment(loader=FileSystemLoader(str(template_dir)))
@@ -62,8 +66,11 @@ def generate_honeypot_sources(app) -> None:
 
         try:
             template = env.get_template(template_name)
-        except Exception as e:
-            app.warn(f"Could not load template {template_name}: {e}")
+        except jinja2.TemplateNotFound as e:
+            logger.warning('Honeypot template not found: %s', e)
+            continue
+        except jinja2.TemplateSyntaxError as e:
+            logger.error('Honeypot template syntax error in %s: %s', template_name, e)
             continue
 
         # Generate canary for this page
@@ -91,7 +98,7 @@ def generate_honeypot_sources(app) -> None:
     # Sphinx will pick up the generated files
 
 
-def cleanup_honeypot_sources(app, exception) -> None:
+def cleanup_honeypot_sources(app, _exception) -> None:
     """Clean up generated honeypot files after build.
 
     Called on 'build-finished' event.
@@ -107,7 +114,7 @@ def cleanup_honeypot_sources(app, exception) -> None:
     # Intentionally empty - see docstring for rationale
 
 
-def setup(app) -> Dict[str, Any]:
+def setup(app) -> dict[str, Any]:
     """Sphinx extension entry point."""
     # Configuration values
     app.add_config_value('honeypot_enabled', True, 'html')
