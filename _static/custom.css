@@ -664,3 +664,340 @@ body[data-theme="auto"] {
     color: var(--blood-fg-gutter);
     font-size: 0.9em;
 }
+
+/* ============================================
+   DEFINITION CARDS (inline term definitions)
+   ============================================ */
+
+.definition-card {
+    background: linear-gradient(135deg, var(--blood-bg-dark) 0%, var(--blood-bg-highlight) 100%);
+    border: 1px solid var(--blood-crimson-dim);
+    border-left: 4px solid var(--blood-gold);
+    border-radius: 8px;
+    margin: 1.5em 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.definition-card:hover {
+    border-left-color: var(--blood-crimson);
+    box-shadow: 0 6px 24px rgba(220, 20, 60, 0.25);
+    transform: translateY(-2px);
+}
+
+.definition-card .sd-card-header {
+    background: rgba(255, 215, 0, 0.05);
+    border-bottom: 1px solid var(--blood-bg-highlight);
+    padding: 0.75em 1em;
+}
+
+.definition-card .sd-card-title {
+    color: var(--blood-gold) !important;
+    font-size: 1.1em;
+    margin: 0;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.definition-card .sd-card-body {
+    padding: 1em 1.25em;
+}
+
+.definition-card .sd-card-footer {
+    padding: 0.5em 1em;
+    border-top: 1px solid var(--blood-bg-highlight);
+    font-size: 0.85em;
+}
+
+/* Definition source link in glossary */
+.definition-source {
+    font-size: 0.85em;
+    margin-top: 0.75em;
+    color: var(--blood-fg-dark);
+}
+
+.definition-source a {
+    color: var(--blood-cyan);
+}
+
+.definition-source a:hover {
+    color: var(--blood-gold);
+}
+
+/* Generated glossary page styling */
+dl.definition-glossary dt {
+    font-weight: 700;
+    font-size: 1.1em;
+    color: var(--blood-gold);
+    border-left: 4px solid var(--blood-crimson);
+    padding-left: 0.75em;
+    margin-top: 1.5em;
+}
+
+dl.definition-glossary dd {
+    background: linear-gradient(135deg, var(--blood-bg-dark) 0%, var(--blood-bg-highlight) 100%);
+    border-radius: 0 8px 8px 0;
+    padding: 1em 1.25em;
+    margin-left: 0;
+    margin-bottom: 0.5em;
+    border-left: 4px solid var(--blood-bg-highlight);
+}
+
+/* ============================================
+   AI CONTENT - Chat & Exchange Styling
+   ============================================ */
+
+/* AI Generated badge - shown on all AI content */
+.ai-generated {
+    position: relative;
+}
+
+.ai-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--blood-crimson) 0%, var(--blood-crimson-dim) 100%);
+    color: var(--blood-fg);
+    font-size: 0.7em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.25em 0.6em;
+    border-radius: 4px;
+    margin-left: auto;
+}
+
+/* AI Chat Container */
+.ai-chat {
+    background: var(--blood-bg-dark);
+    border: 1px solid var(--blood-crimson-dim);
+    border-radius: 12px;
+    margin: 1.5em 0;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ai-chat-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75em;
+    padding: 1em 1.25em;
+    background: rgba(220, 20, 60, 0.1);
+    border-bottom: 1px solid var(--blood-bg-highlight);
+}
+
+.ai-chat-title {
+    color: var(--blood-gold);
+    margin: 0;
+    font-size: 1em;
+}
+
+.ai-chat-meta {
+    color: var(--blood-fg-dark);
+    font-size: 0.85em;
+    margin: 0;
+}
+
+/* Messages container */
+.ai-chat-messages {
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+/* Individual message bubble */
+.ai-message {
+    max-width: 85%;
+    padding: 0.75em 1em;
+    border-radius: 12px;
+    position: relative;
+}
+
+/* Human messages - RIGHT justified (you are the subject/author) */
+.ai-message-human {
+    align-self: flex-end;
+    background: linear-gradient(135deg, var(--blood-bg-highlight) 0%, #2a1515 100%);
+    border: 1px solid var(--blood-bg-highlight);
+    border-right: 3px solid var(--blood-cyan);
+    border-radius: 12px 4px 4px 12px;
+}
+
+.ai-message-human .ai-sender {
+    color: var(--blood-cyan);
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.5em 0;
+    text-align: right;
+}
+
+/* AI messages - LEFT justified (AI is the respondent) */
+.ai-message-assistant {
+    align-self: flex-start;
+    background: linear-gradient(135deg, #1a1a2e 0%, var(--blood-bg-highlight) 100%);
+    border: 1px solid var(--blood-crimson-dim);
+    border-left: 3px solid var(--blood-gold);
+    border-radius: 4px 12px 12px 4px;
+}
+
+.ai-message-assistant .ai-sender {
+    color: var(--blood-gold);
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.5em 0;
+}
+
+.ai-message .ai-content {
+    color: var(--blood-fg);
+}
+
+.ai-message .ai-content p {
+    margin: 0.5em 0;
+}
+
+.ai-message .ai-content p:first-child {
+    margin-top: 0;
+}
+
+.ai-message .ai-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* AI Message Quote (standalone excerpt) */
+.ai-message.ai-quote {
+    max-width: 85%;
+    margin: 1.5em auto;
+}
+
+.ai-message-header {
+    padding: 0.5em 1em;
+    border-bottom: 1px solid var(--blood-bg-highlight);
+    margin-bottom: 0.5em;
+}
+
+.ai-message-title {
+    color: var(--blood-gold);
+    margin: 0 0 0.25em 0;
+    font-size: 0.95em;
+}
+
+.ai-message-meta {
+    color: var(--blood-fg-dark);
+    font-size: 0.8em;
+    margin: 0;
+}
+
+.ai-message-context {
+    color: var(--blood-fg-dark);
+    font-size: 0.85em;
+    font-style: italic;
+    margin: 0.25em 0 0 0;
+    padding-left: 0.5em;
+    border-left: 2px solid var(--blood-bg-highlight);
+}
+
+/* AI Exchange Container */
+.ai-exchange {
+    background: var(--blood-bg-dark);
+    border: 1px solid var(--blood-crimson-dim);
+    border-left: 4px solid var(--blood-gold);
+    border-radius: 8px;
+    margin: 1.5em 0;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.ai-exchange-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75em;
+    padding: 1em 1.25em;
+    background: rgba(255, 215, 0, 0.05);
+    border-bottom: 1px solid var(--blood-bg-highlight);
+}
+
+.ai-exchange-title {
+    color: var(--blood-gold);
+    margin: 0;
+    font-size: 1em;
+}
+
+.ai-exchange-meta {
+    color: var(--blood-fg-dark);
+    font-size: 0.85em;
+    margin: 0;
+}
+
+/* Question section */
+.ai-question {
+    padding: 1em;
+    background: rgba(68, 204, 255, 0.05);
+    border-bottom: 1px solid var(--blood-bg-highlight);
+}
+
+.ai-question-label {
+    color: var(--blood-cyan);
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 0.5em 0;
+}
+
+/* Answer section */
+.ai-answer {
+    padding: 1em;
+}
+
+.ai-answer-label {
+    color: var(--blood-gold);
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 0.5em 0;
+}
+
+/* Code blocks in AI content */
+.ai-message pre,
+.ai-exchange pre {
+    background: var(--blood-bg) !important;
+    border: 1px solid var(--blood-bg-highlight);
+    border-radius: 6px;
+    margin: 0.75em 0;
+}
+
+/* AI Content Cross-Reference Links */
+.ai-ref {
+    color: var(--blood-gold);
+    background: rgba(255, 215, 0, 0.1);
+    padding: 1px 6px;
+    border-radius: 4px;
+    border-bottom: 2px solid var(--blood-gold-dim);
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.ai-ref:hover {
+    background: var(--blood-gold);
+    color: var(--blood-bg);
+    text-shadow: none;
+}
+
+.ai-chat-ref::before {
+    content: "💬 ";
+    font-size: 0.85em;
+}
+
+.ai-exchange-ref::before {
+    content: "❓ ";
+    font-size: 0.85em;
+}
+
+.ai-message-ref::before {
+    content: "📝 ";
+    font-size: 0.85em;
+}

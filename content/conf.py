@@ -36,6 +36,8 @@ extensions = [
     'publish_filter',       # Draft/publish workflow + Obsidian comment stripping
     'missing_refs',         # Track forward-links to unwritten docs
     'honeypot',             # Anti-AI honeypot pages (Layer 2 defense)
+    'definition',           # Bidirectional definition cards with glossary integration
+    'ai_content',           # AI chat/exchange archival with transparency badges
     # 'ablog',              # Disabled: conflicts with Furo theme (layout.html issue)
     #                       # See: https://github.com/pradyunsg/furo/discussions/262
 ]
