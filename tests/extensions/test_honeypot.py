@@ -75,30 +75,31 @@ class TestGenerateHoneypotSources:
             # Cleanup test template
             (honeypot_template_dir / 'test.md.j2').unlink(missing_ok=True)
 
-    def test_warns_when_template_not_found(self, tmp_path):
+    def test_warns_when_template_not_found(self, tmp_path, caplog):
         """Should warn when template file doesn't exist."""
+        import logging
         from honeypot import generate_honeypot_sources
 
         app = Mock()
         app.config.honeypot_enabled = True
         app.config.honeypot_pages = [{'path': 'test', 'template': 'nonexistent'}]
         app.srcdir = str(tmp_path)
-        app.warn = Mock()
 
-        generate_honeypot_sources(app)
+        with caplog.at_level(logging.WARNING):
+            generate_honeypot_sources(app)
 
         # Should have warned about template
-        app.warn.assert_called()
+        assert any('template not found' in record.message.lower() for record in caplog.records)
 
-    def test_warns_when_template_dir_missing(self, tmp_path, honeypot_template_dir):
+    def test_warns_when_template_dir_missing(self, tmp_path, honeypot_template_dir, caplog):
         """Should warn if template directory doesn't exist."""
+        import logging
         from honeypot import generate_honeypot_sources
 
         app = Mock()
         app.config.honeypot_enabled = True
         app.config.honeypot_pages = [{'path': 'test'}]
         app.srcdir = str(tmp_path)
-        app.warn = Mock()
 
         # Move template dir temporarily to simulate missing
         temp_backup = honeypot_template_dir.parent / 'templates_backup'
@@ -107,9 +108,10 @@ class TestGenerateHoneypotSources:
             honeypot_template_dir.rename(temp_backup)
 
         try:
-            generate_honeypot_sources(app)
+            with caplog.at_level(logging.WARNING):
+                generate_honeypot_sources(app)
             # Should have warned about missing template dir
-            app.warn.assert_called()
+            assert any('template directory not found' in record.message.lower() for record in caplog.records)
         finally:
             if temp_backup.exists():
                 temp_backup.rename(honeypot_template_dir)
