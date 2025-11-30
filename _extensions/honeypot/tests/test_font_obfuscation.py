@@ -273,14 +273,15 @@ class TestGetFontCSS:
         """
         Given: Font path
         When: get_font_css is called
-        Then: CSS applies font to text elements
+        Then: CSS applies font to content elements
         """
         from honeypot.sphinx_font_obfuscation import get_font_css
 
         css = get_font_css('_static/scrambled.woff2')
 
-        # Should apply to body text
-        assert 'body' in css or 'font-family' in css
+        # Should apply font-family to content area
+        assert 'font-family' in css
+        assert 'ScrambledText' in css
 
     def test_excludes_code_elements(self):
         """
@@ -294,3 +295,50 @@ class TestGetFontCSS:
 
         # Code should use monospace
         assert 'monospace' in css
+
+    def test_font_path_preserved_in_css(self):
+        """
+        Given: An absolute font path
+        When: get_font_css is called
+        Then: The exact path appears in the CSS url()
+        """
+        from honeypot.sphinx_font_obfuscation import get_font_css
+
+        # Absolute path (required for nested pages)
+        css = get_font_css('/_static/scrambled.woff2')
+
+        assert "url('/_static/scrambled.woff2')" in css
+
+    def test_css_targets_content_area_only(self):
+        """
+        Given: Font path
+        When: get_font_css is called
+        Then: CSS applies font to .content area (doctree-processed text only)
+
+        This prevents scrambling of sidebar/navigation which isn't encoded.
+        """
+        from honeypot.sphinx_font_obfuscation import get_font_css
+
+        css = get_font_css('/_static/scrambled.woff2')
+
+        # Must target .content specifically (not body/html globally)
+        assert '.content' in css
+        # Should NOT apply font to body globally (would scramble navigation)
+        assert 'body {' not in css and 'body,' not in css.split('.content')[0]
+
+    def test_css_excludes_sidebar_navigation(self):
+        """
+        Given: Font path
+        When: get_font_css is called
+        Then: CSS explicitly sets system fonts for sidebar/nav elements
+
+        Sidebar text isn't encoded by doctree, so applying scrambled font
+        would make it unreadable.
+        """
+        from honeypot.sphinx_font_obfuscation import get_font_css
+
+        css = get_font_css('/_static/scrambled.woff2')
+
+        # Sidebar elements should use system fonts
+        assert 'sidebar' in css.lower()
+        assert 'system-ui' in css

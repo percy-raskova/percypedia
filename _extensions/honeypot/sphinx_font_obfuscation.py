@@ -176,9 +176,15 @@ def get_font_css(font_path: str) -> str:
     font-display: block;
 }}
 
-/* Apply scrambled font to all text content */
-body, p, h1, h2, h3, h4, h5, h6, li, td, th, span, div, a,
-.toctree-wrapper, .document, .body, article {{
+/* Apply scrambled font ONLY to main content area (doctree-processed text) */
+/* Sidebar, navigation, and theme chrome use system fonts (not encoded) */
+.content {{
+    font-family: 'ScrambledText', sans-serif !important;
+}}
+
+.content p, .content h1, .content h2, .content h3, .content h4, .content h5, .content h6,
+.content li, .content td, .content th, .content span, .content div, .content a,
+.content blockquote, .content figcaption, .content dt, .content dd {{
     font-family: 'ScrambledText', sans-serif !important;
 }}
 
@@ -188,9 +194,15 @@ kbd, samp, tt, .sig, .sig-name {{
     font-family: monospace !important;
 }}
 
-/* Ensure search and navigation remain readable if font fails */
+/* Ensure search and forms use system fonts */
 .search-field, input, button, select, textarea {{
     font-family: system-ui, sans-serif !important;
+}}
+
+/* Sidebar and navigation explicitly use system fonts */
+.sidebar-brand, .sidebar-brand-text, .toctree-l1, .toctree-l2, .toctree-l3,
+.sidebar-tree, nav, .sidebar-drawer, .toc-title, .toc-tree {{
+    font-family: system-ui, -apple-system, sans-serif !important;
 }}
 """
 
