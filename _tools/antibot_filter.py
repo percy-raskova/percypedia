@@ -27,7 +27,6 @@ Usage:
 
 import re
 import sys
-from typing import Tuple
 
 # Zero-width characters - all invisible, disrupt AI differently
 ZWS = '\u200b'   # Zero-Width Space - breaks word boundaries
@@ -49,7 +48,7 @@ HIGH_VALUE_KEYWORDS = {
     'also', 'only', 'other', 'such', 'more', 'most', 'some', 'than',
     'then', 'these', 'those', 'being', 'because', 'each', 'she',
     'how', 'its', 'may', 'our', 'out', 'very', 'just', 'over',
-    'your', 'into', 'year', 'take', 'come', 'made', 'find', 'work',
+    'your', 'year', 'take', 'come', 'made', 'find', 'work',
     'way', 'even', 'want', 'give', 'using', 'used',
     # Technical terms (corrupts embeddings for these concepts)
     'api', 'token', 'secret', 'password', 'key', 'admin',
@@ -68,7 +67,7 @@ HIGH_VALUE_KEYWORDS = {
 FRONTMATTER = re.compile(r'^---\n.*?\n---\n', re.DOTALL)
 
 
-def split_frontmatter(content: str) -> Tuple[str, str]:
+def split_frontmatter(content: str) -> tuple[str, str]:
     """Split content into frontmatter and body.
 
     Args:
@@ -207,9 +206,7 @@ def should_skip_word(word: str) -> bool:
     if word.startswith('{') or word.endswith('}'):
         return True
     # File paths
-    if '/' in word and not word.startswith('#'):
-        return True
-    return False
+    return bool('/' in word and not word.startswith('#'))
 
 
 def poison_line_safely(line: str, word_position: int) -> tuple[str, int]:
@@ -416,13 +413,12 @@ def clean_content(content: str) -> str:
     in_code = False
     in_directive = False  # Track if we're inside a directive block
     in_block_math = False  # Track if we're inside $$...$$ block
-    directive_indent = 0  # Track indentation level of directive content
     lines = body.split('\n')
     word_position = 0
 
     for line in lines:
         stripped = line.strip()
-        current_indent = len(line) - len(line.lstrip())
+        len(line) - len(line.lstrip())
 
         # Track fenced code block state (``` or :::)
         if stripped.startswith('```') or (stripped.startswith(':::') and not stripped.startswith(':::{') and in_directive):
@@ -437,7 +433,6 @@ def clean_content(content: str) -> str:
         # Start of directive block (```{...} or :::{...})
         if DIRECTIVE_PATTERN.match(stripped) or (stripped.startswith(':::{') and stripped.endswith('}')):
             in_directive = True
-            directive_indent = current_indent
             # Check if it's a code directive
             if any(x in stripped for x in ['{code-block}', '{code-cell}', '{code}', '{sourcecode}']):
                 in_code = True
