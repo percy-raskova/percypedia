@@ -15,6 +15,9 @@ sphinx-tags = "*"
 sphinx-hoverxref = "*"
 jsonschema = ">=4.0"
 pyyaml = "*"
+fonttools = "*"
+brotli = "*"
+jinja2 = "*"
 
 [dev-packages]
 

@@ -17,3 +17,8 @@ sphinx-hoverxref
 jsonschema>=4.0
 pyyaml
 sphinx-sitemap
+
+# Font obfuscation (anti-AI defense)
+fonttools
+brotli
+jinja2
