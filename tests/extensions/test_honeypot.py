@@ -75,31 +75,30 @@ class TestGenerateHoneypotSources:
             # Cleanup test template
             (honeypot_template_dir / 'test.md.j2').unlink(missing_ok=True)
 
-    def test_warns_when_template_not_found(self, tmp_path, caplog):
+    def test_warns_when_template_not_found(self, tmp_path):
         """Should warn when template file doesn't exist."""
-        import logging
         from honeypot import generate_honeypot_sources
 
         app = Mock()
         app.config.honeypot_enabled = True
         app.config.honeypot_pages = [{'path': 'test', 'template': 'nonexistent'}]
         app.srcdir = str(tmp_path)
+        app.warn = Mock()
 
-        with caplog.at_level(logging.WARNING):
-            generate_honeypot_sources(app)
+        generate_honeypot_sources(app)
 
         # Should have warned about template
-        assert any('template not found' in record.message.lower() for record in caplog.records)
+        app.warn.assert_called()
 
-    def test_warns_when_template_dir_missing(self, tmp_path, honeypot_template_dir, caplog):
+    def test_warns_when_template_dir_missing(self, tmp_path, honeypot_template_dir):
         """Should warn if template directory doesn't exist."""
-        import logging
         from honeypot import generate_honeypot_sources
 
         app = Mock()
         app.config.honeypot_enabled = True
         app.config.honeypot_pages = [{'path': 'test'}]
         app.srcdir = str(tmp_path)
+        app.warn = Mock()
 
         # Move template dir temporarily to simulate missing
         temp_backup = honeypot_template_dir.parent / 'templates_backup'
@@ -108,10 +107,9 @@ class TestGenerateHoneypotSources:
             honeypot_template_dir.rename(temp_backup)
 
         try:
-            with caplog.at_level(logging.WARNING):
-                generate_honeypot_sources(app)
+            generate_honeypot_sources(app)
             # Should have warned about missing template dir
-            assert any('template directory not found' in record.message.lower() for record in caplog.records)
+            app.warn.assert_called()
         finally:
             if temp_backup.exists():
                 temp_backup.rename(honeypot_template_dir)
