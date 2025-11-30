@@ -167,6 +167,9 @@ DEFAULT_TAG_VOCABULARY: dict[str, list[str]] = {
 # =============================================================================
 
 # Import centralized patterns (includes infrastructure dirs, build artifacts, etc.)
+from _common.paths import EXCLUDE_PATTERNS
+
+DEFAULT_EXCLUDE_PATTERNS: list[str] = EXCLUDE_PATTERNS
 
 # =============================================================================
 # Default Values for New Files

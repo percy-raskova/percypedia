@@ -11,6 +11,7 @@ import pytest
 from docutils import nodes
 from sphinx.errors import ExtensionError
 
+from definition.collector import DefinitionsCollector
 from definition.directive import DefinitionDirective, definition_card
 
 
@@ -30,10 +31,10 @@ class TestDirectiveRendering:
         directive.lineno = 10
         directive.options = {}
 
-        # Mock environment
+        # Mock environment with collector
         directive.env = MagicMock()
         directive.env.docname = 'theory/labor-aristocracy'
-        directive.env.definition_all_definitions = {}
+        directive.env.definition_collector = DefinitionsCollector()
 
         # Mock state for nested parsing
         directive.state = MagicMock()
@@ -161,23 +162,24 @@ class TestDirectiveRendering:
 
         assert 'no content' in str(exc_info.value).lower()
 
-    def test_directive_stores_definition_in_env(self, mock_directive):
+    def test_directive_stores_definition_in_collector(self, mock_directive):
         """
         Given: A definition directive
         When: The directive is processed
-        Then: Definition is stored in env.definition_all_definitions
+        Then: Definition is stored in env.definition_collector
         """
         # Act
         DefinitionDirective.run(mock_directive)
 
         # Assert
-        definitions = mock_directive.env.definition_all_definitions
-        assert 'labor aristocracy' in definitions
-        entry = definitions['labor aristocracy']
-        assert entry['term'] == 'Labor Aristocracy'
-        assert entry['docname'] == 'theory/labor-aristocracy'
-        assert entry['lineno'] == 10
-        assert 'term-labor-aristocracy' in entry['anchor']
+        collector = mock_directive.env.definition_collector
+        assert 'labor aristocracy' in collector
+        entry = collector.get_definition('Labor Aristocracy')
+        assert entry is not None
+        assert entry.term == 'Labor Aristocracy'
+        assert entry.docname == 'theory/labor-aristocracy'
+        assert entry.lineno == 10
+        assert 'term-labor-aristocracy' in entry.anchor
 
 
 class TestDirectiveWithCustomClasses:
@@ -197,7 +199,7 @@ class TestDirectiveWithCustomClasses:
         directive.options = {'class': ['my-custom-class']}
         directive.env = MagicMock()
         directive.env.docname = 'test'
-        directive.env.definition_all_definitions = {}
+        directive.env.definition_collector = DefinitionsCollector()
         directive.state = MagicMock()
 
         # Act
@@ -215,11 +217,13 @@ class TestMultipleDefinitions:
         """
         Given: Multiple definition directives in same file
         When: Each is processed
-        Then: All are stored separately in env
+        Then: All are stored separately in collector
         """
+        collector = DefinitionsCollector()
+
         env = MagicMock()
         env.docname = 'theory/concepts'
-        env.definition_all_definitions = {}
+        env.definition_collector = collector
 
         terms = ['Term One', 'Term Two', 'Term Three']
 
@@ -236,10 +240,10 @@ class TestMultipleDefinitions:
             DefinitionDirective.run(directive)
 
         # Assert all stored
-        assert len(env.definition_all_definitions) == 3
-        assert 'term one' in env.definition_all_definitions
-        assert 'term two' in env.definition_all_definitions
-        assert 'term three' in env.definition_all_definitions
+        assert len(collector) == 3
+        assert 'term one' in collector
+        assert 'term two' in collector
+        assert 'term three' in collector
 
 
 class TestTermNameEdgeCases:
@@ -255,7 +259,7 @@ class TestTermNameEdgeCases:
         directive.options = {}
         directive.env = MagicMock()
         directive.env.docname = 'test'
-        directive.env.definition_all_definitions = {}
+        directive.env.definition_collector = DefinitionsCollector()
         directive.state = MagicMock()
         return directive
 
@@ -274,7 +278,7 @@ class TestTermNameEdgeCases:
         assert len(card['ids']) == 1
         assert card['ids'][0].startswith('term-')
         # Stored with original name
-        assert 'c++' in base_directive.env.definition_all_definitions
+        assert 'c++' in base_directive.env.definition_collector
 
     def test_term_with_unicode(self, base_directive):
         """
@@ -287,8 +291,10 @@ class TestTermNameEdgeCases:
         DefinitionDirective.run(base_directive)
 
         # Original unicode preserved in storage
-        entry = base_directive.env.definition_all_definitions['teoría del valor']
-        assert entry['term'] == 'Teoría del Valor'
+        collector = base_directive.env.definition_collector
+        entry = collector.get_definition('Teoría del Valor')
+        assert entry is not None
+        assert entry.term == 'Teoría del Valor'
 
     def test_term_with_leading_trailing_whitespace(self, base_directive):
         """

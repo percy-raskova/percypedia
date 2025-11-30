@@ -14,6 +14,8 @@ from docutils.parsers.rst import directives
 from sphinx.errors import ExtensionError
 from sphinx.util.docutils import SphinxDirective
 
+from _common.nodes import create_div_visitors, create_node_class
+
 __all__ = [
     'DefinitionDirective',
     'definition_card',
@@ -33,10 +35,10 @@ CSS_CARD_FOOTER = 'sd-card-footer'
 # Anchor ID prefix for term definitions
 TERM_ANCHOR_PREFIX = 'term-'
 
-
-class definition_card(nodes.General, nodes.Element):
-    """Custom node for definition cards."""
-    pass
+# Create node class and visitors using factory
+# Note: Variable name MUST match class name for pickle support
+definition_card = create_node_class('definition_card', 'Custom node for definition cards.', __name__)
+visit_definition_card_html, depart_definition_card_html = create_div_visitors(include_ids=True)
 
 
 class DefinitionDirective(SphinxDirective):
@@ -106,21 +108,11 @@ class DefinitionDirective(SphinxDirective):
         # Placeholder - footer link added later
         card += footer
 
-        # Store definition info in env dict (for backward compat)
-        env = self.env
-        if not hasattr(env, 'definition_all_definitions'):
-            env.definition_all_definitions = {}
-
+        # Get definition text and store in collector
         definition_text = '\n'.join(self.content)
-        env.definition_all_definitions[term_name.lower()] = {
-            'term': term_name,
-            'docname': env.docname,
-            'lineno': self.lineno,
-            'anchor': anchor_id,
-            'content': definition_text,
-        }
+        env = self.env
 
-        # Also add to collector for glossary generation
+        # Add to collector for glossary generation and cross-referencing
         if hasattr(env, 'definition_collector') and env.definition_collector is not None:
             from .collector import DuplicateTermError
             try:
@@ -135,15 +127,3 @@ class DefinitionDirective(SphinxDirective):
                 raise ExtensionError(str(e)) from e
 
         return [card]
-
-
-def visit_definition_card_html(self, node: definition_card) -> None:
-    """Render definition_card as HTML."""
-    classes = ' '.join(node.get('classes', []))
-    ids = ' '.join(f'id="{id}"' for id in node.get('ids', []))
-    self.body.append(f'<div class="{classes}" {ids}>')
-
-
-def depart_definition_card_html(self, _node: definition_card) -> None:
-    """Close definition_card HTML."""
-    self.body.append('</div>')
