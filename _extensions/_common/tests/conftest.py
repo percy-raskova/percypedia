@@ -1,7 +1,5 @@
 """Shared test fixtures for Sphinx extension tests."""
 
-from unittest.mock import Mock
-
 import pytest
 
 # =============================================================================
@@ -199,23 +197,6 @@ def sample_srcdir(tmp_path):
     )
 
     return tmp_path
-
-
-# =============================================================================
-# Mock Sphinx Fixtures
-# =============================================================================
-
-@pytest.fixture
-def mock_sphinx_app(tmp_path):
-    """Mock Sphinx application."""
-    app = Mock()
-    app.srcdir = str(tmp_path)
-    app.outdir = str(tmp_path / '_build' / 'html')
-    app.config = Mock()
-    app.config.exclude_patterns = []
-    app.connect = Mock()
-    app.add_config_value = Mock()
-    return app
 
 
 # =============================================================================
