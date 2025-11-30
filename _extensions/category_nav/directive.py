@@ -13,12 +13,23 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 
 from docutils import nodes
+from sphinx.addnodes import toctree
 from sphinx.util.docutils import SphinxDirective
 
 # Import from shared module, re-export for backward compatibility
 from _common.frontmatter import extract_frontmatter
 from _common.traversal import iter_markdown_files
 from _common.paths import EXCLUDE_PATTERNS
+
+# =============================================================================
+# Constants
+# =============================================================================
+
+# Default toctree depth for category sections
+DEFAULT_MAXDEPTH = 2
+
+# Regex pattern for extracting H1 titles from markdown
+H1_TITLE_PATTERN = re.compile(r'^#\s+(.+)$', re.MULTILINE)
 
 
 def extract_title(content: str) -> Optional[str]:
@@ -30,8 +41,7 @@ def extract_title(content: str) -> Optional[str]:
     Returns:
         Title string or None if no H1 found
     """
-    # Match # at start of line, followed by space and title text
-    match = re.search(r'^#\s+(.+)$', content, re.MULTILINE)
+    match = H1_TITLE_PATTERN.search(content)
     if match:
         return match.group(1).strip()
     return None
@@ -137,8 +147,6 @@ class CategoryNavDirective(SphinxDirective):
 
     def run(self) -> List[nodes.Node]:
         """Generate toctree nodes grouped by category."""
-        from sphinx.addnodes import toctree
-
         srcdir = Path(self.env.srcdir)
         default_category = self.config.category_nav_default
         exclude = list(self.config.category_nav_exclude)
@@ -158,7 +166,7 @@ class CategoryNavDirective(SphinxDirective):
             toc['parent'] = self.env.docname
             toc['entries'] = [(doc['title'], doc['docname']) for doc in docs]
             toc['includefiles'] = [doc['docname'] for doc in docs]
-            toc['maxdepth'] = 2
+            toc['maxdepth'] = DEFAULT_MAXDEPTH
             toc['glob'] = False
             toc['hidden'] = False
             toc['numbered'] = 0
