@@ -5,7 +5,6 @@ These tests verify the :ai:chat:, :ai:exchange:, and :ai:message: roles
 create proper cross-references to AI content.
 """
 
-import pytest
 
 from docutils import nodes
 
@@ -36,7 +35,7 @@ class TestAIChatRole:
             }
         )
 
-        result_nodes, messages = ai_chat_role(
+        result_nodes, _messages = ai_chat_role(
             'ai:chat', rawtext, text, 10, inliner
         )
 
@@ -64,7 +63,7 @@ class TestAIChatRole:
             }
         )
 
-        result_nodes, messages = ai_chat_role(
+        result_nodes, _messages = ai_chat_role(
             'ai:chat', rawtext, text, 10, inliner
         )
 
@@ -85,7 +84,7 @@ class TestAIChatRole:
 
         inliner = make_mock_inliner()  # Empty chats
 
-        result_nodes, messages = ai_chat_role(
+        result_nodes, _messages = ai_chat_role(
             'ai:chat', rawtext, text, 10, inliner
         )
 
@@ -117,7 +116,7 @@ class TestAIExchangeRole:
             }
         )
 
-        result_nodes, messages = ai_exchange_role(
+        result_nodes, _messages = ai_exchange_role(
             'ai:exchange', rawtext, text, 10, inliner
         )
 
@@ -149,7 +148,7 @@ class TestAIMessageRole:
             }
         )
 
-        result_nodes, messages = ai_message_role(
+        result_nodes, _messages = ai_message_role(
             'ai:message', rawtext, text, 10, inliner
         )
 
@@ -181,7 +180,7 @@ class TestAIRefRole:
             }
         )
 
-        result_nodes, messages = ai_ref_role(
+        result_nodes, _messages = ai_ref_role(
             'ai:ref', rawtext, text, 10, inliner
         )
 
@@ -208,7 +207,7 @@ class TestAIRefRole:
             }
         )
 
-        result_nodes, messages = ai_ref_role(
+        result_nodes, _messages = ai_ref_role(
             'ai:ref', rawtext, text, 10, inliner
         )
 
@@ -235,7 +234,7 @@ class TestAIRefRole:
             }
         )
 
-        result_nodes, messages = ai_ref_role(
+        result_nodes, _messages = ai_ref_role(
             'ai:ref', rawtext, text, 10, inliner
         )
 

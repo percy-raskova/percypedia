@@ -4,11 +4,15 @@ This is the single source of truth for YAML frontmatter extraction.
 All extensions should import from here.
 """
 
-from typing import Any, Dict, Tuple
+import logging
+from typing import Any
+
 import yaml
 
+logger = logging.getLogger(__name__)
 
-def extract_frontmatter(content: str) -> Dict[str, Any]:
+
+def extract_frontmatter(content: str) -> dict[str, Any]:
     """Extract YAML frontmatter from markdown content.
 
     Args:
@@ -56,11 +60,63 @@ def extract_frontmatter(content: str) -> Dict[str, Any]:
     try:
         result = yaml.safe_load(yaml_content)
         return result if isinstance(result, dict) else {}
-    except yaml.YAMLError:
+    except yaml.YAMLError as e:
+        logger.debug('Invalid YAML frontmatter: %s', e)
         return {}
 
 
-def parse_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
+def _find_frontmatter_boundaries(content: str) -> tuple[list[str], int | None]:
+    """Find the closing delimiter index for frontmatter.
+
+    Args:
+        content: Raw markdown content that starts with '---'.
+
+    Returns:
+        Tuple of (lines, end_idx) where end_idx is the line index of closing '---',
+        or None if not found or content is too short.
+    """
+    lines = content.split('\n')
+    if len(lines) < 2:
+        return lines, None
+
+    for i, line in enumerate(lines[1:], start=1):
+        if line.strip() == '---':
+            return lines, i
+
+    return lines, None
+
+
+def _parse_yaml_frontmatter(
+    yaml_content: str, lines: list[str], end_idx: int, original_content: str
+) -> tuple[dict[str, Any], str]:
+    """Parse YAML content and return frontmatter dict with body.
+
+    Args:
+        yaml_content: The YAML string between delimiters.
+        lines: All lines of the original content.
+        end_idx: Index of closing delimiter.
+        original_content: Original content for fallback return.
+
+    Returns:
+        Tuple of (frontmatter_dict, body_string).
+    """
+    # Handle empty frontmatter
+    if not yaml_content.strip():
+        return {}, '\n'.join(lines[end_idx + 1:])
+
+    try:
+        result = yaml.safe_load(yaml_content)
+        if not isinstance(result, dict):
+            return {}, original_content
+
+        return result, '\n'.join(lines[end_idx + 1:])
+
+    except yaml.YAMLError as e:
+        logger.debug('Invalid YAML frontmatter in parse_frontmatter: %s', e)
+        return {}, original_content
+
+
+def parse_frontmatter(content: str) -> tuple[dict[str, Any], str]:
     """Parse frontmatter and body from markdown content.
 
     This is the extended version that returns both frontmatter and body,
@@ -93,35 +149,10 @@ def parse_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
     if not content.startswith('---'):
         return {}, content
 
-    lines = content.split('\n')
-    if len(lines) < 2:
-        return {}, content
-
-    # Find closing delimiter
-    end_idx = None
-    for i, line in enumerate(lines[1:], start=1):
-        if line.strip() == '---':
-            end_idx = i
-            break
+    lines, end_idx = _find_frontmatter_boundaries(content)
 
     if end_idx is None:
         return {}, content
 
     yaml_content = '\n'.join(lines[1:end_idx])
-
-    # Handle empty frontmatter
-    if not yaml_content.strip():
-        body = '\n'.join(lines[end_idx + 1:])
-        return {}, body
-
-    try:
-        result = yaml.safe_load(yaml_content)
-        if not isinstance(result, dict):
-            return {}, content
-
-        # Body is everything after closing delimiter
-        body = '\n'.join(lines[end_idx + 1:])
-        return result, body
-
-    except yaml.YAMLError:
-        return {}, content
+    return _parse_yaml_frontmatter(yaml_content, lines, end_idx, content)

@@ -7,9 +7,7 @@ messages and renders as a styled chat container.
 
 import pytest
 
-from docutils import nodes
-
-from .conftest import make_mock_directive, SAMPLE_CHAT_CONTENT
+from .conftest import SAMPLE_CHAT_CONTENT, make_mock_directive
 
 
 class TestChatMessageParsing:

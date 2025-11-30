@@ -10,13 +10,13 @@ Usage:
         process(md_file)
 """
 
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator, List, Optional
 
 
 def iter_markdown_files(
     srcdir: Path,
-    exclude_patterns: Optional[List[str]] = None,
+    exclude_patterns: list[str] | None = None,
     skip_underscore_files: bool = True,
     skip_underscore_dirs: bool = True,
     skip_dot_dirs: bool = True,

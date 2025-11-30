@@ -4,14 +4,14 @@ AI Content Directives.
 Provides directives for embedding AI-generated content in Sphinx documents.
 """
 
-from typing import List
+from typing import Any, ClassVar
 
 from docutils import nodes
 from docutils.parsers.rst import directives
 from sphinx.util.docutils import SphinxDirective
 
-from .nodes import ai_chat_node, ai_message_node, ai_exchange_node, ai_question_node, ai_answer_node
-from .parser import parse_chat_messages, parse_exchange, format_title, slugify
+from .nodes import ai_answer_node, ai_chat_node, ai_exchange_node, ai_message_node, ai_question_node
+from .parser import format_title, parse_chat_messages, parse_exchange, slugify
 
 
 class AIChatDirective(SphinxDirective):
@@ -37,14 +37,14 @@ class AIChatDirective(SphinxDirective):
     optional_arguments = 0
     final_argument_whitespace = True
 
-    option_spec = {
+    option_spec: ClassVar[dict[str, Any]] = {
         'date': directives.unchanged,
         'source': directives.unchanged,
         'id': directives.unchanged,  # Private, not rendered
         'class': directives.class_option,
     }
 
-    def run(self) -> List[nodes.Node]:
+    def run(self) -> list[nodes.Node]:
         """Process the ai-chat directive."""
         name = self.arguments[0].strip()
         slug = slugify(name)
@@ -139,6 +139,63 @@ class AIChatDirective(SphinxDirective):
         return [chat]
 
 
+def _build_exchange_header(
+    title: str, options: dict[str, Any], badge_text: str = 'AI Exchange'
+) -> nodes.container:
+    """Build header with title, metadata, and AI badge for exchange directives."""
+    header = nodes.container(classes=['ai-exchange-header'])
+
+    title_para = nodes.paragraph(classes=['ai-exchange-title'])
+    title_para += nodes.strong(text=title)
+    header += title_para
+
+    # Collect metadata parts
+    meta_parts = [options[k] for k in ('date', 'model', 'source') if k in options]
+
+    if meta_parts:
+        meta_para = nodes.paragraph(classes=['ai-exchange-meta'])
+        meta_para += nodes.Text(' • '.join(meta_parts))
+        header += meta_para
+
+    badge = nodes.inline(classes=['ai-badge'])
+    badge += nodes.Text(badge_text)
+    header += badge
+
+    return header
+
+
+def _build_question_section(question_text: str, state, content_offset: int) -> ai_question_node:
+    """Build a question section with parsed content."""
+    container = ai_question_node()
+    container['classes'] = ['ai-question']
+
+    label_para = nodes.paragraph(classes=['ai-question-label'])
+    label_para += nodes.strong(text='Question')
+    container += label_para
+
+    content_container = nodes.container(classes=['ai-question-content'])
+    state.nested_parse(question_text.split('\n'), content_offset, content_container)
+    container += content_container
+
+    return container
+
+
+def _build_answer_section(answer_text: str, state, content_offset: int) -> ai_answer_node:
+    """Build an answer section with parsed content."""
+    container = ai_answer_node()
+    container['classes'] = ['ai-answer']
+
+    label_para = nodes.paragraph(classes=['ai-answer-label'])
+    label_para += nodes.strong(text='Answer')
+    container += label_para
+
+    content_container = nodes.container(classes=['ai-answer-content'])
+    state.nested_parse(answer_text.split('\n'), content_offset, content_container)
+    container += content_container
+
+    return container
+
+
 class AIExchangeDirective(SphinxDirective):
     """
     Directive for a single Q&A exchange.
@@ -159,7 +216,7 @@ class AIExchangeDirective(SphinxDirective):
     optional_arguments = 0
     final_argument_whitespace = True
 
-    option_spec = {
+    option_spec: ClassVar[dict[str, Any]] = {
         'date': directives.unchanged,
         'model': directives.unchanged,
         'source': directives.unchanged,
@@ -167,7 +224,7 @@ class AIExchangeDirective(SphinxDirective):
         'class': directives.class_option,
     }
 
-    def run(self) -> List[nodes.Node]:
+    def run(self) -> list[nodes.Node]:
         """Process the ai-exchange directive."""
         name = self.arguments[0].strip()
         slug = slugify(name)
@@ -177,13 +234,8 @@ class AIExchangeDirective(SphinxDirective):
         # Parse question/answer from content
         content_str = '\n'.join(self.content)
         exchange_data = parse_exchange(content_str)
-
         if not exchange_data:
-            # Fallback: treat entire content as answer with no question
-            exchange_data = {
-                'question': '',
-                'answer': content_str,
-            }
+            exchange_data = {'question': '', 'answer': content_str}
 
         # Build the exchange container
         exchange = ai_exchange_node()
@@ -192,64 +244,18 @@ class AIExchangeDirective(SphinxDirective):
             exchange['classes'].extend(self.options['class'])
         exchange['ids'] = [anchor_id]
 
-        # Header with title and metadata
-        header = nodes.container(classes=['ai-exchange-header'])
+        exchange += _build_exchange_header(title, self.options)
 
-        title_para = nodes.paragraph(classes=['ai-exchange-title'])
-        title_para += nodes.strong(text=title)
-        header += title_para
-
-        # Metadata
-        meta_parts = []
-        if 'date' in self.options:
-            meta_parts.append(self.options['date'])
-        if 'model' in self.options:
-            meta_parts.append(self.options['model'])
-        if 'source' in self.options:
-            meta_parts.append(self.options['source'])
-
-        if meta_parts:
-            meta_para = nodes.paragraph(classes=['ai-exchange-meta'])
-            meta_para += nodes.Text(' • '.join(meta_parts))
-            header += meta_para
-
-        # AI badge
-        badge = nodes.inline(classes=['ai-badge'])
-        badge += nodes.Text('AI Exchange')
-        header += badge
-
-        exchange += header
-
-        # Question section
+        # Question section (if present)
         if exchange_data['question']:
-            question_container = ai_question_node()
-            question_container['classes'] = ['ai-question']
-
-            q_label = nodes.paragraph(classes=['ai-question-label'])
-            q_label += nodes.strong(text='Question')
-            question_container += q_label
-
-            q_content = nodes.container(classes=['ai-question-content'])
-            q_lines = exchange_data['question'].split('\n')
-            self.state.nested_parse(q_lines, self.content_offset, q_content)
-            question_container += q_content
-
-            exchange += question_container
+            exchange += _build_question_section(
+                exchange_data['question'], self.state, self.content_offset
+            )
 
         # Answer section
-        answer_container = ai_answer_node()
-        answer_container['classes'] = ['ai-answer']
-
-        a_label = nodes.paragraph(classes=['ai-answer-label'])
-        a_label += nodes.strong(text='Answer')
-        answer_container += a_label
-
-        a_content = nodes.container(classes=['ai-answer-content'])
-        a_lines = exchange_data['answer'].split('\n')
-        self.state.nested_parse(a_lines, self.content_offset, a_content)
-        answer_container += a_content
-
-        exchange += answer_container
+        exchange += _build_answer_section(
+            exchange_data['answer'], self.state, self.content_offset
+        )
 
         # Store in environment
         env = self.env
@@ -257,11 +263,8 @@ class AIExchangeDirective(SphinxDirective):
             env.ai_content_exchanges = {}
 
         env.ai_content_exchanges[name] = {
-            'title': title,
-            'slug': slug,
-            'anchor': anchor_id,
-            'docname': env.docname,
-            'lineno': self.lineno,
+            'title': title, 'slug': slug, 'anchor': anchor_id,
+            'docname': env.docname, 'lineno': self.lineno,
             'date': self.options.get('date', ''),
             'model': self.options.get('model', ''),
             'source': self.options.get('source', ''),
@@ -269,6 +272,39 @@ class AIExchangeDirective(SphinxDirective):
         }
 
         return [exchange]
+
+
+def _build_message_header(
+    name: str, title: str, sender: str, options: dict[str, Any]
+) -> nodes.container:
+    """Build header with title, metadata, context, and AI badge for message directive."""
+    header = nodes.container(classes=['ai-message-header'])
+
+    # Title (optional - only if it's meaningful)
+    if name and not name.startswith('quote-'):
+        title_para = nodes.paragraph(classes=['ai-message-title'])
+        title_para += nodes.strong(text=title)
+        header += title_para
+
+    # Metadata line
+    meta_parts = [options[k] for k in ('date', 'model', 'source') if k in options]
+    if meta_parts:
+        meta_para = nodes.paragraph(classes=['ai-message-meta'])
+        meta_para += nodes.Text(' • '.join(meta_parts))
+        header += meta_para
+
+    # Context (if provided)
+    if 'context' in options:
+        context_para = nodes.paragraph(classes=['ai-message-context'])
+        context_para += nodes.emphasis(text=options['context'])
+        header += context_para
+
+    # AI badge
+    badge = nodes.inline(classes=['ai-badge'])
+    badge += nodes.Text('AI Quote' if sender == 'assistant' else 'Human')
+    header += badge
+
+    return header
 
 
 class AIMessageDirective(SphinxDirective):
@@ -292,7 +328,7 @@ class AIMessageDirective(SphinxDirective):
     optional_arguments = 0
     final_argument_whitespace = True
 
-    option_spec = {
+    option_spec: ClassVar[dict[str, Any]] = {
         'sender': directives.unchanged,  # 'human' or 'assistant'
         'date': directives.unchanged,
         'source': directives.unchanged,
@@ -302,7 +338,7 @@ class AIMessageDirective(SphinxDirective):
         'class': directives.class_option,
     }
 
-    def run(self) -> List[nodes.Node]:
+    def run(self) -> list[nodes.Node]:
         """Process the ai-message directive."""
         name = self.arguments[0].strip()
         slug = slugify(name)
@@ -322,42 +358,7 @@ class AIMessageDirective(SphinxDirective):
         message['ids'] = [anchor_id]
         message['sender'] = sender
 
-        # Header with metadata
-        header = nodes.container(classes=['ai-message-header'])
-
-        # Title (optional - only if it's meaningful)
-        if name and not name.startswith('quote-'):
-            title_para = nodes.paragraph(classes=['ai-message-title'])
-            title_para += nodes.strong(text=title)
-            header += title_para
-
-        # Metadata line
-        meta_parts = []
-        if 'date' in self.options:
-            meta_parts.append(self.options['date'])
-        if 'model' in self.options:
-            meta_parts.append(self.options['model'])
-        if 'source' in self.options:
-            meta_parts.append(self.options['source'])
-
-        if meta_parts:
-            meta_para = nodes.paragraph(classes=['ai-message-meta'])
-            meta_para += nodes.Text(' • '.join(meta_parts))
-            header += meta_para
-
-        # Context (if provided)
-        if 'context' in self.options:
-            context_para = nodes.paragraph(classes=['ai-message-context'])
-            context_para += nodes.emphasis(text=self.options['context'])
-            header += context_para
-
-        # AI badge
-        badge = nodes.inline(classes=['ai-badge'])
-        badge_text = 'AI Quote' if sender == 'assistant' else 'Human'
-        badge += nodes.Text(badge_text)
-        header += badge
-
-        message += header
+        message += _build_message_header(name, title, sender, self.options)
 
         # Sender label
         sender_label = nodes.paragraph(classes=['ai-sender'])
@@ -367,12 +368,7 @@ class AIMessageDirective(SphinxDirective):
         # Message content
         content_container = nodes.container(classes=['ai-content'])
         content_str = '\n'.join(self.content)
-        content_lines = content_str.split('\n')
-        self.state.nested_parse(
-            content_lines,
-            self.content_offset,
-            content_container,
-        )
+        self.state.nested_parse(content_str.split('\n'), self.content_offset, content_container)
         message += content_container
 
         # Store in environment
@@ -381,12 +377,8 @@ class AIMessageDirective(SphinxDirective):
             env.ai_content_messages = {}
 
         env.ai_content_messages[name] = {
-            'title': title,
-            'slug': slug,
-            'anchor': anchor_id,
-            'docname': env.docname,
-            'lineno': self.lineno,
-            'sender': sender,
+            'title': title, 'slug': slug, 'anchor': anchor_id,
+            'docname': env.docname, 'lineno': self.lineno, 'sender': sender,
             'date': self.options.get('date', ''),
             'source': self.options.get('source', ''),
             'model': self.options.get('model', ''),
@@ -412,13 +404,13 @@ class AIArchiveDirective(SphinxDirective):
     required_arguments = 0
     optional_arguments = 0
 
-    option_spec = {
+    option_spec: ClassVar[dict[str, Any]] = {
         'show-dates': directives.flag,
         'type': directives.unchanged,  # 'chats', 'exchanges', 'messages', 'all'
         'class': directives.class_option,
     }
 
-    def run(self) -> List[nodes.Node]:
+    def run(self) -> list[nodes.Node]:
         """Process the ai-archive directive."""
         env = self.env
         show_dates = 'show-dates' in self.options

@@ -8,7 +8,6 @@ Provides roles for referencing AI content across documents:
 - :ai:ref:`name` - Generic reference (searches all types)
 """
 
-from typing import Tuple, List
 
 from docutils import nodes
 from docutils.parsers.rst.states import Inliner
@@ -21,7 +20,7 @@ def make_ai_reference(
     text: str,
     lineno: int,
     inliner: Inliner,
-) -> Tuple[List[nodes.Node], List[nodes.system_message]]:
+) -> tuple[list[nodes.Node], list[nodes.system_message]]:
     """
     Create a reference node for AI content.
 
@@ -63,14 +62,14 @@ def make_ai_reference(
 
 
 def ai_chat_role(
-    name: str,
+    _name: str,
     rawtext: str,
     text: str,
     lineno: int,
     inliner: Inliner,
-    options: dict = None,
-    content: list = None,
-) -> Tuple[List[nodes.Node], List[nodes.system_message]]:
+    _options: dict | None = None,
+    _content: list | None = None,
+) -> tuple[list[nodes.Node], list[nodes.system_message]]:
     """Role for :ai:chat:`name` references."""
     return make_ai_reference(
         'chat', 'ai_content_chats', rawtext, text, lineno, inliner
@@ -78,14 +77,14 @@ def ai_chat_role(
 
 
 def ai_exchange_role(
-    name: str,
+    _name: str,
     rawtext: str,
     text: str,
     lineno: int,
     inliner: Inliner,
-    options: dict = None,
-    content: list = None,
-) -> Tuple[List[nodes.Node], List[nodes.system_message]]:
+    _options: dict | None = None,
+    _content: list | None = None,
+) -> tuple[list[nodes.Node], list[nodes.system_message]]:
     """Role for :ai:exchange:`name` references."""
     return make_ai_reference(
         'exchange', 'ai_content_exchanges', rawtext, text, lineno, inliner
@@ -93,14 +92,14 @@ def ai_exchange_role(
 
 
 def ai_message_role(
-    name: str,
+    _name: str,
     rawtext: str,
     text: str,
     lineno: int,
     inliner: Inliner,
-    options: dict = None,
-    content: list = None,
-) -> Tuple[List[nodes.Node], List[nodes.system_message]]:
+    _options: dict | None = None,
+    _content: list | None = None,
+) -> tuple[list[nodes.Node], list[nodes.system_message]]:
     """Role for :ai:message:`name` references."""
     return make_ai_reference(
         'message', 'ai_content_messages', rawtext, text, lineno, inliner
@@ -108,14 +107,14 @@ def ai_message_role(
 
 
 def ai_ref_role(
-    name: str,
+    _name: str,
     rawtext: str,
     text: str,
     lineno: int,
     inliner: Inliner,
-    options: dict = None,
-    content: list = None,
-) -> Tuple[List[nodes.Node], List[nodes.system_message]]:
+    _options: dict | None = None,
+    _content: list | None = None,
+) -> tuple[list[nodes.Node], list[nodes.system_message]]:
     """
     Generic role for :ai:ref:`name` references.
 

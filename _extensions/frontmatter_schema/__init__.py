@@ -3,19 +3,17 @@
 # Provides JSON Schema validation for YAML frontmatter in markdown documents.
 # The canonical schema lives in _schemas/frontmatter.schema.json.
 #
-# Usage:
-#   from frontmatter_schema import validate_frontmatter, extract_and_validate
-#   errors = validate_frontmatter({'title': 'Test', 'tags': ['foo/bar']})
-#   errors = extract_and_validate(markdown_content)
+# This module provides validate_frontmatter() and extract_and_validate() functions
+# for validating YAML frontmatter against the JSON schema.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import from shared module, re-export for backward compatibility
 from _common.frontmatter import extract_frontmatter
+from _common.paths import EXCLUDE_PATTERNS, SCHEMAS_DIR
 from _common.traversal import iter_markdown_files
-from _common.paths import SCHEMAS_DIR, EXCLUDE_PATTERNS
 
 try:
     import jsonschema
@@ -29,11 +27,17 @@ SCHEMA_PATH = SCHEMAS_DIR / 'frontmatter.schema.json'
 
 
 # Re-export for backward compatibility
-__all__ = ['extract_frontmatter', 'validate_frontmatter', 'extract_and_validate',
-           'validate_file', 'validate_directory', 'load_schema']
+__all__ = [
+    'extract_and_validate',
+    'extract_frontmatter',
+    'load_schema',
+    'validate_directory',
+    'validate_file',
+    'validate_frontmatter',
+]
 
 
-def load_schema() -> Dict[str, Any]:
+def load_schema() -> dict[str, Any]:
     """Load the frontmatter JSON schema from disk.
 
     Returns:
@@ -47,9 +51,9 @@ def load_schema() -> Dict[str, Any]:
 
 
 def validate_frontmatter(
-    frontmatter: Dict[str, Any],
-    schema: Optional[Dict[str, Any]] = None,
-) -> List[str]:
+    frontmatter: dict[str, Any],
+    schema: dict[str, Any] | None = None,
+) -> list[str]:
     """Validate frontmatter against the JSON schema.
 
     Args:
@@ -82,7 +86,7 @@ def validate_frontmatter(
     return errors
 
 
-def extract_and_validate(content: str, schema: Optional[Dict[str, Any]] = None) -> List[str]:
+def extract_and_validate(content: str, schema: dict[str, Any] | None = None) -> list[str]:
     """Extract frontmatter from markdown and validate against schema.
 
     Convenience function combining extraction and validation.
@@ -100,7 +104,7 @@ def extract_and_validate(content: str, schema: Optional[Dict[str, Any]] = None) 
     return validate_frontmatter(frontmatter, schema)
 
 
-def validate_file(filepath: Path, schema: Optional[Dict[str, Any]] = None) -> List[str]:
+def validate_file(filepath: Path, schema: dict[str, Any] | None = None) -> list[str]:
     """Validate a markdown file's frontmatter against the schema.
 
     Args:
@@ -116,9 +120,9 @@ def validate_file(filepath: Path, schema: Optional[Dict[str, Any]] = None) -> Li
 
 def validate_directory(
     dirpath: Path,
-    schema: Optional[Dict[str, Any]] = None,
-    exclude_patterns: Optional[List[str]] = None,
-) -> Dict[str, List[str]]:
+    schema: dict[str, Any] | None = None,
+    exclude_patterns: list[str] | None = None,
+) -> dict[str, list[str]]:
     """Validate all markdown files in a directory.
 
     Args:

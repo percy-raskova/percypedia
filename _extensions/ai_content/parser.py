@@ -5,10 +5,9 @@ Parses [human]/[assistant] markers from directive content.
 """
 
 import re
-from typing import List, Dict
 
 
-def parse_chat_messages(content: str) -> List[Dict[str, str]]:
+def parse_chat_messages(content: str) -> list[dict[str, str]]:
     """
     Parse chat content with [human]/[assistant] markers.
 

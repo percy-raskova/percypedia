@@ -7,18 +7,18 @@ Usage in MyST Markdown:
     ```
 """
 
-from typing import List
+from typing import Any, ClassVar
 
 from docutils import nodes
 from docutils.parsers.rst import directives
-from sphinx.util.docutils import SphinxDirective
 from sphinx.errors import ExtensionError
+from sphinx.util.docutils import SphinxDirective
 
 __all__ = [
-    'definition_card',
     'DefinitionDirective',
-    'visit_definition_card_html',
+    'definition_card',
     'depart_definition_card_html',
+    'visit_definition_card_html',
 ]
 
 # CSS class constants (compatible with sphinx-design)
@@ -52,11 +52,11 @@ class DefinitionDirective(SphinxDirective):
     optional_arguments = 0
     final_argument_whitespace = True  # Allow spaces in term name
 
-    option_spec = {
+    option_spec: ClassVar[dict[str, Any]] = {
         'class': directives.class_option,
     }
 
-    def run(self) -> List[nodes.Node]:
+    def run(self) -> list[nodes.Node]:
         """Process the definition directive."""
         # Validate term name
         term_name = self.arguments[0].strip() if self.arguments else ''
@@ -144,6 +144,6 @@ def visit_definition_card_html(self, node: definition_card) -> None:
     self.body.append(f'<div class="{classes}" {ids}>')
 
 
-def depart_definition_card_html(self, node: definition_card) -> None:
+def depart_definition_card_html(self, _node: definition_card) -> None:
     """Close definition_card HTML."""
     self.body.append('</div>')

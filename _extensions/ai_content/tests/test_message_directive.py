@@ -7,9 +7,7 @@ AI message excerpt with attribution and styling.
 
 import pytest
 
-from docutils import nodes
-
-from .conftest import make_mock_directive, SAMPLE_MESSAGE_CONTENT
+from .conftest import SAMPLE_MESSAGE_CONTENT, make_mock_directive
 
 
 class TestMessageDirective:

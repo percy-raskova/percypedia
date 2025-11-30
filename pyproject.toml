@@ -10,3 +10,100 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "property: marks property-based tests (requires hypothesis)",
 ]
+
+# =============================================================================
+# Ruff - Fast Python linter and formatter
+# =============================================================================
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["_extensions", "_tools"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG",    # flake8-unused-arguments
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # eradicate (commented-out code)
+    "PL",     # Pylint
+    "RUF",    # Ruff-specific rules
+]
+ignore = [
+    "E501",    # line too long (handled by formatter)
+    "PLR2004", # magic value comparison (too noisy)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**/*.py" = [
+    "ARG",      # pytest fixtures often have unused args
+    "PLC0415",  # inline imports in tests for isolation/fixtures
+    "PLR0913",  # test fixtures/factories may have many parameters
+]
+"_extensions/honeypot/poisoners.py" = [
+    "RUF001",   # Intentional homoglyphs for anti-AI poisoning
+    "RUF003",   # Intentional homoglyphs in comments
+    "PLR0913",  # poison_content has config params with defaults
+]
+"_extensions/honeypot/__init__.py" = [
+    "PLC0415",  # Conditional jinja2 import (optional dependency)
+]
+"_extensions/definition/directive.py" = [
+    "PLC0415",  # Lazy import in exception handler
+]
+"_extensions/ai_content/roles.py" = [
+    "PLR0913",  # Sphinx role signature is fixed by framework
+]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# =============================================================================
+# Mypy - Static type checking
+# =============================================================================
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict_equality = true
+extra_checks = true
+check_untyped_defs = true
+disallow_untyped_defs = false  # Gradual typing - don't require all functions typed
+disallow_incomplete_defs = true
+no_implicit_optional = true
+
+# Per-module overrides
+[[tool.mypy.overrides]]
+module = [
+    "sphinx.*",
+    "docutils.*",
+    "myst_parser.*",
+    "sphinx_design.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+check_untyped_defs = false
+
+# =============================================================================
+# Bandit - Security linting
+# =============================================================================
+[tool.bandit]
+exclude_dirs = ["tests", "_build", ".venv", "node_modules"]
+skips = [
+    "B101",  # assert_used - OK in tests and Sphinx extensions
+]

@@ -1,9 +1,8 @@
 """Shared test fixtures for Sphinx extension tests."""
 
-import pytest
-from pathlib import Path
 from unittest.mock import Mock
 
+import pytest
 
 # =============================================================================
 # Frontmatter Content Fixtures

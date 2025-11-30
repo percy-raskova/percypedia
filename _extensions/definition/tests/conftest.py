@@ -1,8 +1,9 @@
 """Shared fixtures for definition directive tests."""
 
-import pytest
 from pathlib import Path
 from textwrap import dedent
+
+import pytest
 
 
 @pytest.fixture

@@ -7,8 +7,8 @@ These tests verify term storage, retrieval, and duplicate detection.
 import pytest
 
 from definition.collector import (
-    DefinitionsCollector,
     DefinitionEntry,
+    DefinitionsCollector,
     DuplicateTermError,
 )
 

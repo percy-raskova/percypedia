@@ -5,17 +5,16 @@ Tests the draft/publish workflow and Obsidian comment stripping.
 These tests establish a baseline for safe refactoring.
 """
 
-import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from publish_filter import (
-    get_unpublished_docs,
-    builder_inited,
-    strip_obsidian_comments,
-    setup,
-    PROTECTED_DOCNAMES,
     OBSIDIAN_COMMENT_PATTERN,
+    PROTECTED_DOCNAMES,
+    builder_inited,
+    get_unpublished_docs,
+    setup,
+    strip_obsidian_comments,
 )
 
 
@@ -285,7 +284,7 @@ class TestGetUnpublishedDocs:
         # Make file unreadable by patching read_text
         with patch.object(Path, 'read_text', side_effect=PermissionError):
             # Should not raise
-            result = get_unpublished_docs(app)
+            get_unpublished_docs(app)
 
         # Result depends on implementation, but should not crash
 

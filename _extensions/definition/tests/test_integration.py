@@ -7,13 +7,12 @@ These tests verify that:
 3. Event handlers properly wire up the extension
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from definition import setup
-from definition.directive import DefinitionDirective
 from definition.collector import DefinitionsCollector
-from definition.generator import GlossaryGenerator, collect_glossary_pages
+from definition.directive import DefinitionDirective
+from definition.generator import collect_glossary_pages
 
 
 class TestSphinxAppSetup:

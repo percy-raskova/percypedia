@@ -6,19 +6,18 @@ and merges with standard glossary entries.
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 __all__ = [
-    'DuplicateTermError',
     'DefinitionEntry',
     'DefinitionsCollector',
+    'DuplicateTermError',
 ]
 
 
 class DuplicateTermError(Exception):
     """Raised when a term is defined multiple times."""
 
-    def __init__(self, term: str, locations: List[str]):
+    def __init__(self, term: str, locations: list[str]):
         self.term = term
         self.locations = locations
         message = f"Duplicate term '{term}' defined in:\n"
@@ -53,7 +52,7 @@ class DefinitionsCollector:
             case_sensitive: If False, "Term" and "term" are considered duplicates
         """
         self.case_sensitive = case_sensitive
-        self.definitions: Dict[str, DefinitionEntry] = {}
+        self.definitions: dict[str, DefinitionEntry] = {}
 
     def _normalize_term(self, term: str) -> str:
         """Normalize a term for comparison."""
@@ -99,7 +98,7 @@ class DefinitionsCollector:
             anchor=anchor,
         )
 
-    def check_against_std_glossary(self, std_terms: Dict[str, tuple]) -> None:
+    def check_against_std_glossary(self, std_terms: dict[str, tuple]) -> None:
         """
         Check for conflicts with standard {glossary} entries.
 
@@ -124,14 +123,14 @@ class DefinitionsCollector:
                     ]
                 )
 
-    def get_all_definitions(self) -> List[DefinitionEntry]:
+    def get_all_definitions(self) -> list[DefinitionEntry]:
         """Get all definitions sorted alphabetically by term."""
         return sorted(
             self.definitions.values(),
             key=lambda e: e.term.lower()
         )
 
-    def get_definition(self, term: str) -> Optional[DefinitionEntry]:
+    def get_definition(self, term: str) -> DefinitionEntry | None:
         """Get a specific definition by term."""
         normalized = self._normalize_term(term)
         return self.definitions.get(normalized)

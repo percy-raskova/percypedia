@@ -17,25 +17,25 @@ Roles:
 
 from sphinx.application import Sphinx
 
-from .directives import AIChatDirective, AIExchangeDirective, AIMessageDirective, AIArchiveDirective
-from .roles import ai_chat_role, ai_exchange_role, ai_message_role, ai_ref_role
+from .directives import AIArchiveDirective, AIChatDirective, AIExchangeDirective, AIMessageDirective
 from .nodes import (
-    ai_chat_node,
-    ai_message_node,
-    ai_exchange_node,
-    ai_question_node,
     ai_answer_node,
-    visit_ai_chat_html,
+    ai_chat_node,
+    ai_exchange_node,
+    ai_message_node,
+    ai_question_node,
+    depart_ai_answer_html,
     depart_ai_chat_html,
-    visit_ai_message_html,
-    depart_ai_message_html,
-    visit_ai_exchange_html,
     depart_ai_exchange_html,
-    visit_ai_question_html,
+    depart_ai_message_html,
     depart_ai_question_html,
     visit_ai_answer_html,
-    depart_ai_answer_html,
+    visit_ai_chat_html,
+    visit_ai_exchange_html,
+    visit_ai_message_html,
+    visit_ai_question_html,
 )
+from .roles import ai_chat_role, ai_exchange_role, ai_message_role, ai_ref_role
 
 __version__ = '0.1.0'
 

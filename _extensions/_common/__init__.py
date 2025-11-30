@@ -10,6 +10,6 @@ from .traversal import iter_markdown_files
 
 __all__ = [
     'extract_frontmatter',
-    'parse_frontmatter',
     'iter_markdown_files',
+    'parse_frontmatter',
 ]

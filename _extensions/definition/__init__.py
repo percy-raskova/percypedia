@@ -8,31 +8,31 @@ Provides a {definition} directive that:
 4. Creates bidirectional links between definitions and glossary
 """
 
-from typing import Any, Dict, List, Set
+from typing import Any
 
 from sphinx.application import Sphinx
 from sphinx.environment import BuildEnvironment
 
+from .collector import DefinitionsCollector
 from .directive import (
     DefinitionDirective,
     definition_card,
-    visit_definition_card_html,
     depart_definition_card_html,
+    visit_definition_card_html,
 )
-from .collector import DefinitionsCollector
 from .generator import collect_glossary_pages
 
 __version__ = '0.1.0'
 
 __all__ = [
-    '__version__',
     'DefinitionDirective',
-    'definition_card',
-    'visit_definition_card_html',
-    'depart_definition_card_html',
     'DefinitionsCollector',
+    '__version__',
     'collect_glossary_pages',
+    'definition_card',
+    'depart_definition_card_html',
     'setup',
+    'visit_definition_card_html',
 ]
 
 
@@ -49,11 +49,11 @@ def init_collector(app: Sphinx) -> None:
 
 def get_outdated_docs(
     app: Sphinx,
-    env: BuildEnvironment,
-    added: Set[str],
-    changed: Set[str],
-    removed: Set[str],
-) -> List[str]:
+    _env: BuildEnvironment,
+    _added: set[str],
+    _changed: set[str],
+    _removed: set[str],
+) -> list[str]:
     """
     Mark glossary page for rebuild when any document changes.
 
@@ -66,7 +66,7 @@ def get_outdated_docs(
 def merge_collectors(
     app: Sphinx,
     env: BuildEnvironment,
-    docnames: List[str],
+    _docnames: list[str],
     other_env: BuildEnvironment,
 ) -> None:
     """
@@ -101,7 +101,7 @@ def merge_collectors(
         )
 
 
-def setup(app: Sphinx) -> Dict[str, Any]:
+def setup(app: Sphinx) -> dict[str, Any]:
     """Initialize the definition extension."""
     # Configuration values
     app.add_config_value('definition_glossary_path', 'glossary', 'env')

@@ -9,7 +9,6 @@ Usage:
 
 import os
 from pathlib import Path
-from typing import List
 
 # =============================================================================
 # Root Directories (with env var overrides)
@@ -50,7 +49,7 @@ ASSETS_DIR = PROJECT_ROOT / '_assets'
 
 # Patterns for excluding from content discovery
 # Used by: Sphinx, category_nav, frontmatter_schema, frontmatter_normalizer
-EXCLUDE_PATTERNS: List[str] = [
+EXCLUDE_PATTERNS: list[str] = [
     # Build artifacts
     '_build', '_build/*',
     '.venv', '.venv/*',
@@ -76,6 +75,6 @@ EXCLUDE_PATTERNS: List[str] = [
 ]
 
 # Additional patterns for Sphinx exclude_patterns only
-SPHINX_EXTRA_EXCLUDES: List[str] = [
+SPHINX_EXTRA_EXCLUDES: list[str] = [
     'sample/*/index.md',  # Sample index files
 ]

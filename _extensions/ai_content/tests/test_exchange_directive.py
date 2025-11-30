@@ -7,9 +7,7 @@ a single question and answer, separated by ---.
 
 import pytest
 
-from docutils import nodes
-
-from .conftest import make_mock_directive, SAMPLE_EXCHANGE_CONTENT
+from .conftest import SAMPLE_EXCHANGE_CONTENT, make_mock_directive
 
 
 class TestExchangeParsing:

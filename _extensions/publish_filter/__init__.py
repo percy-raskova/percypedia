@@ -9,15 +9,16 @@
 #   publish: false  -> Document is excluded from build
 #   publish: true   -> Document is included (default behavior)
 
+import logging
 import re
 from pathlib import Path
-from typing import List, Set
 
 from sphinx.application import Sphinx
 
 from _common.frontmatter import extract_frontmatter
 from _common.traversal import iter_markdown_files
 
+logger = logging.getLogger(__name__)
 
 # Critical files that must NEVER be excluded from builds
 # Even if marked publish: false (e.g., by automated tools)
@@ -34,7 +35,7 @@ PROTECTED_DOCNAMES = {
 OBSIDIAN_COMMENT_PATTERN = r'%%.*?%%'
 
 
-def get_unpublished_docs(app: Sphinx) -> Set[str]:
+def get_unpublished_docs(app: Sphinx) -> set[str]:
     """Scan source files and return docnames with publish: false.
 
     Args:
@@ -69,7 +70,8 @@ def get_unpublished_docs(app: Sphinx) -> Set[str]:
             if frontmatter.get('publish') is False:
                 unpublished.add(docname)
 
-        except Exception:
+        except OSError as e:
+            logger.warning('Could not read %s: %s', md_file, e)
             continue
 
     return unpublished
@@ -90,7 +92,7 @@ def builder_inited(app: Sphinx) -> None:
                 app.config.exclude_patterns.append(pattern)
 
 
-def strip_obsidian_comments(app: Sphinx, docname: str, source: List[str]) -> None:
+def strip_obsidian_comments(_app: Sphinx, _docname: str, source: list[str]) -> None:
     """Remove Obsidian-style comments (%%...%%) from source.
 
     This is a Sphinx source-read event handler that modifies source in-place.

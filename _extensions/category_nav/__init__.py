@@ -6,11 +6,13 @@
 # Also marks all documents as orphans since navigation is handled dynamically,
 # suppressing Sphinx's "document isn't included in any toctree" warnings.
 
-from typing import Any, Dict, List
+from typing import Any
 
 from sphinx.application import Sphinx
 
-from .directive import CategoryNavDirective, extract_frontmatter, collect_categories
+from .directive import CategoryNavDirective
+from .directive import collect_categories as collect_categories  # re-export
+from .directive import extract_frontmatter as extract_frontmatter  # re-export
 
 # =============================================================================
 # Constants
@@ -23,7 +25,7 @@ DEFAULT_CATEGORY = 'Miscellaneous'
 DEFAULT_EXCLUDE = ['index', 'glossary']
 
 
-def mark_as_orphan(app: Sphinx, docname: str, source: List[str]) -> None:
+def mark_as_orphan(app: Sphinx, docname: str, _source: list[str]) -> None:
     """Mark all documents as orphans to suppress toctree warnings.
 
     Since category_nav handles navigation dynamically via the {category-nav}
@@ -40,7 +42,7 @@ def mark_as_orphan(app: Sphinx, docname: str, source: List[str]) -> None:
     app.env.metadata.setdefault(docname, {})['orphan'] = True
 
 
-def setup(app: Sphinx) -> Dict[str, Any]:
+def setup(app: Sphinx) -> dict[str, Any]:
     """Sphinx extension entry point.
 
     Args:

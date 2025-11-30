@@ -5,11 +5,9 @@ These tests verify the {definition} directive renders correctly as a
 sphinx-design card with proper structure and CSS classes.
 """
 
-import pytest
-from pathlib import Path
-from textwrap import dedent
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
+import pytest
 from docutils import nodes
 from sphinx.errors import ExtensionError
 
@@ -286,7 +284,7 @@ class TestTermNameEdgeCases:
         """
         base_directive.arguments = ['Teoría del Valor']
 
-        result = DefinitionDirective.run(base_directive)
+        DefinitionDirective.run(base_directive)
 
         # Original unicode preserved in storage
         entry = base_directive.env.definition_all_definitions['teoría del valor']

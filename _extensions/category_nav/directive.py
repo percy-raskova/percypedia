@@ -10,7 +10,6 @@ This module provides:
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Any
 
 from docutils import nodes
 from sphinx.addnodes import toctree
@@ -18,8 +17,8 @@ from sphinx.util.docutils import SphinxDirective
 
 # Import from shared module, re-export for backward compatibility
 from _common.frontmatter import extract_frontmatter
-from _common.traversal import iter_markdown_files
 from _common.paths import EXCLUDE_PATTERNS
+from _common.traversal import iter_markdown_files
 
 # =============================================================================
 # Constants
@@ -32,7 +31,7 @@ DEFAULT_MAXDEPTH = 2
 H1_TITLE_PATTERN = re.compile(r'^#\s+(.+)$', re.MULTILINE)
 
 
-def extract_title(content: str) -> Optional[str]:
+def extract_title(content: str) -> str | None:
     """Extract the first H1 heading from markdown content.
 
     Args:
@@ -50,9 +49,9 @@ def extract_title(content: str) -> Optional[str]:
 def collect_categories(
     srcdir: Path,
     default_category: str = 'Miscellaneous',
-    exclude: Optional[List[str]] = None,
-    exclude_patterns: Optional[List[str]] = None,
-) -> Dict[str, List[Dict[str, str]]]:
+    exclude: list[str] | None = None,
+    exclude_patterns: list[str] | None = None,
+) -> dict[str, list[dict[str, str]]]:
     """Scan source directory and group markdown files by category.
 
     Args:
@@ -75,7 +74,7 @@ def collect_categories(
     # Combine with centralized exclude patterns
     all_exclude_patterns = list(set(exclude_patterns) | set(EXCLUDE_PATTERNS))
 
-    categories: Dict[str, List[Dict[str, str]]] = defaultdict(list)
+    categories: dict[str, list[dict[str, str]]] = defaultdict(list)
     srcdir = Path(srcdir)
 
     # Use shared traversal - category_nav skips underscore files but not all underscore dirs
@@ -118,7 +117,7 @@ def collect_categories(
         docs.sort(key=lambda d: d['title'].lower())
 
     # Sort categories alphabetically, with default_category last
-    sorted_categories: Dict[str, List[Dict[str, str]]] = {}
+    sorted_categories: dict[str, list[dict[str, str]]] = {}
     for key in sorted(categories.keys()):
         if key != default_category:
             sorted_categories[key] = categories[key]
@@ -145,7 +144,7 @@ class CategoryNavDirective(SphinxDirective):
     required_arguments = 0
     optional_arguments = 0
 
-    def run(self) -> List[nodes.Node]:
+    def run(self) -> list[nodes.Node]:
         """Generate toctree nodes grouped by category."""
         srcdir = Path(self.env.srcdir)
         default_category = self.config.category_nav_default
@@ -154,7 +153,7 @@ class CategoryNavDirective(SphinxDirective):
         # Collect and categorize documents
         categories = collect_categories(srcdir, default_category, exclude)
 
-        result_nodes: List[nodes.Node] = []
+        result_nodes: list[nodes.Node] = []
 
         for category, docs in categories.items():
             # Create section for category (no title - caption provides it)

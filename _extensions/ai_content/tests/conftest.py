@@ -5,20 +5,19 @@ This module provides factory functions and fixtures for creating mock
 directive objects, reducing duplication across test files.
 """
 
-import pytest
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 
 def make_mock_directive(
     directive_class,
-    arguments: list = None,
-    content: list = None,
-    options: dict = None,
+    arguments: list | None = None,
+    content: list | None = None,
+    options: dict | None = None,
     docname: str = 'test-doc',
     lineno: int = 10,
     content_offset: int = 0,
-    env_attrs: dict = None,
+    env_attrs: dict | None = None,
 ):
     """
     Factory function to create mock directive instances.
@@ -64,9 +63,9 @@ def make_mock_directive(
 
 
 def make_mock_inliner(
-    chats: dict = None,
-    exchanges: dict = None,
-    messages: dict = None,
+    chats: dict | None = None,
+    exchanges: dict | None = None,
+    messages: dict | None = None,
 ):
     """
     Factory function to create mock inliner for role tests.
@@ -113,8 +112,8 @@ SAMPLE_MESSAGE_CONTENT = [
 
 
 def make_archive_directive(
-    options: dict = None,
-    env_attrs: dict = None,
+    options: dict | None = None,
+    env_attrs: dict | None = None,
     docname: str = 'ai-archive/index',
 ):
     """

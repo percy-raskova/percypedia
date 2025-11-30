@@ -5,7 +5,8 @@ Creates a virtual glossary page that merges inline {definition} entries
 with standard {glossary} entries.
 """
 
-from typing import Any, Dict, List, Optional, Tuple, Iterator
+from collections.abc import Iterator
+from typing import Any
 
 from sphinx.application import Sphinx
 
@@ -53,8 +54,8 @@ class GlossaryGenerator:
 
     def generate_entries(
         self,
-        std_terms: Optional[Dict[str, tuple]] = None,
-    ) -> List[Dict[str, Any]]:
+        std_terms: dict[str, tuple] | None = None,
+    ) -> list[dict[str, Any]]:
         """
         Generate combined glossary entries.
 
@@ -109,7 +110,7 @@ class GlossaryGenerator:
 
     def generate_html_page(
         self,
-        entries: List[Dict[str, Any]],
+        entries: list[dict[str, Any]],
         base_url: str = '',
     ) -> str:
         """
@@ -158,8 +159,8 @@ class GlossaryGenerator:
 
     def generate_page_tuple(
         self,
-        entries: List[Dict[str, Any]],
-    ) -> Tuple[str, Dict[str, Any], str]:
+        entries: list[dict[str, Any]],
+    ) -> tuple[str, dict[str, Any], str]:
         """
         Generate page tuple for html-collect-pages event.
 
@@ -176,7 +177,7 @@ class GlossaryGenerator:
         return (self.glossary_path, context, DEFAULT_TEMPLATE)
 
 
-def collect_glossary_pages(app: Sphinx) -> Iterator[Tuple[str, Dict[str, Any], str]]:
+def collect_glossary_pages(app: Sphinx) -> Iterator[tuple[str, dict[str, Any], str]]:
     """
     Event handler for html-collect-pages.
 

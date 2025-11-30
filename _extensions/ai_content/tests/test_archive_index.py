@@ -6,10 +6,9 @@ AI content (chats, exchanges, messages).
 """
 
 import pytest
-
 from docutils import nodes
 
-from .conftest import make_archive_directive, SAMPLE_ARCHIVE_ENV
+from .conftest import make_archive_directive
 
 
 class TestArchiveIndexDirective:

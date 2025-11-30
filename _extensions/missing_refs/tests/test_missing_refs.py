@@ -6,28 +6,25 @@ These tests establish a baseline for safe refactoring.
 """
 
 import json
-import pytest
-from datetime import datetime, timezone
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from datetime import datetime
+from unittest.mock import MagicMock
 
 from missing_refs import (
-    MissingRefsCollector,
-    get_collector,
-    reset_collector,
-    on_missing_reference,
-    on_build_finished,
-    setup,
-    # Constants
-    __version__,
+    DEFAULT_PAGE_PATH,
+    DEFAULT_PAGE_TITLE,
+    JSON_OUTPUT_FILENAME,
     REFTYPE_DOC,
     UNCATEGORIZED,
     UNKNOWN_SOURCE,
-    DEFAULT_PAGE_TITLE,
-    DEFAULT_PAGE_PATH,
-    JSON_OUTPUT_FILENAME,
+    MissingRefsCollector,
+    # Constants
+    __version__,
+    get_collector,
+    on_build_finished,
+    on_missing_reference,
+    reset_collector,
+    setup,
 )
-
 
 # =============================================================================
 # Test Group 0: Module constants
@@ -651,45 +648,51 @@ class TestWriteMarkdown:
 # =============================================================================
 
 class TestGlobalCollector:
-    """Test global collector singleton pattern."""
+    """Test env-based collector pattern."""
 
     def test_get_collector_returns_collector(self):
         """
-        Given: Fresh state
+        Given: Fresh env
         When: get_collector is called
         Then: Returns MissingRefsCollector instance
         """
-        reset_collector()
+        env = MagicMock()
+        env.missing_refs_collector = None
+        reset_collector(env)
 
-        collector = get_collector()
+        collector = get_collector(env)
 
         assert isinstance(collector, MissingRefsCollector)
 
     def test_get_collector_returns_same_instance(self):
         """
-        Given: Collector already created
-        When: get_collector called again
+        Given: Collector already created on env
+        When: get_collector called again with same env
         Then: Returns same instance
         """
-        reset_collector()
+        env = MagicMock()
+        env.missing_refs_collector = None
+        reset_collector(env)
 
-        collector1 = get_collector()
-        collector2 = get_collector()
+        collector1 = get_collector(env)
+        collector2 = get_collector(env)
 
         assert collector1 is collector2
 
     def test_reset_collector_clears_instance(self):
         """
-        Given: Collector with data
+        Given: Collector with data on env
         When: reset_collector called, then get_collector
         Then: Returns fresh empty collector
         """
-        reset_collector()
-        collector1 = get_collector()
+        env = MagicMock()
+        env.missing_refs_collector = None
+        reset_collector(env)
+        collector1 = get_collector(env)
         collector1.record_missing('topic', 'source')
 
-        reset_collector()
-        collector2 = get_collector()
+        reset_collector(env)
+        collector2 = get_collector(env)
 
         assert collector1 is not collector2
         assert len(collector2.missing) == 0
@@ -702,10 +705,6 @@ class TestGlobalCollector:
 class TestOnMissingReference:
     """Test Sphinx missing-reference event handler."""
 
-    def setup_method(self):
-        """Reset collector before each test."""
-        reset_collector()
-
     def test_records_doc_reference(self):
         """
         Given: Missing reference event for doc type
@@ -714,13 +713,14 @@ class TestOnMissingReference:
         """
         app = MagicMock()
         env = MagicMock()
+        env.missing_refs_collector = None
         env.docname = 'index'
         node = {'reftype': 'doc', 'reftarget': 'theory/future'}
         contnode = MagicMock()
 
         on_missing_reference(app, env, node, contnode)
 
-        collector = get_collector()
+        collector = get_collector(env)
         assert 'theory/future' in collector.missing
 
     def test_ignores_non_doc_references(self):
@@ -731,13 +731,14 @@ class TestOnMissingReference:
         """
         app = MagicMock()
         env = MagicMock()
+        env.missing_refs_collector = None
         env.docname = 'index'
         node = {'reftype': 'ref', 'reftarget': 'some-label'}
         contnode = MagicMock()
 
         on_missing_reference(app, env, node, contnode)
 
-        collector = get_collector()
+        collector = get_collector(env)
         assert len(collector.missing) == 0
 
     def test_ignores_empty_reftarget(self):
@@ -748,13 +749,14 @@ class TestOnMissingReference:
         """
         app = MagicMock()
         env = MagicMock()
+        env.missing_refs_collector = None
         env.docname = 'index'
         node = {'reftype': 'doc', 'reftarget': ''}
         contnode = MagicMock()
 
         on_missing_reference(app, env, node, contnode)
 
-        collector = get_collector()
+        collector = get_collector(env)
         assert len(collector.missing) == 0
 
     def test_returns_none(self):
@@ -765,6 +767,7 @@ class TestOnMissingReference:
         """
         app = MagicMock()
         env = MagicMock()
+        env.missing_refs_collector = None
         env.docname = 'index'
         node = {'reftype': 'doc', 'reftarget': 'topic'}
         contnode = MagicMock()
@@ -780,13 +783,14 @@ class TestOnMissingReference:
         Then: Uses 'unknown' as source
         """
         app = MagicMock()
-        env = MagicMock(spec=[])  # No attributes
+        env = MagicMock(spec=['missing_refs_collector'])
+        env.missing_refs_collector = None
         node = {'reftype': 'doc', 'reftarget': 'topic'}
         contnode = MagicMock()
 
         on_missing_reference(app, env, node, contnode)
 
-        collector = get_collector()
+        collector = get_collector(env)
         assert 'unknown' in collector.missing['topic']['referenced_by']
 
 
@@ -797,20 +801,19 @@ class TestOnMissingReference:
 class TestOnBuildFinished:
     """Test Sphinx build-finished event handler."""
 
-    def setup_method(self):
-        """Reset collector before each test."""
-        reset_collector()
-
     def test_does_nothing_on_exception(self, tmp_path):
         """
         Given: Build finished with exception
         When: on_build_finished is called
         Then: No output files created
         """
+        env = MagicMock()
+        env.missing_refs_collector = None
         app = MagicMock()
         app.outdir = str(tmp_path)
+        app.env = env
 
-        collector = get_collector()
+        collector = get_collector(env)
         collector.record_missing('topic', 'source')
 
         on_build_finished(app, Exception("Build failed"))
@@ -823,8 +826,11 @@ class TestOnBuildFinished:
         When: on_build_finished is called
         Then: No output files created
         """
+        env = MagicMock()
+        env.missing_refs_collector = None
         app = MagicMock()
         app.outdir = str(tmp_path)
+        app.env = env
 
         on_build_finished(app, None)
 
@@ -836,11 +842,14 @@ class TestOnBuildFinished:
         When: on_build_finished is called
         Then: JSON file written to outdir
         """
+        env = MagicMock()
+        env.missing_refs_collector = None
         app = MagicMock()
         app.outdir = str(tmp_path)
+        app.env = env
         app.config.missing_refs_generate_page = False
 
-        collector = get_collector()
+        collector = get_collector(env)
         collector.record_missing('topic', 'source')
 
         on_build_finished(app, None)
@@ -858,14 +867,17 @@ class TestOnBuildFinished:
         outdir = tmp_path / 'out'
         outdir.mkdir()
 
+        env = MagicMock()
+        env.missing_refs_collector = None
         app = MagicMock()
         app.outdir = str(outdir)
         app.srcdir = str(srcdir)
+        app.env = env
         app.config.missing_refs_generate_page = True
         app.config.missing_refs_page_path = 'coming-soon.md'
         app.config.missing_refs_page_title = 'Coming Soon'
 
-        collector = get_collector()
+        collector = get_collector(env)
         collector.record_missing('topic', 'source')
 
         on_build_finished(app, None)
@@ -883,12 +895,15 @@ class TestOnBuildFinished:
         outdir = tmp_path / 'out'
         outdir.mkdir()
 
+        env = MagicMock()
+        env.missing_refs_collector = None
         app = MagicMock()
         app.outdir = str(outdir)
         app.srcdir = str(srcdir)
+        app.env = env
         app.config.missing_refs_generate_page = False
 
-        collector = get_collector()
+        collector = get_collector(env)
         collector.record_missing('topic', 'source')
 
         on_build_finished(app, None)
@@ -901,17 +916,20 @@ class TestOnBuildFinished:
         When: on_build_finished is called
         Then: Collector is reset for next build
         """
+        env = MagicMock()
+        env.missing_refs_collector = None
         app = MagicMock()
         app.outdir = str(tmp_path)
+        app.env = env
         app.config.missing_refs_generate_page = False
 
-        collector = get_collector()
+        collector = get_collector(env)
         collector.record_missing('topic', 'source')
 
         on_build_finished(app, None)
 
-        # Get new collector (should be fresh)
-        new_collector = get_collector()
+        # Get new collector from env (should be fresh after reset)
+        new_collector = get_collector(env)
         assert len(new_collector.missing) == 0
 
 
@@ -986,22 +1004,20 @@ class TestSetup:
 class TestIntegration:
     """Integration tests for full workflows."""
 
-    def setup_method(self):
-        """Reset collector before each test."""
-        reset_collector()
-
     def test_full_workflow_json_output(self, tmp_path):
         """
         Given: Multiple missing references recorded
         When: Build finishes successfully
         Then: JSON output contains all references grouped correctly
         """
+        env = MagicMock()
+        env.missing_refs_collector = None
         app = MagicMock()
         app.outdir = str(tmp_path)
+        app.env = env
         app.config.missing_refs_generate_page = False
 
         # Simulate multiple missing references
-        env = MagicMock()
         env.docname = 'index'
 
         targets = [
@@ -1038,14 +1054,17 @@ class TestIntegration:
         outdir = tmp_path / 'out'
         outdir.mkdir()
 
+        env = MagicMock()
+        env.missing_refs_collector = None
         app = MagicMock()
         app.outdir = str(outdir)
         app.srcdir = str(srcdir)
+        app.env = env
         app.config.missing_refs_generate_page = True
         app.config.missing_refs_page_path = 'planned.md'
         app.config.missing_refs_page_title = 'Planned Articles'
 
-        collector = get_collector()
+        collector = get_collector(env)
         collector.record_missing('theory/future-topic', 'index')
 
         on_build_finished(app, None)

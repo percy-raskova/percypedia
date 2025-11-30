@@ -10,9 +10,9 @@
 import json
 import logging
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -21,23 +21,23 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 __all__ = [
-    # Main class
-    'MissingRefsCollector',
-    # Global collector management
-    'get_collector',
-    'reset_collector',
-    # Sphinx event handlers
-    'on_missing_reference',
-    'on_build_finished',
-    'setup',
-    # Constants
-    '__version__',
+    'DEFAULT_PAGE_PATH',
+    'DEFAULT_PAGE_TITLE',
+    'JSON_OUTPUT_FILENAME',
     'REFTYPE_DOC',
     'UNCATEGORIZED',
     'UNKNOWN_SOURCE',
-    'DEFAULT_PAGE_TITLE',
-    'DEFAULT_PAGE_PATH',
-    'JSON_OUTPUT_FILENAME',
+    # Main class
+    'MissingRefsCollector',
+    # Constants
+    '__version__',
+    # Global collector management
+    'get_collector',
+    'on_build_finished',
+    # Sphinx event handlers
+    'on_missing_reference',
+    'reset_collector',
+    'setup',
 ]
 
 # =============================================================================
@@ -68,23 +68,23 @@ class MissingRefsCollector:
     """Collects and organizes missing document references."""
 
     def __init__(self):
-        self.missing: Dict[str, Dict[str, Any]] = {}
+        self.missing: dict[str, dict[str, Any]] = {}
 
-    def _group_by_category(self) -> Dict[str, List[str]]:
+    def _group_by_category(self) -> dict[str, list[str]]:
         """Group missing targets by their category.
 
         Returns:
             Dictionary mapping category names to sorted lists of target paths.
             Targets without a category are grouped under UNCATEGORIZED.
         """
-        by_category: Dict[str, List[str]] = defaultdict(list)
+        by_category: dict[str, list[str]] = defaultdict(list)
         for target, info in self.missing.items():
             cat = info['category'] or UNCATEGORIZED
             by_category[cat].append(target)
 
         # Sort targets within each category
-        for cat in by_category:
-            by_category[cat] = sorted(by_category[cat])
+        for cat, targets in by_category.items():
+            by_category[cat] = sorted(targets)
 
         return dict(sorted(by_category.items()))
 
@@ -111,7 +111,7 @@ class MissingRefsCollector:
         if referenced_by not in self.missing[target]['referenced_by']:
             self.missing[target]['referenced_by'].append(referenced_by)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert collected data to a dictionary structure.
 
         Returns:
@@ -127,7 +127,7 @@ class MissingRefsCollector:
             })
 
         return {
-            'generated_at': datetime.now(timezone.utc).isoformat(),
+            'generated_at': datetime.now(UTC).isoformat(),
             'count': len(self.missing),
             'missing_documents': documents,
             'by_category': self._group_by_category(),
@@ -190,29 +190,34 @@ class MissingRefsCollector:
         path.write_text(self.to_markdown(title), encoding='utf-8')
 
 
-# Global collector instance for the current build
-_collector: Optional[MissingRefsCollector] = None
+def get_collector(env: Any) -> MissingRefsCollector:
+    """Get or create the collector instance from the environment.
+
+    Args:
+        env: Sphinx build environment
+
+    Returns:
+        The MissingRefsCollector for this build
+    """
+    if not hasattr(env, 'missing_refs_collector') or env.missing_refs_collector is None:
+        env.missing_refs_collector = MissingRefsCollector()
+    return env.missing_refs_collector
 
 
-def get_collector() -> MissingRefsCollector:
-    """Get or create the global collector instance."""
-    global _collector
-    if _collector is None:
-        _collector = MissingRefsCollector()
-    return _collector
+def reset_collector(env: Any) -> None:
+    """Reset the collector on the environment (for testing or new builds).
 
-
-def reset_collector() -> None:
-    """Reset the global collector (for testing or new builds)."""
-    global _collector
-    _collector = None
+    Args:
+        env: Sphinx build environment
+    """
+    env.missing_refs_collector = None
 
 
 def on_missing_reference(
-    app: Any,
+    _app: Any,
     env: Any,
-    node: Dict[str, Any],
-    contnode: Any
+    node: dict[str, Any],
+    _contnode: Any
 ) -> None:
     """Handle missing reference events.
 
@@ -232,13 +237,12 @@ def on_missing_reference(
     if reftype == REFTYPE_DOC and reftarget:
         # Get the source document
         source_doc = env.docname if hasattr(env, 'docname') else UNKNOWN_SOURCE
-        get_collector().record_missing(reftarget, source_doc)
+        get_collector(env).record_missing(reftarget, source_doc)
 
     # Return None to let Sphinx continue with default handling (warning)
-    return None
 
 
-def on_build_finished(app: Any, exception: Optional[Exception]) -> None:
+def on_build_finished(app: Any, exception: Exception | None) -> None:
     """Write output files when build completes.
 
     Args:
@@ -248,7 +252,7 @@ def on_build_finished(app: Any, exception: Optional[Exception]) -> None:
     if exception:
         return  # Don't write if build failed
 
-    collector = get_collector()
+    collector = get_collector(app.env)
 
     if not collector.missing:
         return  # Nothing to write
@@ -270,10 +274,10 @@ def on_build_finished(app: Any, exception: Optional[Exception]) -> None:
         logger.info(f"Generated {md_path}")
 
     # Reset for next build
-    reset_collector()
+    reset_collector(app.env)
 
 
-def setup(app: Any) -> Dict[str, Any]:
+def setup(app: Any) -> dict[str, Any]:
     """Sphinx extension entry point.
 
     Args:
