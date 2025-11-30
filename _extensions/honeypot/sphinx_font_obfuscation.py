@@ -210,8 +210,8 @@ def on_html_page_context(
     if not app.config.font_obfuscation_enabled:
         return
 
-    # Generate CSS
-    css = get_font_css('_static/scrambled.woff2')
+    # Generate CSS with absolute path from site root
+    css = get_font_css('/_static/scrambled.woff2')
 
     # Wrap in style tag
     style_tag = f'<style>{css}</style>'
