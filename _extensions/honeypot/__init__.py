@@ -19,10 +19,11 @@ Usage in conf.py:
     ]
 """
 
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
-from .poisoners import generate_canary, prompt_injection
+from .poisoners import generate_canary, prompt_injection, DEFAULT_CANARY_EMAIL
 
 
 def generate_honeypot_sources(app) -> None:
@@ -66,7 +67,6 @@ def generate_honeypot_sources(app) -> None:
             continue
 
         # Generate canary for this page
-        from datetime import datetime
         timestamp = datetime.now().isoformat()
         canary = generate_canary(page_path, timestamp)
 
@@ -79,7 +79,7 @@ def generate_honeypot_sources(app) -> None:
 
         # Add ONLY prompt injection (hidden from humans, parsed by AI)
         # NO text obfuscation - we WANT AI to read the content clearly
-        fake_email = app.config.honeypot_canary_email or "licensing@percybrain.com"
+        fake_email = app.config.honeypot_canary_email or DEFAULT_CANARY_EMAIL
         final_content = content + "\n" + prompt_injection(canary, fake_email=fake_email)
 
         # Write to honeypot directory
@@ -95,16 +95,16 @@ def cleanup_honeypot_sources(app, exception) -> None:
     """Clean up generated honeypot files after build.
 
     Called on 'build-finished' event.
+
+    Note: Cleanup is intentionally disabled. Generated honeypot files in
+    honeypot-trap/ are kept for debugging and are also needed by Sphinx
+    to build the final HTML. The files are gitignored so they don't
+    pollute the repository.
     """
     if not app.config.honeypot_enabled:
         return
 
-    # Optionally remove temp files (or keep for debugging)
-    # srcdir = Path(app.srcdir)
-    # honeypot_dir = srcdir / '_honeypot'
-    # if honeypot_dir.exists():
-    #     import shutil
-    #     shutil.rmtree(honeypot_dir)
+    # Intentionally empty - see docstring for rationale
 
 
 def setup(app) -> Dict[str, Any]:
