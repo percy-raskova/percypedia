@@ -11,7 +11,9 @@
 
 import re
 from pathlib import Path
-from typing import Set
+from typing import List, Set
+
+from sphinx.application import Sphinx
 
 from _common.frontmatter import extract_frontmatter
 from _common.traversal import iter_markdown_files
@@ -25,12 +27,23 @@ PROTECTED_DOCNAMES = {
     'honeypot',   # We intentionally want honeypot to be produced!
 }
 
+# Obsidian-style comment pattern: %%content%%
+# Matches single-line: %%hidden%%
+# Matches multi-line: %%\nmulti\nline\n%%
+# Uses non-greedy match (.*?) to handle multiple comments on same line
+OBSIDIAN_COMMENT_PATTERN = r'%%.*?%%'
 
-def get_unpublished_docs(app) -> Set[str]:
+
+def get_unpublished_docs(app: Sphinx) -> Set[str]:
     """Scan source files and return docnames with publish: false.
 
-    Protected files (index.md, glossary.md) are never excluded,
-    even if marked publish: false.
+    Args:
+        app: Sphinx application instance.
+
+    Returns:
+        Set of docnames that have publish: false in frontmatter.
+        Protected files (index.md, glossary.md) are never excluded,
+        even if marked publish: false.
     """
     unpublished = set()
     srcdir = Path(app.srcdir)
@@ -62,8 +75,12 @@ def get_unpublished_docs(app) -> Set[str]:
     return unpublished
 
 
-def builder_inited(app):
-    """Add unpublished documents to exclude_patterns."""
+def builder_inited(app: Sphinx) -> None:
+    """Add unpublished documents to exclude_patterns.
+
+    Args:
+        app: Sphinx application instance.
+    """
     unpublished = get_unpublished_docs(app)
     if unpublished:
         # Add to exclude patterns
@@ -73,22 +90,34 @@ def builder_inited(app):
                 app.config.exclude_patterns.append(pattern)
 
 
-def strip_obsidian_comments(app, docname, source):
+def strip_obsidian_comments(app: Sphinx, docname: str, source: List[str]) -> None:
     """Remove Obsidian-style comments (%%...%%) from source.
+
+    This is a Sphinx source-read event handler that modifies source in-place.
+
+    Args:
+        app: Sphinx application instance.
+        docname: Document name being processed.
+        source: List containing single string of source content (modified in-place).
 
     Obsidian comments use %% delimiters:
     - Single line: %%this is hidden%%
-    - Multi-line: %%\nthis is\nhidden\n%%
+    - Multi-line: %%\\nthis is\\nhidden\\n%%
     """
     if source and source[0]:
-        # Pattern matches %% followed by any content (non-greedy) until %%
         # DOTALL flag makes . match newlines for multi-line comments
-        pattern = r'%%.*?%%'
-        source[0] = re.sub(pattern, '', source[0], flags=re.DOTALL)
+        source[0] = re.sub(OBSIDIAN_COMMENT_PATTERN, '', source[0], flags=re.DOTALL)
 
 
-def setup(app):
-    """Sphinx extension entry point."""
+def setup(app: Sphinx) -> dict:
+    """Sphinx extension entry point.
+
+    Args:
+        app: Sphinx application instance.
+
+    Returns:
+        Extension metadata dict with version and parallel safety flags.
+    """
     # Exclude unpublished docs before reading
     app.connect('builder-inited', builder_inited)
 
