@@ -51,6 +51,42 @@ def init_ai_content(app: Sphinx) -> None:
         env.ai_content_messages = {}
 
 
+def merge_ai_content(
+    app: Sphinx,
+    env,
+    docnames: list[str],
+    other,
+) -> None:
+    """Merge AI content data from parallel workers.
+
+    Called during parallel builds when worker environments are merged
+    into the main environment.
+
+    Args:
+        app: Sphinx application instance
+        env: Main build environment
+        docnames: Document names processed (unused)
+        other: Worker's build environment to merge from
+    """
+    # Merge chats
+    if hasattr(other, 'ai_content_chats'):
+        if not hasattr(env, 'ai_content_chats'):
+            env.ai_content_chats = {}
+        env.ai_content_chats.update(other.ai_content_chats)
+
+    # Merge exchanges
+    if hasattr(other, 'ai_content_exchanges'):
+        if not hasattr(env, 'ai_content_exchanges'):
+            env.ai_content_exchanges = {}
+        env.ai_content_exchanges.update(other.ai_content_exchanges)
+
+    # Merge messages
+    if hasattr(other, 'ai_content_messages'):
+        if not hasattr(env, 'ai_content_messages'):
+            env.ai_content_messages = {}
+        env.ai_content_messages.update(other.ai_content_messages)
+
+
 def setup(app: Sphinx) -> dict:
     """Initialize the AI content extension."""
     # Configuration values
@@ -93,6 +129,7 @@ def setup(app: Sphinx) -> dict:
 
     # Event handlers
     app.connect('builder-inited', init_ai_content)
+    app.connect('env-merge-info', merge_ai_content)
 
     return {
         'version': __version__,

@@ -1,90 +1,33 @@
 """
 Custom docutils nodes for AI content rendering.
+
+Uses the node factory from _common.nodes to reduce boilerplate.
 """
 
-from docutils import nodes
+from _common.nodes import create_div_visitors, create_node_class
 
+# Create node classes using the factory
+# Note: Variable names MUST match class names for pickle support
+ai_chat_node = create_node_class('ai_chat_node', 'Container node for a full AI chat conversation.', __name__)
+ai_message_node = create_node_class('ai_message_node', 'Node for a single message in a chat.', __name__)
+ai_exchange_node = create_node_class('ai_exchange_node', 'Node for a Q&A exchange pair.', __name__)
+ai_question_node = create_node_class('ai_question_node', 'Node for the question part of an exchange.', __name__)
+ai_answer_node = create_node_class('ai_answer_node', 'Node for the answer part of an exchange.', __name__)
 
-class ai_chat_node(nodes.General, nodes.Element):
-    """Container node for a full AI chat conversation."""
-    pass
+# Create HTML visitors using the factory
+# ai_chat: uses classes and IDs
+visit_ai_chat_html, depart_ai_chat_html = create_div_visitors(include_ids=True)
 
+# ai_message: uses classes and 'sender' data attribute (no IDs)
+visit_ai_message_html, depart_ai_message_html = create_div_visitors(
+    include_ids=False, data_attrs=['sender']
+)
 
-class ai_message_node(nodes.General, nodes.Element):
-    """Node for a single message in a chat."""
-    pass
+# ai_exchange: uses classes and IDs
+visit_ai_exchange_html, depart_ai_exchange_html = create_div_visitors(include_ids=True)
 
+# ai_question: uses classes only
+visit_ai_question_html, depart_ai_question_html = create_div_visitors(include_ids=False)
 
-class ai_exchange_node(nodes.General, nodes.Element):
-    """Node for a Q&A exchange pair."""
-    pass
-
-
-class ai_question_node(nodes.General, nodes.Element):
-    """Node for the question part of an exchange."""
-    pass
-
-
-class ai_answer_node(nodes.General, nodes.Element):
-    """Node for the answer part of an exchange."""
-    pass
-
-
-# HTML visitors
-
-def visit_ai_chat_html(self, node: ai_chat_node) -> None:
-    """Render ai_chat_node opening tag."""
-    classes = ' '.join(node.get('classes', []))
-    ids = ' '.join(f'id="{id}"' for id in node.get('ids', []))
-    self.body.append(f'<div class="{classes}" {ids}>')
-
-
-def depart_ai_chat_html(self, _node: ai_chat_node) -> None:
-    """Render ai_chat_node closing tag."""
-    self.body.append('</div>')
-
-
-def visit_ai_message_html(self, node: ai_message_node) -> None:
-    """Render ai_message_node opening tag."""
-    classes = ' '.join(node.get('classes', []))
-    sender = node.get('sender', 'unknown')
-    self.body.append(f'<div class="{classes}" data-sender="{sender}">')
-
-
-def depart_ai_message_html(self, _node: ai_message_node) -> None:
-    """Render ai_message_node closing tag."""
-    self.body.append('</div>')
-
-
-def visit_ai_exchange_html(self, node: ai_exchange_node) -> None:
-    """Render ai_exchange_node opening tag."""
-    classes = ' '.join(node.get('classes', []))
-    ids = ' '.join(f'id="{id}"' for id in node.get('ids', []))
-    self.body.append(f'<div class="{classes}" {ids}>')
-
-
-def depart_ai_exchange_html(self, _node: ai_exchange_node) -> None:
-    """Render ai_exchange_node closing tag."""
-    self.body.append('</div>')
-
-
-def visit_ai_question_html(self, node: ai_question_node) -> None:
-    """Render ai_question_node opening tag."""
-    classes = ' '.join(node.get('classes', []))
-    self.body.append(f'<div class="{classes}">')
-
-
-def depart_ai_question_html(self, _node: ai_question_node) -> None:
-    """Render ai_question_node closing tag."""
-    self.body.append('</div>')
-
-
-def visit_ai_answer_html(self, node: ai_answer_node) -> None:
-    """Render ai_answer_node opening tag."""
-    classes = ' '.join(node.get('classes', []))
-    self.body.append(f'<div class="{classes}">')
-
-
-def depart_ai_answer_html(self, _node: ai_answer_node) -> None:
-    """Render ai_answer_node closing tag."""
-    self.body.append('</div>')
+# ai_answer: uses classes only
+visit_ai_answer_html, depart_ai_answer_html = create_div_visitors(include_ids=False)
