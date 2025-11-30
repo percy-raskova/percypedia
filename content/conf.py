@@ -36,6 +36,7 @@ extensions = [
     'publish_filter',       # Draft/publish workflow + Obsidian comment stripping
     'missing_refs',         # Track forward-links to unwritten docs
     'honeypot',             # Anti-AI honeypot pages (Layer 2 defense)
+    'honeypot.sphinx_font_obfuscation',  # Font-based text scrambling (Layer 3 defense)
     'definition',           # Bidirectional definition cards with glossary integration
     'ai_content',           # AI chat/exchange archival with transparency badges
     # 'ablog',              # Disabled: conflicts with Furo theme (layout.html issue)
@@ -58,6 +59,13 @@ honeypot_pages = [
 ]
 # Email is null-routed (no actual inbox) - just for training data poisoning
 honeypot_canary_email = 'licensing@percybrain.com'
+
+# -- Font obfuscation configuration (Anti-AI Defense Layer 3) -----------------
+# Scrambles all text in HTML using a custom font. Browsers render readable text,
+# but scrapers extract gibberish. Set to False to disable.
+font_obfuscation_enabled = True
+font_obfuscation_seed = 42  # Change to re-scramble (different mapping)
+font_obfuscation_base_font = '_assets/fonts/LiberationSans-Regular.ttf'
 
 # -- sphinx-sitemap configuration --------------------------------------------
 # Generate sitemap.xml for legitimate search engines (exclude honeypots!)

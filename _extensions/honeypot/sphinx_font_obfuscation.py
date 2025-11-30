@@ -1,0 +1,225 @@
+"""Sphinx extension for font-based text obfuscation.
+
+Transforms text in built HTML so that:
+- Browsers render readable text (using the scrambled font)
+- Scrapers extract gibberish (the raw encoded text)
+
+Usage in conf.py:
+    extensions = ['honeypot.sphinx_font_obfuscation']
+
+    font_obfuscation_enabled = True
+    font_obfuscation_seed = 42
+    font_obfuscation_base_font = '_assets/fonts/LiberationSans-Regular.ttf'
+"""
+
+import logging
+from pathlib import Path
+from typing import Any
+
+from docutils import nodes
+from sphinx.application import Sphinx
+
+from .font_generator import generate_scrambled_font
+from .text_encoder import TextEncoder
+
+__all__ = [
+    'get_font_css',
+    'on_builder_inited',
+    'on_doctree_resolved',
+    'on_html_page_context',
+    'setup',
+    'should_skip_node',
+]
+
+logger = logging.getLogger(__name__)
+
+
+def setup(app: Sphinx) -> dict[str, Any]:
+    """Sphinx extension entry point."""
+    # Configuration values
+    app.add_config_value('font_obfuscation_enabled', False, 'html')
+    app.add_config_value('font_obfuscation_seed', 42, 'html')
+    app.add_config_value('font_obfuscation_base_font', '', 'html')
+
+    # Event handlers
+    app.connect('builder-inited', on_builder_inited)
+    app.connect('doctree-resolved', on_doctree_resolved)
+    app.connect('html-page-context', on_html_page_context)
+
+    return {
+        'version': '1.0.0',
+        'parallel_read_safe': True,
+        'parallel_write_safe': True,
+    }
+
+
+def on_builder_inited(app: Sphinx) -> None:
+    """Generate scrambled font when build starts.
+
+    Called on 'builder-inited' event.
+    Creates the WOFF2 font file and initializes the text encoder.
+    """
+    if not app.config.font_obfuscation_enabled:
+        return
+
+    # Get base font path
+    base_font_path = app.config.font_obfuscation_base_font
+    if not base_font_path:
+        # Default to Liberation Sans in _assets/fonts/
+        base_font_path = Path(app.srcdir).parent / '_assets' / 'fonts' / 'LiberationSans-Regular.ttf'
+    else:
+        base_font_path = Path(base_font_path)
+        if not base_font_path.is_absolute():
+            base_font_path = Path(app.srcdir).parent / base_font_path
+
+    if not base_font_path.exists():
+        logger.warning(
+            'Font obfuscation base font not found: %s. Skipping obfuscation.',
+            base_font_path
+        )
+        app.config.font_obfuscation_enabled = False
+        return
+
+    # Create output directory
+    static_dir = Path(app.outdir) / '_static'
+    static_dir.mkdir(parents=True, exist_ok=True)
+
+    font_path = static_dir / 'scrambled.woff2'
+
+    # Generate font
+    seed = app.config.font_obfuscation_seed
+    logger.info('Generating scrambled font with seed %d...', seed)
+
+    encode_map = generate_scrambled_font(
+        base_font_path=base_font_path,
+        output_path=font_path,
+        seed=seed,
+        save_map=True,
+    )
+
+    # Store encoder on app for use in doctree-resolved
+    app._font_encoder = TextEncoder(encode_map)
+
+    logger.info('Font obfuscation initialized. Font: %s', font_path)
+
+
+def should_skip_node(node: nodes.Text) -> bool:
+    """Determine if a text node should be left unencoded.
+
+    Skips:
+    - Code blocks (literal_block)
+    - Inline code (literal)
+    - Raw HTML (raw)
+
+    Args:
+        node: A docutils Text node
+
+    Returns:
+        True if node should not be encoded
+    """
+    # Walk up the parent chain to check for code-like ancestors
+    parent = node.parent
+    while parent is not None:
+        if isinstance(parent, (nodes.literal_block, nodes.literal, nodes.raw)):
+            return True
+        parent = getattr(parent, 'parent', None)
+
+    return False
+
+
+def on_doctree_resolved(app: Sphinx, doctree: nodes.document, docname: str) -> None:
+    """Transform text nodes to encoded text.
+
+    Called on 'doctree-resolved' event.
+    Walks the doctree and replaces text with encoded versions.
+    """
+    if not app.config.font_obfuscation_enabled:
+        return
+
+    encoder = getattr(app, '_font_encoder', None)
+    if encoder is None:
+        return
+
+    # Collect text nodes to transform (can't modify during traversal)
+    nodes_to_transform = []
+    for node in doctree.findall(nodes.Text):
+        if not should_skip_node(node):
+            nodes_to_transform.append(node)
+
+    # Transform collected nodes
+    for node in nodes_to_transform:
+        original_text = node.astext()
+        encoded_text = encoder.encode(original_text)
+
+        if encoded_text != original_text:
+            # Create new text node with encoded content
+            new_node = nodes.Text(encoded_text)
+            node.parent.replace(node, new_node)
+
+
+def get_font_css(font_path: str) -> str:
+    """Generate CSS for the scrambled font.
+
+    Args:
+        font_path: Relative path to the WOFF2 font file
+
+    Returns:
+        CSS string with @font-face and font-family rules
+    """
+    return f"""
+/* Font-based text obfuscation - generated by sphinx_font_obfuscation */
+@font-face {{
+    font-family: 'ScrambledText';
+    src: url('{font_path}') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: block;
+}}
+
+/* Apply scrambled font to all text content */
+body, p, h1, h2, h3, h4, h5, h6, li, td, th, span, div, a,
+.toctree-wrapper, .document, .body, article {{
+    font-family: 'ScrambledText', sans-serif !important;
+}}
+
+/* Preserve monospace for code blocks */
+pre, code, .highlight, .literal, .literal-block,
+kbd, samp, tt, .sig, .sig-name {{
+    font-family: monospace !important;
+}}
+
+/* Ensure search and navigation remain readable if font fails */
+.search-field, input, button, select, textarea {{
+    font-family: system-ui, sans-serif !important;
+}}
+"""
+
+
+def on_html_page_context(
+    app: Sphinx,
+    pagename: str,
+    templatename: str,
+    context: dict,
+    doctree: nodes.document | None,
+) -> None:
+    """Inject font CSS into HTML pages.
+
+    Called on 'html-page-context' event.
+    Adds the @font-face CSS to each page's head.
+    """
+    if not app.config.font_obfuscation_enabled:
+        return
+
+    # Generate CSS
+    css = get_font_css('_static/scrambled.woff2')
+
+    # Wrap in style tag
+    style_tag = f'<style>{css}</style>'
+
+    # Add to page context
+    # Furo and many themes support 'metatags' or we can use extra_head
+    if 'metatags' in context:
+        context['metatags'] = context.get('metatags', '') + style_tag
+    else:
+        # Fallback: add to extra CSS
+        context['extra_head'] = context.get('extra_head', '') + style_tag
