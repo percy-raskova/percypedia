@@ -1,6 +1,6 @@
 ---
 title: Testing Framework
-category: Meta
+category: Documentation
 description: How to run and write tests for extensions and tools
 publish: true
 ---

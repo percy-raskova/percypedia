@@ -1,5 +1,5 @@
 ---
-category: Meta
+category: Documentation
 ---
 
 # ​Fro‍nt‌ma⁠tt‍er ​Sche‌ma ​Ref‌er⁠en‍ce

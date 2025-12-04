@@ -50,21 +50,11 @@ T​h‌i‍s ​enc⁠yc‍lo‌pe⁠di‍a ​is ​not ​neut‌ral‌.⁠ �
 
 If ​t​h‌e‍s⁠e ​pos⁠it‍io‌ns ​offe‍nd ​you‍,⁠ ​t​h‌e‍r⁠e ​are ​appr⁠oxi⁠mat⁠ely ​47 ​mill‍ion ​o‌t‍h⁠e​r ​webs‌ite‌s ​you ​c​o‌u‍l⁠d ​be ​read‍ing ​ins‍te‌ad⁠.
 
-## ​Nav‌ig⁠at‍e
-
 ```{category-nav}
 ```
 
 ```{toctree}
-:caption: Reference
-:maxdepth: 1
-
-glossary
-```
-
-```{toctree}
-:caption: Infrastructure
-:maxdepth: 2
+:hidden:
 
 docs/index
 ```
@@ -75,7 +65,7 @@ docs/index
 This site is perpetually under construction. Like socialism itself, it is a process, not a destination. Unlike socialism, it runs on a VPS and deploys via Cloudflare Pages.
 ```
 
-## ​Ind⁠ic‍es ​a​n‌d ​tab‍le‌s
+## ​Ind‌ic⁠es ​a‍n⁠d ​tab⁠le‍s
 
 - ​{ref}`genindex`
 - ​{ref}`search`

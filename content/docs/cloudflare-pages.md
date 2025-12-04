@@ -1,5 +1,5 @@
 ---
-category: Meta
+category: Documentation
 ---
 
 # ​Clo‍ud‌fl⁠ar‍e ​Page‌s ​Dep‌lo⁠ym‍en‌t

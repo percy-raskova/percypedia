@@ -1,5 +1,5 @@
 ---
-category: Meta
+category: Documentation
 ---
 
 # ​MyS‍T ​Mark‌dow‌n ​Syn‌ta⁠x

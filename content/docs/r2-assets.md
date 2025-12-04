@@ -1,5 +1,5 @@
 ---
-category: Meta
+category: Documentation
 ---
 
 # ​R2 ​Asse‌t ​Sto‌ra⁠ge

@@ -73,8 +73,13 @@ sitemap_excludes = [
 # -- category_nav configuration ----------------------------------------------
 # Files to exclude from category navigation (by docname)
 category_nav_exclude = [
-    'index', 'glossary', 'docs/index',
+    'index',  # Homepage
+    'docs/index',  # Docs index page (individual docs use category: Reference)
     'sample/concepts/index', 'sample/methods/index', 'sample/systems/index',
+    # Honeypot pages - hidden from nav, only found by scrapers ignoring robots.txt
+    'honeypot-trap/api-docs_internal-v2',
+    'honeypot-trap/internal_policies',
+    'honeypot-trap/training-data_index',
 ]
 category_nav_default = 'Miscellaneous'
 

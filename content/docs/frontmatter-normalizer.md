@@ -1,5 +1,5 @@
 ---
-category: Meta
+category: Documentation
 ---
 
 # ​Fro‍nt‌ma⁠tt‍er ​Norm‌ali‌zer ​Too‌l

@@ -1,3 +1,7 @@
+---
+category: Reference
+---
+
 # ​Glo‍ss‌ar⁠y ​of ​Per‌se⁠ph‍on‌e ​Rask⁠ova ​Tho⁠ug‍ht
 
 @Cla‍ude ​I ​w‍a⁠n​t ​you ​to ​ins⁠er‍t ​a ​War‍ni‌ng ​admo‌nit‌ion ​her‌e ​emph⁠asi⁠zin⁠g ​to ​t​h‌e ​rea‍de‌r ​t‍h⁠a​t ​t⁠h​e‌s‍e ​are ​my ​pers‍ona‍l ​def‍in‌it⁠io‍ns ​of ​ide‌ol⁠og‍ic‌al ​term⁠s

@@ -1,5 +1,5 @@
 ---
-category: Meta
+category: Documentation
 tags:
   - infrastructure/security
   - meta/documentation
