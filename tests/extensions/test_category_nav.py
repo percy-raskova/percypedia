@@ -517,7 +517,7 @@ class TestCategoryNavDirectiveRun:
         assert toc['caption'] == 'TestCat'
         assert toc['maxdepth'] == 2
         assert toc['glob'] is False
-        assert toc['hidden'] is False
+        assert toc['hidden'] is True  # Hidden=True populates sidebar only, doesn't render in page
         assert toc['parent'] == 'index'
 
     def test_run_returns_empty_list_when_no_docs(self, tmp_path):

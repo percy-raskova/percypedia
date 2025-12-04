@@ -38,6 +38,10 @@
       "type": "string",
       "description": "Single category for website sidebar navigation. One document, one category."
     },
+    "subcategory": {
+      "type": "string",
+      "description": "Second-level grouping within a category for nested navigation (e.g., Docs, Meta)."
+    },
     "tags": {
       "type": "array",
       "items": {

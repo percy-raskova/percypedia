@@ -61,7 +61,7 @@ def collect_categories(
         exclude_patterns: List of path patterns to skip (e.g., ['.venv', 'private'])
 
     Returns:
-        Dict mapping category names to lists of document info dicts.
+        Dict mapping category names to list of document info dicts.
         Each doc dict has 'docname' and 'title' keys.
         Categories are sorted alphabetically, with default_category last.
         Documents within each category are sorted by title.
@@ -107,17 +107,20 @@ def collect_categories(
         # Get title (prefer frontmatter, fall back to H1)
         title = frontmatter.get('title') or extract_title(content) or docname
 
-        categories[category].append({
+        doc_info = {
             'docname': docname,
             'title': title,
-        })
+        }
+
+        categories[category].append(doc_info)
 
     # Sort documents within each category by title
     for docs in categories.values():
         docs.sort(key=lambda d: d['title'].lower())
 
-    # Sort categories alphabetically, with default_category last
+    # Build sorted result: alphabetically, with default_category last
     sorted_categories: dict[str, list[dict[str, str]]] = {}
+
     for key in sorted(categories.keys()):
         if key != default_category:
             sorted_categories[key] = categories[key]
@@ -137,12 +140,32 @@ class CategoryNavDirective(SphinxDirective):
         ```
 
     Scans all markdown files, groups by `category:` frontmatter field,
-    and generates a toctree for each category.
+    and generates a flat toctree for each category.
     """
 
     has_content = False
     required_arguments = 0
     optional_arguments = 0
+
+    def _create_toctree(
+        self,
+        docs: list[dict[str, str]],
+        caption: str,
+    ) -> toctree:
+        """Create a toctree node for a list of documents."""
+        toc = toctree()
+        toc['parent'] = self.env.docname
+        toc['entries'] = [(doc['title'], doc['docname']) for doc in docs]
+        toc['includefiles'] = [doc['docname'] for doc in docs]
+        toc['maxdepth'] = DEFAULT_MAXDEPTH
+        toc['glob'] = False
+        toc['hidden'] = True  # Populate sidebar only, don't render in page content
+        toc['numbered'] = 0
+        toc['titlesonly'] = False
+        toc['caption'] = caption
+        toc['rawcaption'] = caption
+        toc['rawentries'] = []
+        return toc
 
     def run(self) -> list[nodes.Node]:
         """Generate toctree nodes grouped by category."""
@@ -156,24 +179,18 @@ class CategoryNavDirective(SphinxDirective):
         result_nodes: list[nodes.Node] = []
 
         for category, docs in categories.items():
-            # Create section for category (no title - caption provides it)
             section = nodes.section()
             section['ids'] = [nodes.make_id(f'category-{category}')]
 
-            # Create toctree for this category (caption serves as heading)
-            toc = toctree()
-            toc['parent'] = self.env.docname
-            toc['entries'] = [(doc['title'], doc['docname']) for doc in docs]
-            toc['includefiles'] = [doc['docname'] for doc in docs]
-            toc['maxdepth'] = DEFAULT_MAXDEPTH
-            toc['glob'] = False
-            toc['hidden'] = False
-            toc['numbered'] = 0
-            toc['titlesonly'] = False
-            toc['caption'] = category
-            toc['rawcaption'] = category
-            toc['rawentries'] = []
+            # For Reference category, add Index and Search pages
+            if category == 'Reference':
+                docs = list(docs)  # Copy to avoid modifying original
+                docs.extend([
+                    {'docname': 'genindex', 'title': 'Index'},
+                    {'docname': 'search', 'title': 'Search'},
+                ])
 
+            toc = self._create_toctree(docs, category)
             section += toc
             result_nodes.append(section)
 
