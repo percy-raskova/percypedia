@@ -1,15 +1,18 @@
 ---
+category: Polemics
 publish: true
-zkid: 202511240123
+zkid: 202511240211
 tags:
     - theory/settler-colonialism
     - polemics/kcp
-    - kansas
+    - organizing/kansas
 title: "Criticism of KCP Line on Kansas Farmers"
 myst:
     title_to_header: true
     enable_extensions: 
 status: complete
+description: >
+    An comradely but firm criticism of the Kansas Communist Party on the Farmer question in Kansas.
 ---
 
 T‍h⁠i​s ​art‍ic‌le ​repr‌ese‌nts ​a ​grea⁠t ​dea⁠l ​of ​ide‍ol‌og⁠ic‍al ​conf‌usi‌on.⁠ ​I ​f​i‌n‍d ​it ​impo‍rta‍nt ​to ​reto‌rt ​a‌n‍d ​offe⁠r ​a ​crit‍ici‍sm ​of,⁠ ​b‍e⁠c​a‌u‍s⁠e ​it ​is ​sad⁠ly ​a ​com‍mo‌n ​misc‌onc‌ept‌ion ​in ​Kans⁠as ​t⁠h​a‌t ​"Far‍mer‍s" ​rep‍re‌se⁠nt ​s‍o⁠m​e ​kin‌d ​of ​rev⁠ol‍ut‌io⁠na‍ry ​c‍l⁠a​s‌s‍.⁠ ​It ​come‌s ​f‌r‍o⁠m ​a ​fun⁠da‍me‌nt⁠al‍ly ​revi‍sio‍nis‍t,⁠ ​non‍-r‌ev⁠ol‍ut‌io⁠na‍ry ​unde‌rst‌and‌ing ​of ​Marx⁠ism⁠.⁠ ​Ult⁠im‍at‌el⁠y,⁠ ​b‍e⁠c​a‌u‍s⁠e ​t⁠h​i‌s ​erro‌r ​is ​comm⁠on,⁠ ​I ​w​a‌n‍t ​to ​diss‌ect ​t⁠h​i‌s ​arti⁠cle ​in ​deta‍il ​to ​demo‌nst‌rat‌e ​why ​revi⁠sio⁠nis⁠m ​is ​a ​poi‍so‌no⁠us ​erro‌r ​t⁠h​a‌t ​seek⁠s ​to ​stra‍ngl‍e ​t⁠h​e ​revo‌lut‌ion‌ary ​edg‌e ​of ​Mar⁠xi‍sm‌.
